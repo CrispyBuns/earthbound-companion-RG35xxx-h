@@ -9,7 +9,8 @@ Directory.CreateDirectory(Settings.BaseGame);
 Environment.SetEnvironmentVariable("COMPANION_ACHIEVEMENTS_DIR",Path.Combine(root,"Achievements"));
 void Require(bool condition,string message){if(!condition)throw new Exception(message);}
 var achievementView=AchievementProfiles.Read("original");
-Require(achievementView.Entries.Count==5&&achievementView.Entries.All(e=>!e.Unlocked),"Missing profile should show locked starter set");
+Require(achievementView.Entries.Count==46&&achievementView.Entries.All(e=>!e.Unlocked),"Missing profile should show full locked set");
+Require(achievementView.Entries.Select(e=>e.Id).Distinct().Count()==46&&achievementView.Entries.All(e=>AchievementProfiles.Categories.Contains(e.Category)),"Catalog IDs or categories invalid");
 Directory.CreateDirectory(AchievementProfiles.Root);
 string achievementFile=Path.Combine(AchievementProfiles.Root,"earthbound-original.json");
 File.WriteAllText(achievementFile,"""{"schema":1,"gameId":"earthbound","edition":"original","achievements":[{"id":"first-fight","progress":1,"unlockedAt":1700000000},{"id":"getting-the-hang","progress":3,"unlockedAt":0}]}""");

@@ -94,7 +94,7 @@ index b2ce2ad4..fee7cbdb 100644
       * battler initialization as gameplay, not a second parser of the pak. */
      if (inspect_shuffle) {
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index f0a1b75e..06a19130 100644
+index f0a1b75e..c903d679 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -53,6 +53,9 @@ set_source_files_properties(
@@ -103,12 +103,30 @@ index f0a1b75e..06a19130 100644
  add_library(earthbound_game STATIC ${SOURCES} ${DATA_SOURCES})
 +set(EB_ACHIEVEMENTS_CORE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../Achievements/Core" CACHE PATH "Companion achievement core")
 +target_sources(earthbound_game PRIVATE "${EB_ACHIEVEMENTS_CORE_DIR}/src/companion_achievements.c")
-+target_include_directories(earthbound_game PRIVATE "${EB_ACHIEVEMENTS_CORE_DIR}/include")
++target_include_directories(earthbound_game PRIVATE "${EB_ACHIEVEMENTS_CORE_DIR}/include" "${EB_ACHIEVEMENTS_CORE_DIR}/..")
  
  # libm: sin/cos/atan2/round etc. (entity.c, door.c, overworld_teleport.c,
  # callroutine_movement.c). On glibc, GCC will also fuse adjacent sin()+cos()
+diff --git a/src/core/state_dump.c b/src/core/state_dump.c
+index 09af2a4f..e263d1cd 100644
+--- a/src/core/state_dump.c
++++ b/src/core/state_dump.c
+@@ -1,4 +1,5 @@
+ #include "core/state_dump.h"
++#include "game/eb_achievements.h"
+ 
+ /* The savestate serialization core is compiled for EVERY target (build-order item #5:
+  * expose the porting-layer machinery). Storage is reached ONLY through the
+@@ -877,6 +878,7 @@ bool state_dump_load_slots(void) {
+     bool ok = false;
+     if (first >= 0 && read_slot(first))        ok = true;
+     else if (second >= 0 && read_slot(second)) ok = true;
++    if(ok) eb_achievements_loaded();
+     return ok;
+ }
+ 
 diff --git a/src/game/battle.c b/src/game/battle.c
-index 3027e63e..118a4110 100644
+index 3027e63e..4d1b87e9 100644
 --- a/src/game/battle.c
 +++ b/src/game/battle.c
 @@ -1,3 +1,4 @@
@@ -132,7 +150,7 @@ index 3027e63e..118a4110 100644
      /* Disable all entities during the victory sequence */
      disable_all_entities();
  
-@@ -6105,6 +6108,32 @@ static void iw_victory_setup(void) {
+@@ -6105,6 +6108,39 @@ static void iw_victory_setup(void) {
  
  /* CLI-only fixture: exercises the actual normal/instant victory reward paths
   * before any player save is loaded. No story flags or loot are synthesized. */
@@ -162,15 +180,22 @@ index 3027e63e..118a4110 100644
 +    for(int i=0;i<4;i++)iw_victory_setup();
 +    return true;
 +}
++bool battle_achievements_win_fixture(uint16_t enemy,bool instant) {
++    bt.enemies_in_battle=1;bt.enemies_in_battle_ids[0]=enemy;
++    if(instant) {iw_victory_setup();return true;}
++    ModeState fixture={0};fixture.battle.phase=BTL_VICTORY;
++    mode_step_battle(&fixture);
++    return fixture.battle.phase==BTL_VICTORY_DROP;
++}
  bool battle_reward_selftest(void) {
      entity_system_init();
      window_system_init();
 diff --git a/src/game/companion_achievements.c b/src/game/companion_achievements.c
 new file mode 100644
-index 00000000..7557ec0e
+index 00000000..8959ce77
 --- /dev/null
 +++ b/src/game/companion_achievements.c
-@@ -0,0 +1,266 @@
+@@ -0,0 +1,361 @@
 +/* SPDX-License-Identifier: GPL-3.0-or-later
 + * EarthBound adapter. The reusable event engine is independently MIT licensed.
 + * This module is deliberately outside the serialized game state. */
@@ -186,6 +211,10 @@ index 00000000..7557ec0e
 +#include "game/game_state.h"
 +#include "game/maternalbound.h"
 +#include "game/text.h"
++#include "game/ending.h"
++#include "core/mode_stack.h"
++#include "data/assets.h"
++#include "include/binary.h"
 +#include "platform/platform.h"
 +#include "include/constants.h"
 +#ifdef _WIN32
@@ -198,15 +227,9 @@ index 00000000..7557ec0e
 +#include <fcntl.h>
 +#endif
 +
-+static const ca_definition definitions[] = {
-+ {"morning-onett", "Morning, Onett", "See Onett wake up after the meteor adventure.", "story.daybreak", 1, CA_MILESTONE},
-+ {"meteor-patrol", "Meteor Patrol", "Win the battle against Starman Junior.", "boss.starman-junior", 1, CA_MILESTONE},
-+ {"arcade-peacekeeper", "Arcade Peacekeeper", "Finish Frank's challenge at the arcade.", "story.frank", 1, CA_MILESTONE},
-+ {"first-fight", "First Fight, First Win", "Win a battle, including an instant victory.", "battle.won", 1, CA_COUNTER},
-+ {"getting-the-hang", "Getting the Hang of It", "Win five battles. Replayed battles count too.", "battle.won", 5, CA_COUNTER}
-+};
++#include "earthbound_catalog.h"
 +static ca_engine engine;
-+static bool enabled, quiet;
++static bool enabled, quiet, reconciled, expanded_profile;
 +static char profile[4096], edition[40];
 +static const char *notices[CA_MAX_ACHIEVEMENTS];
 +static size_t notice_read, notice_write;
@@ -326,10 +349,25 @@ index 00000000..7557ec0e
 +  if(!ok || i==engine.count || seen[i]){ok=false;break;}
 +  seen[i]=true;ok=ca_restore(&engine,id->valuestring,(uint32_t)p->valuedouble,(uint64_t)t->valuedouble);
 + }
++ if(ok) {
++  /* Sparse pilot profiles retain their original timestamps. Only newly added
++   * counters inherit the minimum number of victories actually recorded. */
++  uint32_t known_wins=0;
++  for(size_t i=0;i<engine.count;i++)if(seen[i] && strcmp(definitions[i].event,"battle.won")==0 && engine.states[i].progress>known_wins)known_wins=engine.states[i].progress;
++  expanded_profile=false;
++  for(size_t i=0;i<engine.count;i++)if(!seen[i]) {
++   expanded_profile=true;
++   if(strcmp(definitions[i].event,"battle.won")==0 && known_wins) {
++    uint32_t progress=known_wins<definitions[i].target?known_wins:definitions[i].target;
++    uint64_t timestamp=progress==definitions[i].target?(uint64_t)time(NULL):0;
++    ok=ca_restore(&engine,definitions[i].id,progress,timestamp) && ok;
++   }
++  }
++ }
 + cJSON_Delete(root);return ok;
 +}
 +bool eb_achievements_init(const char *directory,bool shuffle) {
-+ close_store();notice_read=notice_write=0;shown=NULL;
++ close_store();notice_read=notice_write=0;shown=NULL;reconciled=false;expanded_profile=false;
 + if(!directory || !directories(directory))return false;
 + snprintf(edition,sizeof(edition),"%s%s",shuffle?"shuffle-":"",maternalbound_enabled()?"redux":"original");
 + snprintf(profile,sizeof(profile),"%s/earthbound-%s.json",directory,edition);
@@ -348,7 +386,7 @@ index 00000000..7557ec0e
 + bool ok=f?restore(f):errno==ENOENT;
 + if(f)fclose(f);
 + if(!ok){fprintf(stderr,"Achievements: profile is unreadable or unsupported; left untouched: %s\n",profile);close_store();return false;}
-+ if(!f && !store(NULL,engine.states,engine.count)){close_store();return false;}
++ if((!f || expanded_profile) && !store(NULL,engine.states,engine.count)){close_store();return false;}
 + enabled=true;atexit(close_store);
 + fprintf(stderr,"Achievements: local profile %s (%zu/%zu unlocked)\n",profile,ca_unlocked(&engine),engine.count);
 + return true;
@@ -358,12 +396,52 @@ index 00000000..7557ec0e
 + if(enabled && now>0)ca_event(&engine,name,amount,(uint64_t)now);
 +}
 +void eb_achievements_flag(uint16_t flag) {
-+ if(flag==422)event("story.daybreak",1);
-+ else if(flag==64)event("story.frank",1);
++ for(size_t i=0;i<sizeof(flag_rules)/sizeof(flag_rules[0]);i++)
++  if(flag_rules[i].flag==flag)event(flag_rules[i].event,1);
 +}
 +void eb_achievements_victory(const uint16_t *enemies,uint16_t count) {
 + event("battle.won",1);
-+ for(uint16_t i=0;i<count;i++)if(enemies[i]==214){event("boss.starman-junior",1);break;}
++ for(size_t r=0;r<sizeof(enemy_rules)/sizeof(enemy_rules[0]);r++)
++  for(uint16_t i=0;i<count;i++)if(enemies[i]==enemy_rules[r].enemy){event(enemy_rules[r].event,1);break;}
++}
++void eb_achievements_loaded(void) {reconciled=false;}
++void eb_achievements_credits(void) {
++ bool previous=quiet;quiet=!reconciled;
++ if(event_flag_get(EVENT_FLAG_WIN_GIEGU))event("ending.credits",1);
++ quiet=previous;
++}
++static uint32_t progress_for(const char *name) {
++ uint32_t progress=0;
++ for(size_t i=0;i<engine.count;i++)if(strcmp(definitions[i].event,name)==0 && engine.states[i].progress>progress)progress=engine.states[i].progress;
++ return progress;
++}
++static void snapshot(const char *name,uint32_t value) {
++ uint32_t previous=progress_for(name);
++ if(value>previous)event(name,value-previous);
++}
++static uint32_t photographs(void) {
++ const uint8_t *data=ASSET_DATA(ASSET_ENDING_PHOTOGRAPHER_CFG_BIN);
++ size_t size=ASSET_SIZE(ASSET_ENDING_PHOTOGRAPHER_CFG_BIN);
++ if(!data || size<NUM_PHOTOS*PHOTOGRAPHER_CFG_ENTRY_SIZE)return 0;
++ uint32_t count=0;
++ for(size_t i=0;i<NUM_PHOTOS;i++)if(event_flag_get(read_u16_le(data+i*PHOTOGRAPHER_CFG_ENTRY_SIZE+PHOTOGRAPHER_CFG_EVENT_FLAG)))count++;
++ return count;
++}
++static void reconcile(bool silent) {
++ quiet=silent;
++ for(size_t i=0;i<sizeof(flag_rules)/sizeof(flag_rules[0]);i++)
++  if(event_flag_get(flag_rules[i].flag))event(flag_rules[i].event,1);
++ /* A victory proves this earlier visit even though FLG_STEP_PAST clears after it. */
++ if(event_flag_get(EVENT_FLAG_WIN_GIEGU))event("story.cave-past",1);
++ uint32_t level=0;unsigned party=0;
++ for(size_t i=0;i<4;i++)if(party_characters[i].level>level)level=party_characters[i].level;
++ for(size_t i=0;i<game_state.player_controlled_party_count && i<6;i++) {
++  unsigned member=game_state.party_members[i];if(member>=1 && member<=4)party|=1u<<(member-1);
++ }
++ snapshot("snapshot.level",level);
++ snapshot("snapshot.photos",photographs());
++ if(party==15)snapshot("snapshot.party",1);
++ quiet=false;
 +}
 +static int text_width(const char *text) {
 + int result=0;for(;*text;text++)result+=font_get_width(FONT_ID_TINY,ascii_to_eb_char(*text)-0x50)+1;
@@ -372,10 +450,8 @@ index 00000000..7557ec0e
 +void eb_achievements_prepare(bool gameplay) {
 + if(!enabled)return;
 + if(gameplay) {
-+  quiet=true;
-+  if(event_flag_get(422))eb_achievements_flag(422);
-+  if(event_flag_get(64))eb_achievements_flag(64);
-+  quiet=false;
++  reconcile(!reconciled);
++  reconciled=true;
 + }
 + uint64_t now=platform_timer_ticks(), frequency=platform_timer_ticks_per_sec();
 + if(shown && frequency && now-notice_start>=frequency*4)shown=NULL;
@@ -412,37 +488,81 @@ index 00000000..7557ec0e
 + draw_text(y,top+8+font_get_height(FONT_ID_TINY),(EB_VIEWPORT_WIDTH-text_width(shown))/2,shown,pixels);
 +}
 +/* Invoked only by the opt-in, isolated native test entry point. */
++static bool state_for(const char *id,uint32_t progress) {
++ for(size_t i=0;i<engine.count;i++)if(strcmp(definitions[i].id,id)==0)return engine.states[i].progress==progress;
++ return false;
++}
 +bool eb_achievements_selftest(void) {
 + if(!enabled || ca_unlocked(&engine)!=0)return false;
-+ event_flag_set(421);if(ca_unlocked(&engine))return false;
-+ event_flag_set(422);event_flag_set(422);
-+ if(ca_unlocked(&engine)!=1)return false;
-+ event_flag_set(515);if(ca_unlocked(&engine)!=1)return false;
-+ event_flag_set(64);if(ca_unlocked(&engine)!=2)return false;
++ event_flag_set(421);event_flag_set(515);
++ if(ca_unlocked(&engine))return false;
 + extern bool battle_achievements_selftest(bool victories);
-+ if(!battle_achievements_selftest(false) || ca_unlocked(&engine)!=2 || engine.states[4].progress!=0)return false;
-+ if(!battle_achievements_selftest(true) || ca_unlocked(&engine)!=5 || engine.states[4].progress!=5)return false;
-+ event_flag_clear(422);event_flag_set(422);
-+ if(ca_unlocked(&engine)!=5)return false;
-+ eb_achievements_prepare(false);
++ if(!battle_achievements_selftest(false) || ca_unlocked(&engine) || progress_for("battle.won"))return false;
++ if(!battle_achievements_selftest(true) || !state_for("getting-the-hang",5) || !state_for("wins-25",5))return false;
++ /* The real ending consumer must not award credits before Giygas is defeated. */
++ ModeState credits={0};credits.ending.phase=EN_CR_HOLD;credits.ending.hold_counter=1;
++ mode_step_ending(&credits);if(!state_for("credits",0))return false;
++ for(size_t i=0;i<sizeof(flag_rules)/sizeof(flag_rules[0]);i++) {
++  size_t before=ca_unlocked(&engine);event_flag_clear(flag_rules[i].flag);event_flag_set(flag_rules[i].flag);
++  if(ca_unlocked(&engine)!=before+1)return false;
++  event_flag_set(flag_rules[i].flag);if(ca_unlocked(&engine)!=before+1)return false;
++ }
++ /* Normal victories and instant wins both report the actual encounter roster. */
++ extern bool battle_achievements_win_fixture(uint16_t enemy,bool instant);
++ if(!battle_achievements_win_fixture(183,false) || !state_for("kraken",0))return false;
++ if(!battle_achievements_win_fixture(226,false) || !state_for("mini-barf",1))return false;
++ if(!battle_achievements_win_fixture(182,false) || !state_for("kraken",1))return false;
++ for(unsigned i=8;i<100;i++)if(!battle_achievements_win_fixture(7,true))return false;
++ if(!state_for("wins-100",100) || !state_for("wins-25",25))return false;
++ /* Distinct photos come from the pack's photographer table, not a guessed range. */
++ const uint8_t *photos=ASSET_DATA(ASSET_ENDING_PHOTOGRAPHER_CFG_BIN);
++ if(!photos || ASSET_SIZE(ASSET_ENDING_PHOTOGRAPHER_CFG_BIN)<NUM_PHOTOS*PHOTOGRAPHER_CFG_ENTRY_SIZE)return false;
++ uint16_t first_photo=read_u16_le(photos+PHOTOGRAPHER_CFG_EVENT_FLAG);
++ event_flag_set(first_photo);eb_achievements_prepare(true);
++ if(!state_for("photo-one",1) || !state_for("photo-eight",1))return false;
++ eb_achievements_prepare(true);if(!state_for("photo-eight",1))return false;
++ game_state.player_controlled_party_count=game_state.party_count=3;
++ game_state.party_members[0]=1;game_state.party_members[1]=2;game_state.party_members[2]=3;
++ party_characters[0].level=24;eb_achievements_prepare(true);
++ if(!state_for("party-four",0) || !state_for("level-25",24))return false;
++ for(unsigned i=1;i<NUM_PHOTOS;i++)event_flag_set(read_u16_le(photos+i*PHOTOGRAPHER_CFG_ENTRY_SIZE+PHOTOGRAPHER_CFG_EVENT_FLAG));
++ game_state.player_controlled_party_count=game_state.party_count=4;
++ for(unsigned i=0;i<4;i++)game_state.party_members[i]=i+1;
++ party_characters[0].level=50;
++ eb_achievements_prepare(true);
++ if(!state_for("photo-all",32) || !state_for("party-four",1) || !state_for("level-50",50))return false;
++ credits.ending.phase=EN_CR_HOLD;credits.ending.hold_counter=1;mode_step_ending(&credits);
++ if(ca_unlocked(&engine)!=engine.count)return false;
++ /* Restoring an older game state cannot remove achievements or refill counters. */
++ event_flag_clear(73);event_flag_clear(422);party_characters[0].level=1;
++ for(unsigned i=0;i<NUM_PHOTOS;i++)event_flag_clear(read_u16_le(photos+i*PHOTOGRAPHER_CFG_ENTRY_SIZE+PHOTOGRAPHER_CFG_EVENT_FLAG));
++ eb_achievements_loaded();eb_achievements_prepare(true);
++ if(ca_unlocked(&engine)!=engine.count || !state_for("wins-100",100) || !state_for("photo-all",32))return false;
++ /* Scan every title against the cropped framebuffer bounds. */
 + pixel_t line[EB_VIEWPORT_WIDTH+16];unsigned changed=0;
-+ for(int y=-1;y<=EB_VIEWPORT_HEIGHT;y++) {
-+  for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++)line[x]=0x4321;
-+  eb_achievements_draw_scanline(y,line+8);
-+  for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++) {
-+   if(line[x]==0x4321)continue;
-+   if(x<8+(EB_VIEWPORT_WIDTH-234)/2 || x>=8+(EB_VIEWPORT_WIDTH+234)/2 || y<0 || y>=EB_VIEWPORT_HEIGHT)return false;
-+   changed++;
++ for(size_t i=0;i<engine.count;i++) {
++  shown=definitions[i].title;popup_width=text_width(shown)+20;
++  if(popup_width>234)return false;
++  if(popup_width<180)popup_width=180;
++  for(int y=-1;y<=EB_VIEWPORT_HEIGHT;y++) {
++   for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++)line[x]=0x4321;
++   eb_achievements_draw_scanline(y,line+8);
++   for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++)if(line[x]!=0x4321) {
++    if(x<8+(EB_VIEWPORT_WIDTH-234)/2 || x>=8+(EB_VIEWPORT_WIDTH+234)/2 || y<0 || y>=EB_VIEWPORT_HEIGHT)return false;
++    changed++;
++   }
 +  }
 + }
++ shown=NULL;notice_read=0;eb_achievements_prepare(false);
++ fprintf(stderr,"Achievement full set: %zu definitions, story setters, normal/instant/defeat consumers, credits guard, unique photos, levels, rollback and all popup bounds PASS\n",engine.count);
 + return changed>0;
 +}
 diff --git a/src/game/eb_achievements.h b/src/game/eb_achievements.h
 new file mode 100644
-index 00000000..06e221ea
+index 00000000..3bf6dd1e
 --- /dev/null
 +++ b/src/game/eb_achievements.h
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,13 @@
 +/* SPDX-License-Identifier: GPL-3.0-or-later */
 +#ifndef EB_COMPANION_ACHIEVEMENTS_H
 +#define EB_COMPANION_ACHIEVEMENTS_H
@@ -451,11 +571,33 @@ index 00000000..06e221ea
 +void eb_achievements_flag(uint16_t flag);
 +void eb_achievements_victory(const uint16_t *enemies, uint16_t count);
 +void eb_achievements_prepare(bool gameplay);
++void eb_achievements_loaded(void);
++void eb_achievements_credits(void);
 +void eb_achievements_draw_scanline(int y, pixel_t *pixels);
 +bool eb_achievements_selftest(void);
 +#endif
+diff --git a/src/game/ending.c b/src/game/ending.c
+index c851ec47..3bef999f 100644
+--- a/src/game/ending.c
++++ b/src/game/ending.c
+@@ -6,6 +6,7 @@
+  */
+ 
+ #include "game/ending.h"
++#include "game/eb_achievements.h"
+ #include "game/overworld.h"
+ #include "game/text.h"
+ #include "game/game_state.h"
+@@ -1344,6 +1345,7 @@ static void restore_credits_photo_frame(void) {
+  */
+ StepResult mode_step_ending(ModeState *st) {
+     EndingState *s = &st->ending;
++    if(s->phase>=EN_CR_SETUP && s->phase<=EN_CR_HOLD) eb_achievements_credits();
+ 
+     /* Self-heal the credits assets: a savestate restored into a later EN_CR_*
+      * phase may not have run EN_CR_SETUP in this process. No-op outside credits
 diff --git a/src/game/game_state.c b/src/game/game_state.c
-index f6d0dccf..9879ce16 100644
+index f6d0dccf..c6cc3304 100644
 --- a/src/game/game_state.c
 +++ b/src/game/game_state.c
 @@ -1,3 +1,4 @@
@@ -475,8 +617,16 @@ index f6d0dccf..9879ce16 100644
  }
  
  void event_flag_clear(uint16_t flag) {
+@@ -721,6 +725,7 @@ bool load_game(int slot) {
+         event_flag_set(14);
+     }
+ 
++    eb_achievements_loaded();
+     return true;
+ }
+ 
 diff --git a/src/game_main.c b/src/game_main.c
-index 48dec61a..c832cac1 100644
+index 48dec61a..090431cd 100644
 --- a/src/game_main.c
 +++ b/src/game_main.c
 @@ -1,3 +1,4 @@
@@ -498,7 +648,7 @@ index 48dec61a..c832cac1 100644
  
 -            if (want_fps || version_overlay_show)
 -                fps_cb = combined_overlay_stamp_scanline;
-+            eb_achievements_prepare(mode_stack_has_any(GAME_MODE_OVERWORLD, GAME_MODE_BATTLE));
++            eb_achievements_prepare(mode_stack_has_any(GAME_MODE_OVERWORLD, GAME_MODE_BATTLE) || mode_stack_has_any(GAME_MODE_ENDING, GAME_MODE_ENDING));
 +            fps_cb = combined_overlay_stamp_scanline;
              platform_render_frame(fps_cb);
          }

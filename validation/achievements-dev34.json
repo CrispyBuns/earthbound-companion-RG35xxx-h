@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "archive": "EarthBound-Companion-Redux-Tester-v0.5.0-redux-dev.34.zip",
+  "bytes": 129187593,
+  "sha256": "d4764d938cd636284f256a25ab064e8c8d0c3eb21503b7ac846b17b8687e35d0",
+  "nativeSha256": "096e783d2dbfc9f4eaa76c2e3d85930c0fb67267458dcfc362706ca162eb4455",
+  "prohibitedContent": false,
+  "ownerProtectedFiles": 32,
+  "packagedNativeFullSetEditions": [
+    "original",
+    "redux"
+  ],
+  "packagedLauncherScenarios": 6,
+  "achievementDefinitions": 46,
+  "coreChecks": 24,
+  "ownerPilotGameplay": "Owner earned all five pilot achievements and saved after Starman Junior.",
+  "focusedChecks": [
+    "owner five-achievement profile upgrades to 46; exact timestamps and minimum recorded victories preserved silently",
+    "original: all 46; story/normal/instant/defeat/credits consumers, 32 distinct photos, rollback, 100 wins and all title bounds; shuffle isolation and restart",
+    "redux: all 46; story/normal/instant/defeat/credits consumers, 32 distinct photos, rollback, 100 wins and all title bounds; shuffle isolation and restart",
+    "owner newest pilot checkpoint cold-load; five unlocks unchanged; historical story progress credited silently",
+    "actual owner credits checkpoint: Giygas, eight melodies and credits reconcile; no fabricated historical battle wins",
+    "corrupt/future profile preserved; unavailable storage and tracking opt-out; headless default",
+    "all 32 newest protected owner data hashes unchanged"
+  ],
+  "regressions": [
+    "original savestate",
+    "original keyitems",
+    "original screen-transitions",
+    "original playtest-rewards",
+    "original pc",
+    "redux savestate",
+    "redux keyitems",
+    "redux screen-transitions",
+    "redux playtest-rewards",
+    "redux pc",
+    "six production launcher paths, settings, save recovery and edition/seed guards",
+    "full launcher page capture at minimum window size"
+  ],
+  "limits": [
+    "Fixtures and copied checkpoints, not another natural full campaign.",
+    "New-platform gameplay remains a community preview.",
+    "No competitive verification or online service."
+  ]
+}

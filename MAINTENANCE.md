@@ -1,9 +1,10 @@
 # Feature freeze and maintenance
 
-October 11, 2026: the owner explicitly requested a reusable achievement system.
-The separate `feature/companion-achievements` branch contains a five-achievement
-local pilot; [implementation and coverage](docs/ACHIEVEMENTS-PILOT.md). Published
-releases and the rest of the maintenance scope remain unchanged.
+October 11, 2026: the owner earned all five pilot achievements and explicitly
+requested the full-game expansion and public release. Dev.34 adds 46 standalone
+achievements; [set and coverage](docs/ACHIEVEMENTS.md), [release checks](docs/RELEASE-dev34.md).
+The rest of the maintenance scope remains unchanged. This does not reopen a
+broad gameplay/patch audit or require another owner full playthrough.
 
 Effective October 8, 2026, active feature development is wrapped at **v0.5.0-redux-dev.32**. The project is in community testing and focused bug-fix maintenance. The existing experimental designation remains; closeout does not certify complete compatibility.
 

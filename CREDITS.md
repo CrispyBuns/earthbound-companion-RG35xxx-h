@@ -1,5 +1,9 @@
 # Credits and provenance
 
+**Companion Achievements:** original reusable C engine by Carl Prewitt Jr., MIT
+licensed. Local game definitions, adapters and launcher integration are maintained
+here. No RetroAchievements implementation or badge artwork is included.
+
 Development route research: [Rick N. Bruns / SNESMaps — Giant Step map](https://www.snesmaps.com/maps/EarthBound/EarthboundMapGiantStep.html). The third-party map is referenced, not redistributed.
 
 EarthBound Companion exists because of years of documentation, disassembly, native-port, ROM-hacking and preservation work. Links below identify what was used directly and what informed compatibility research.

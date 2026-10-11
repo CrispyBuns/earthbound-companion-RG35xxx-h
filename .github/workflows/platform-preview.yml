@@ -24,6 +24,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet build Companion/Companion.csproj -c Release
+      - run: python scripts/generate_achievement_catalog.py --check
       - run: dotnet run --project Ports/Tests/Companion.Portable.Tests.csproj -c Release
       - run: dotnet run --project Ports/Desktop/Companion.Portable.csproj -c Release -- --smoke-test "${{ runner.temp }}/launcher-smoke.png"
   desktop:
@@ -53,6 +54,13 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev libxinerama-dev libgl1-mesa-dev libasound2-dev libpulse-dev libudev-dev xvfb
       - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
+      - name: Verify shared achievement catalog and core
+        shell: bash
+        run: |
+          python scripts/generate_achievement_catalog.py --check
+          cmake -S Achievements/Core -B build/achievements
+          cmake --build build/achievements
+          ctest --test-dir build/achievements --output-on-failure
       - name: Build SDL and native game without ROM
         shell: bash
         run: |
@@ -98,6 +106,7 @@ jobs:
           cp docs/PLATFORM-TESTING.md build/package/PLATFORM-TESTING.md
           cp native-source/src/vendor/lakesnes/LICENSE.txt build/package/LICENSE-LakeSnes.txt
           cp CREDITS.md UPSTREAM.md build/package/
+          cp docs/ACHIEVEMENTS.md build/package/
           cp -r Licenses build/package/
           cp build/dependencies/SDL-5d249570393f7a37e037abf22cd6012a4cc56a71/LICENSE.txt build/package/LICENSE-SDL2.txt
           if [ "${{ runner.os }}" = "macOS" ]; then

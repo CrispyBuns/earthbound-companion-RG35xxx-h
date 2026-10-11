@@ -2,6 +2,9 @@
 
 Feature-frozen at v0.5.0-redux-dev.32 as of October 8, 2026. The explicit dev.33 display request is documented in docs/RELEASE-dev33.md. Read MAINTENANCE.md for current scope/coverage; historical audit notes do not reopen development.
 
+The explicit October 11 owner request adds the full-game standalone achievement
+set in dev.34; see docs/RELEASE-dev34.md. This is a narrow feature exception.
+
 - Default to focused fixes for reported defects. New features and broad audits require an explicit user request.
 - Do not automatically launch whole-project audits, agent reviews or a full campaign. Do not ask the owner to replay the game as the default verification method.
 - Preserve recipe algorithms and save namespaces. Use isolated sessions/copies; protect owner saves before installation or recovery changes.

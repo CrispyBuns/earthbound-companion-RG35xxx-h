@@ -1,0 +1,468 @@
+{
+  "schema": 1,
+  "gameId": "earthbound",
+  "setVersion": 1,
+  "achievements": [
+    {
+      "id": "morning-onett",
+      "title": "Morning, Onett",
+      "description": "See Onett wake up after the meteor adventure.",
+      "event": "story.daybreak",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 422
+    },
+    {
+      "id": "meteor-patrol",
+      "title": "Meteor Patrol",
+      "description": "Win the battle against Starman Junior.",
+      "event": "boss.starman-junior",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "enemies": [
+        214
+      ]
+    },
+    {
+      "id": "arcade-peacekeeper",
+      "title": "Arcade Peacekeeper",
+      "description": "Finish Frank's challenge at the arcade.",
+      "event": "story.frank",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 64
+    },
+    {
+      "id": "first-fight",
+      "title": "First Fight, First Win",
+      "description": "Win a battle, including an instant victory.",
+      "event": "battle.won",
+      "target": 1,
+      "category": "Battles",
+      "rule": "counter"
+    },
+    {
+      "id": "getting-the-hang",
+      "title": "Getting the Hang of It",
+      "description": "Win five battles. Replayed battles count too.",
+      "event": "battle.won",
+      "target": 5,
+      "category": "Battles",
+      "rule": "counter"
+    },
+    {
+      "id": "giant-step",
+      "title": "A Giant First Step",
+      "description": "Defeat Titanic Ant at Giant Step.",
+      "event": "story.giant-step",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 190
+    },
+    {
+      "id": "road-open",
+      "title": "Next Stop, Twoson",
+      "description": "Get the police to open the road out of Onett.",
+      "event": "story.road-open",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 105
+    },
+    {
+      "id": "paint-over",
+      "title": "A Different Shade",
+      "description": "Defeat Carpainter in Happy Happy Village.",
+      "event": "story.carpainter",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 68
+    },
+    {
+      "id": "lilliput",
+      "title": "Small Steps, Big Sound",
+      "description": "Defeat Mondo Mole at Lilliput Steps.",
+      "event": "story.lilliput",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 191
+    },
+    {
+      "id": "tent-down",
+      "title": "No Vacancy",
+      "description": "Defeat the Boogey Tent in Threed.",
+      "event": "story.tent",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 69
+    },
+    {
+      "id": "zombie-paper",
+      "title": "Sticky Situation",
+      "description": "Capture the zombies with Zombie Paper.",
+      "event": "story.zombie-paper",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 125
+    },
+    {
+      "id": "mini-barf",
+      "title": "Roadside Cleanup",
+      "description": "Win the battle against Mini Barf.",
+      "event": "boss.mini-barf",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "enemies": [
+        226
+      ]
+    },
+    {
+      "id": "belch",
+      "title": "Factory Reset",
+      "description": "Defeat Master Belch at his factory.",
+      "event": "story.belch",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 71
+    },
+    {
+      "id": "milky-well",
+      "title": "Well Played",
+      "description": "Defeat Trillionage Sprout at Milky Well.",
+      "event": "story.milky-well",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 193
+    },
+    {
+      "id": "five-moles",
+      "title": "Number Three, Five Times",
+      "description": "Defeat all five Guardian Diggers in the desert mine.",
+      "event": "story.five-moles",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 72
+    },
+    {
+      "id": "department-store",
+      "title": "After Hours",
+      "description": "Defeat the Dept. Store Spook in Fourside.",
+      "event": "story.department-store",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 139
+    },
+    {
+      "id": "moonside",
+      "title": "Yes Means No",
+      "description": "Defeat Evil Mani-Mani in Moonside.",
+      "event": "story.moonside",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 75
+    },
+    {
+      "id": "clumsy-robot",
+      "title": "Unplugged",
+      "description": "Defeat Clumsy Robot in the Monotoli Building.",
+      "event": "story.clumsy-robot",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 362
+    },
+    {
+      "id": "fourside-free",
+      "title": "Roof with a View",
+      "description": "Complete the rescue at the Monotoli Building.",
+      "event": "story.fourside-free",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 143
+    },
+    {
+      "id": "rainy-circle",
+      "title": "Rain Check",
+      "description": "Defeat Shrooom! at Rainy Circle.",
+      "event": "story.rainy-circle",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 192
+    },
+    {
+      "id": "teleport",
+      "title": "No More Bus Fare",
+      "description": "Learn Teleport from the monkey in the desert.",
+      "event": "story.teleport",
+      "target": 1,
+      "category": "Exploration",
+      "rule": "milestone",
+      "flag": 275
+    },
+    {
+      "id": "dalaam",
+      "title": "Mind over Matter",
+      "description": "Complete Poo's Mu training in Dalaam.",
+      "event": "story.dalaam",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 273
+    },
+    {
+      "id": "magnet-hill",
+      "title": "Magnetic Personality",
+      "description": "Defeat Plague Rat of Doom at Magnet Hill.",
+      "event": "story.magnet-hill",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 194
+    },
+    {
+      "id": "kraken",
+      "title": "Sea Legs",
+      "description": "Win the sea battle against Kraken.",
+      "event": "boss.kraken",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "enemies": [
+        182
+      ]
+    },
+    {
+      "id": "pyramid",
+      "title": "Pyramid Scheme",
+      "description": "Defeat the Guardian General in the pyramid.",
+      "event": "story.pyramid",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 283
+    },
+    {
+      "id": "pink-cloud",
+      "title": "Above the Clouds",
+      "description": "Defeat Thunder and Storm at Pink Cloud.",
+      "event": "story.pink-cloud",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 195
+    },
+    {
+      "id": "master-barf",
+      "title": "Still Not a Belch",
+      "description": "Defeat Master Barf in Deep Darkness.",
+      "event": "story.master-barf",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 276
+    },
+    {
+      "id": "stonehenge",
+      "title": "Stars Fall Down",
+      "description": "Defeat Starman Deluxe beneath Stonehenge.",
+      "event": "story.stonehenge",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 70
+    },
+    {
+      "id": "tenda",
+      "title": "Out of Their Shell",
+      "description": "Help the Tenda overcome their shyness.",
+      "event": "story.tenda",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 155
+    },
+    {
+      "id": "lumine-hall",
+      "title": "Written on the Wall",
+      "description": "Defeat Electro Specter in Lumine Hall.",
+      "event": "story.lumine-hall",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 196
+    },
+    {
+      "id": "fire-spring",
+      "title": "Under Pressure",
+      "description": "Defeat Diamond Dog at Fire Spring.",
+      "event": "story.fire-spring",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 197
+    },
+    {
+      "id": "eight-melodies",
+      "title": "The Whole Song",
+      "description": "Collect all eight Sanctuary melodies.",
+      "event": "story.eight-melodies",
+      "target": 1,
+      "category": "Sanctuaries",
+      "rule": "milestone",
+      "flag": 384
+    },
+    {
+      "id": "nightmare",
+      "title": "Know Yourself",
+      "description": "Defeat Ness's Nightmare in Magicant.",
+      "event": "story.nightmare",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 74
+    },
+    {
+      "id": "cave-past",
+      "title": "A Long Way from Home",
+      "description": "Enter the Cave of the Past.",
+      "event": "story.cave-past",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 372
+    },
+    {
+      "id": "giygas",
+      "title": "Everyone Is Listening",
+      "description": "Defeat Giygas with the final prayers.",
+      "event": "story.giygas",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone",
+      "flag": 73
+    },
+    {
+      "id": "credits",
+      "title": "Names Worth Reading",
+      "description": "Reach the staff credits after defeating Giygas.",
+      "event": "ending.credits",
+      "target": 1,
+      "category": "Story",
+      "rule": "milestone"
+    },
+    {
+      "id": "bicycle",
+      "title": "Two Wheels",
+      "description": "Receive the bicycle from the shop in Twoson.",
+      "event": "story.bicycle",
+      "target": 1,
+      "category": "Exploration",
+      "rule": "milestone",
+      "flag": 81
+    },
+    {
+      "id": "contact-lens",
+      "title": "Good Eyes",
+      "description": "Find the contact lens in the Dusty Dunes Desert.",
+      "event": "story.contact-lens",
+      "target": 1,
+      "category": "Exploration",
+      "rule": "milestone",
+      "flag": 385
+    },
+    {
+      "id": "party-four",
+      "title": "The Four of Us",
+      "description": "Have Ness, Paula, Jeff and Poo together in the party.",
+      "event": "snapshot.party",
+      "target": 1,
+      "category": "Exploration",
+      "rule": "milestone",
+      "snapshot": "party"
+    },
+    {
+      "id": "photo-one",
+      "title": "Fuzzy Pickles",
+      "description": "Have the photographer take a souvenir photo.",
+      "event": "snapshot.photos",
+      "target": 1,
+      "category": "Exploration",
+      "rule": "milestone",
+      "snapshot": "photos"
+    },
+    {
+      "id": "photo-eight",
+      "title": "A Growing Album",
+      "description": "Collect eight different souvenir photos.",
+      "event": "snapshot.photos",
+      "target": 8,
+      "category": "Exploration",
+      "rule": "counter",
+      "snapshot": "photos"
+    },
+    {
+      "id": "photo-all",
+      "title": "An Album of the World",
+      "description": "Collect all 32 different souvenir photos.",
+      "event": "snapshot.photos",
+      "target": 32,
+      "category": "Exploration",
+      "rule": "counter",
+      "snapshot": "photos"
+    },
+    {
+      "id": "level-25",
+      "title": "Finding Your Feet",
+      "description": "Raise any party member to level 25.",
+      "event": "snapshot.level",
+      "target": 25,
+      "category": "Battles",
+      "rule": "counter",
+      "snapshot": "level"
+    },
+    {
+      "id": "level-50",
+      "title": "Seasoned Traveler",
+      "description": "Raise any party member to level 50.",
+      "event": "snapshot.level",
+      "target": 50,
+      "category": "Battles",
+      "rule": "counter",
+      "snapshot": "level"
+    },
+    {
+      "id": "wins-25",
+      "title": "Holding Your Own",
+      "description": "Win 25 battles. Replayed battles count too.",
+      "event": "battle.won",
+      "target": 25,
+      "category": "Battles",
+      "rule": "counter"
+    },
+    {
+      "id": "wins-100",
+      "title": "Battle Tested",
+      "description": "Win 100 battles. Replayed battles count too.",
+      "event": "battle.won",
+      "target": 100,
+      "category": "Battles",
+      "rule": "counter"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace EarthBoundCompanion;
 
-public sealed record AchievementEntry(string Id,string Title,string Description,int Target,int Progress=0,long UnlockedAt=0) {
+public sealed record AchievementEntry(string Id,string Title,string Description,int Target,int Progress=0,long UnlockedAt=0,string Category="Story") {
  public bool Unlocked=>UnlockedAt>0;
  public string Status=>Unlocked?$"Unlocked · {DateTimeOffset.FromUnixTimeSeconds(UnlockedAt).LocalDateTime:g}":$"{Progress} / {Target}";
 }
@@ -14,16 +14,17 @@ public static class AchievementProfiles {
   Path.Combine(Settings.User,"Achievements");
  public static readonly string[] Editions=["original","redux","shuffle-original","shuffle-redux"];
  public static readonly string[] EditionLabels=["Original EarthBound","MaternalBound Redux","Story Shuffle · Original","Story Shuffle · Redux"];
- static readonly AchievementEntry[] Pilot=[
-  new("morning-onett","Morning, Onett","See Onett wake up after the meteor adventure.",1),
-  new("meteor-patrol","Meteor Patrol","Win the battle against Starman Junior.",1),
-  new("arcade-peacekeeper","Arcade Peacekeeper","Finish Frank's challenge at the arcade.",1),
-  new("first-fight","First Fight, First Win","Win a battle, including an instant victory.",1),
-  new("getting-the-hang","Getting the Hang of It","Win five battles. Replayed battles count too.",5)
- ];
+ public static readonly string[] Categories=["All achievements","Story","Sanctuaries","Exploration","Battles"];
+ public static readonly AchievementEntry[] Catalog=LoadCatalog();
+ static AchievementEntry[] LoadCatalog() {
+  using var stream=typeof(AchievementProfiles).Assembly.GetManifestResourceStream("EarthBoundCompanion.AchievementCatalog")??throw new InvalidDataException("Missing achievement catalog.");
+  using var document=JsonDocument.Parse(stream);
+  return document.RootElement.GetProperty("achievements").EnumerateArray().Select(e=>new AchievementEntry(
+   e.GetProperty("id").GetString()!,e.GetProperty("title").GetString()!,e.GetProperty("description").GetString()!,e.GetProperty("target").GetInt32(),Category:e.GetProperty("category").GetString()!)).ToArray();
+ }
  public static AchievementView Read(string edition) {
   if(!Editions.Contains(edition))throw new ArgumentException("Unknown achievement edition.",nameof(edition));
-  var entries=Pilot.ToArray();string file=Path.Combine(Root,$"earthbound-{edition}.json");
+  var entries=Catalog.ToArray();string file=Path.Combine(Root,$"earthbound-{edition}.json");
   if(!File.Exists(file))return new(entries,"No progress recorded yet. Play with achievement tracking enabled to get started.");
   try {
    using var stream=new FileStream(file,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete);
@@ -41,7 +42,7 @@ public static class AchievementProfiles {
    }
    return new(entries,$"{entries.Count(e=>e.Unlocked)} of {entries.Length} unlocked · Local profile");
   }catch(Exception e)when(e is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException or FormatException or OverflowException) {
-   return new(Pilot.ToArray(),$"Could not read this profile: {e.Message} The file has been left untouched.");
+   return new(Catalog.ToArray(),$"Could not read this profile: {e.Message} The file has been left untouched.");
   }
  }
 }

@@ -1,4 +1,4 @@
-param([string]$Version='0.5.0-redux-dev.33', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
+param([string]$Version='0.5.0-redux-dev.34', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
 $ErrorActionPreference='Stop'
 $projectRoot=[IO.Path]::GetFullPath($WorkspaceRoot)
 $releaseRoot=Join-Path $projectRoot 'release'
@@ -33,6 +33,8 @@ if($LASTEXITCODE -ne 0){throw 'Package documentation links could not be prepared
 foreach($file in Get-ChildItem -LiteralPath (Join-Path $docs 'Mods') -File){Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $app 'Mods')}
 foreach($file in Get-ChildItem -LiteralPath (Join-Path $projectRoot 'EarthBound Companion\Licenses') -File){Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $app 'Licenses')}
 foreach($file in Get-ChildItem -LiteralPath (Join-Path $docs 'Licenses') -Filter 'librashader*' -File){Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $app 'Licenses') -Force}
+Copy-Item -LiteralPath (Join-Path $docs 'Licenses\CompanionAchievements-LICENSE') -Destination (Join-Path $app 'Licenses')
+Copy-Item -LiteralPath (Join-Path $docs 'docs\ACHIEVEMENTS.md') -Destination (Join-Path $app 'ACHIEVEMENTS.md')
 Copy-Item -LiteralPath (Join-Path $projectRoot '_BuildScratch\CoilSnake\LICENSE') -Destination (Join-Path $app 'Licenses\CoilSnake-LICENSE')
 Copy-Item -LiteralPath (Join-Path $projectRoot '_BuildScratch\CoilSnake\coilsnake\util\eb\exhal\COPYING.txt') -Destination (Join-Path $app 'Licenses\Exhal-COPYING.txt')
 @'

@@ -1,6 +1,9 @@
 # Linux, macOS and Android previews
 
-These builds live on `ports/multiplatform-preview`. Windows dev.33 remains the stable release and keeps its Windows Forms launcher, renderer and installation paths. Preview builds use their own data and never replace a Windows installation.
+Dev.34 is the current Windows release; preview.5 supplies Linux, macOS and Android
+builds with the same 46-achievement catalog. Windows retains its Windows Forms
+launcher, renderer and installation paths. Previews use separate platform data
+and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).
 
 ## What is included
 

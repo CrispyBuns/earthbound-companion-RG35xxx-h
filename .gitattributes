@@ -15,4 +15,5 @@ validation/*dev19*.json -text whitespace=cr-at-eol
 scripts/party_name_parents_qa_dev19.py -text whitespace=cr-at-eol,-blank-at-eof
 # Preserve vendored core hashes and patch-format blank context lines.
 Achievements/Core/** text eol=lf
+Achievements/earthbound* text eol=lf
 patches/native-achievements.patch whitespace=-blank-at-eol,-blank-at-eof

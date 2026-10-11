@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.0-redux-dev.34 / v0.5.0-ports-preview.5
+
+- Add 46 original offline achievements spanning Onett through the credits,
+  all eight Sanctuaries, photography, exploration, levels and battle wins.
+- Add native notifications and launcher lists with categories, dates and progress.
+- Preserve the five pilot unlocks and dates; reconcile supported milestones
+  from existing saves quietly. Loading an old game save does not revoke unlocks.
+- Keep Original, Redux and both Shuffle editions separate, with local per-game
+  progress. No accounts or server are required. [Complete set](docs/ACHIEVEMENTS.md).
+
 ## v0.5.0-redux-dev.33
 
 - Carry fractional camera position into world presentation and preserve party/background occlusion.

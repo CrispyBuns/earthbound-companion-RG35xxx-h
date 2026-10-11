@@ -29,7 +29,7 @@ for edition in packs:
  profile=output/(edition+'-progress')
  assert 'production hooks: PASS' in run(edition+'-hooks',edition,['--selftest-achievements'],profile)
  file=profile/f'earthbound-{edition}.json';records=json.loads(file.read_text())['achievements']
- assert len(records)==5 and all(item['unlockedAt']>0 for item in records)
+ assert len(records)==46 and all(item['unlockedAt']>0 for item in records)
  before=digest(file);text=run(edition+'-restart',edition,[],profile)
  assert digest(file)==before and 'Achievement unlocked:' not in text
  run(edition+'-shuffle',edition,['--selftest-achievements','--achievement-shuffle'],profile)

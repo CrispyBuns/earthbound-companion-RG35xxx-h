@@ -4,11 +4,12 @@
     <UseWindowsForms>true</UseWindowsForms><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <AssemblyName>EarthBound Companion</AssemblyName><Version>0.5.0</Version>
-    <InformationalVersion>0.5.0-achievements-preview.1</InformationalVersion>
+    <InformationalVersion>0.5.0-redux-dev.34</InformationalVersion>
     <ApplicationIcon>Assets\earthbound-companion.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile><SelfContained>true</SelfContained><RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup><EmbeddedResource Include="randomizer-layout.json" /><EmbeddedResource Include="progression-policy*.json" /><EmbeddedResource Include="..\research\msu-manifest.json" Link="msu-manifest.json" /></ItemGroup>
   <ItemGroup><EmbeddedResource Include="Assets\earthbound-companion.ico" LogicalName="EarthBoundCompanion.AppIcon" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="..\Achievements\earthbound.json" LogicalName="EarthBoundCompanion.AchievementCatalog" /></ItemGroup>
 </Project>

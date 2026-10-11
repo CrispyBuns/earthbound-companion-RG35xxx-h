@@ -1,5 +1,9 @@
 # Local achievements pilot — October 11, 2026
 
+Historical record of the owner-tested five-achievement pilot. The subsequent
+owner request expands it to the public [46-achievement set](ACHIEVEMENTS.md) in
+[dev.34](RELEASE-dev34.md). The statements below describe the earlier local pilot.
+
 Explicit owner-requested feature work on `feature/companion-achievements`, based
 on platform preview commit `06aef537a15baf1ea51eda10224330e908f4299e`.
 Published Windows dev.33 and platform previews are unchanged. This branch is a

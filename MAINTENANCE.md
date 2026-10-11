@@ -1,5 +1,9 @@
 # Feature freeze and maintenance
 
+October 11 maintenance: dev.35 fixes a tester-reported fractional-camera snap
+when overworld dialogue opens/closes. This is a focused display regression fix;
+the feature freeze and achievement set remain unchanged. See docs/RELEASE-dev35.md.
+
 October 11, 2026: the owner earned all five pilot achievements and explicitly
 requested the full-game expansion and public release. Dev.34 adds 46 standalone
 achievements; [set and coverage](docs/ACHIEVEMENTS.md), [release checks](docs/RELEASE-dev34.md).

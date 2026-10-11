@@ -1,0 +1,234 @@
+{
+  "passed": true,
+  "nativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd",
+  "windows": {
+    "passed": true,
+    "archive": "EarthBound-Companion-Redux-Tester-v0.5.0-redux-dev.35.zip",
+    "bytes": 129189364,
+    "sha256": "f84a8ed8e913997aeb155d8e9770e8049d7ed305631ce9555a8eb6a25adf8faa",
+    "nativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd",
+    "prohibitedContent": false,
+    "packagedNativeFullSetEditions": [
+      "original",
+      "redux"
+    ],
+    "packagedLauncherScenarios": 6
+  },
+  "renderedCases": [
+    {
+      "edition": "original",
+      "filter": 0,
+      "aspect": 0,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "original",
+      "filter": 1,
+      "aspect": 0,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "original",
+      "filter": 2,
+      "aspect": 0,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "original",
+      "filter": 0,
+      "aspect": 1,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "original",
+      "filter": 0,
+      "aspect": 2,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "redux",
+      "filter": 0,
+      "aspect": 0,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "redux",
+      "filter": 1,
+      "aspect": 0,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "redux",
+      "filter": 2,
+      "aspect": 0,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "redux",
+      "filter": 0,
+      "aspect": 1,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    },
+    {
+      "edition": "redux",
+      "filter": 0,
+      "aspect": 2,
+      "cameraPhaseUnchanged": true,
+      "staticWorldChangedPixels": [
+        0,
+        0
+      ],
+      "productionNativeSha256": "fcfc2f56d44886b3041537c4da903d0080a1222f47674ee58c7c16c5ccad11dd"
+    }
+  ],
+  "pauseMenuEditions": [
+    "original",
+    "redux"
+  ],
+  "baselineImageComparison": {
+    "baseline-window-aligned": {
+      "openChangedWorldPixels": 4895,
+      "closeChangedWorldPixels": 4895
+    },
+    "fixed-window-colors": {
+      "openChangedWorldPixels": 0,
+      "closeChangedWorldPixels": 0
+    },
+    "textboxInteriorIdentical": true
+  },
+  "nativeChecks": [
+    {
+      "edition": "original",
+      "check": "--selftest-savestate",
+      "passed": true
+    },
+    {
+      "edition": "original",
+      "check": "--selftest-screen-transitions",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "check": "--selftest-savestate",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "check": "--selftest-screen-transitions",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "check": "--selftest-redux-motion",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "check": "--selftest-redux-psi",
+      "passed": true
+    }
+  ],
+  "publicFixtureToolPassed": true,
+  "protectedDataFilesUnchanged": 52,
+  "packageManifest": "Intentionally updated and backed up with the prior programs.",
+  "installedLatestCheckpointColdLoad": true,
+  "platformCI": {
+    "url": "https://github.com/rages4calm/earthbound-companion/actions/runs/38181647412",
+    "verifiedCodeCommit": "01d1fb0ac856640e2ad76a22eaea0d7845cdef3d",
+    "passed": true,
+    "jobs": [
+      "windows-guard",
+      "linux-x64",
+      "osx-arm64",
+      "osx-x64",
+      "android"
+    ],
+    "artifacts": [
+      {
+        "name": "EarthBound-Companion-android-arm64-preview.apk",
+        "bytes": 37775042,
+        "sha256": "04ef62fd7013b45b3d335ea92dd43757ef2313a4ba8f5f654dfa8bcbb6f04c96",
+        "kind": "android",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-android-x64-preview.apk",
+        "bytes": 38626965,
+        "sha256": "20178ea55dd23d8a87b1dbc21156cdbcab53945d2719f3db1d59a3e25436200c",
+        "kind": "android",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+        "bytes": 124640614,
+        "sha256": "88201cd2d03a4017dbc4f7743cb09a303fbbd79b7b5faee1f6494a2b11e00b82",
+        "kind": "desktop",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+        "bytes": 90004001,
+        "sha256": "9743f33a71d5b58768e615756507b37f41d5f8b874376f369aef11d596d208b3",
+        "kind": "desktop",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+        "bytes": 94887690,
+        "sha256": "9e069ddfdbd154724de56d7434bb86e889481b642cb64210c5904661013a6069",
+        "kind": "desktop",
+        "gameContentIncluded": false
+      }
+    ]
+  },
+  "limits": [
+    "Prepared Onett scenes and copied checkpoints; not every NPC/map or a new campaign.",
+    "Rendered dialogue checks ran on Windows. Other platforms pass builds and launcher/startup checks; broader platform gameplay remains pending.",
+    "No physical monitor scanout measurement."
+  ]
+}

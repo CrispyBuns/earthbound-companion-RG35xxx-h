@@ -15,7 +15,7 @@
 | Android ARM64 phones/tablets | [Android preview.5](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.5) | `android-arm64` APK |
 | Android x64 | [Android preview.5](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.5) | `android-x64` APK — emulator testing |
 
-Linux, macOS and Android builds are **community previews**; full playthroughs and broader device testing are still pending. Linux requires glibc 2.38+, macOS requires 12+, and Android requires 8.0+. macOS previews are not notarized. [Platform setup, features and testing limits](https://github.com/rages4calm/earthbound-companion/blob/ports/multiplatform-preview/docs/PORTABILITY.md).
+Linux, macOS and Android builds are **community previews**; full playthroughs and broader device testing are still pending. Linux requires glibc 2.38+, macOS requires 12+, and Android requires 8.0+. macOS previews are not notarized. [Platform setup, features and testing limits](docs/PORTABILITY.md).
 
 Desktop builds set up Original and Redux from your own clean USA ROM. Android imports privately generated asset packs. No release includes a ROM or game assets. External Slang shader presets are currently Windows-only.
 

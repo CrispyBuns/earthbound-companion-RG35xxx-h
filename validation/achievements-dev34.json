@@ -1,8 +1,8 @@
 {
   "passed": true,
   "archive": "EarthBound-Companion-Redux-Tester-v0.5.0-redux-dev.34.zip",
-  "bytes": 129187593,
-  "sha256": "d4764d938cd636284f256a25ab064e8c8d0c3eb21503b7ac846b17b8687e35d0",
+  "bytes": 129187567,
+  "sha256": "55bed365a938e25ac5ba10cf6cb610860f8124190e6231123264de3f4b0de3ac",
   "nativeSha256": "096e783d2dbfc9f4eaa76c2e3d85930c0fb67267458dcfc362706ca162eb4455",
   "prohibitedContent": false,
   "ownerProtectedFiles": 32,
@@ -41,5 +41,56 @@
     "Fixtures and copied checkpoints, not another natural full campaign.",
     "New-platform gameplay remains a community preview.",
     "No competitive verification or online service."
-  ]
+  ],
+  "platformCI": {
+    "run": "https://github.com/rages4calm/earthbound-companion/actions/runs/38150295497",
+    "sourceCommit": "1de188f2121117ea403e9db7bcc8998b0f80d77d",
+    "passed": true,
+    "jobs": [
+      "windows-guard",
+      "linux-x64",
+      "osx-arm64",
+      "osx-x64",
+      "android"
+    ],
+    "intelMacRerun": "Initial live download failed because the runner could not resolve a hostname. The failed job passed on rerun.",
+    "limits": "Builds, native/launcher checks and Android emulator startup; broader device and natural gameplay testing remains pending.",
+    "artifacts": [
+      {
+        "name": "EarthBound-Companion-android-arm64-preview.apk",
+        "bytes": 37770946,
+        "sha256": "8cbea310b99ad8703e108c66666d762a0dd0cb958842240382e6e292f903e9aa",
+        "kind": "android",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-android-x64-preview.apk",
+        "bytes": 38626965,
+        "sha256": "a8582c9db0285d2f4e31b394f5df6a4491bcd5e888bdc36256906d3a0c65369f",
+        "kind": "android",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+        "bytes": 124635263,
+        "sha256": "d1e6eb9e763c3184e7f4ca486f3538196f10e3d2d2491456ee49e47742a901a5",
+        "kind": "desktop",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+        "bytes": 89999845,
+        "sha256": "c79f56ce0799eca637ea619054a03d22e009fbfdee8d62100e5f2b6ead96befd",
+        "kind": "desktop",
+        "gameContentIncluded": false
+      },
+      {
+        "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+        "bytes": 94885288,
+        "sha256": "4f5ff1de65e5aea275a0828d0494a3bc71fdcd06a1e8446f31a54ecdaab44908",
+        "kind": "desktop",
+        "gameContentIncluded": false
+      }
+    ]
+  }
 }

@@ -37,6 +37,14 @@ Release checks also cover fresh patch application, packaging, launcher paths and
 supported crop captures. Public packages exclude ROMs, packs, soundtrack payloads,
 saves and synthetic achievement progress.
 
+[Platform CI](https://github.com/rages4calm/earthbound-companion/actions/runs/38150295497)
+passes the Windows guard, Linux x64, both macOS architectures and Android jobs,
+including launcher checks and Android emulator startup. Intel macOS passed on
+rerun after a temporary DNS failure during a live download. All five downloaded
+platform packages pass the content and license check. The verified code is
+`1de188f`; subsequent release changes only update documentation and validation
+metadata. [Package hashes and recorded coverage](../validation/achievements-dev34.json).
+
 The full set is checked with bounded fixtures and copied checkpoints, not another
 natural campaign. New-platform gameplay remains a community preview. Competitive
 verification, anti-cheat, online services and other game integrations are out of

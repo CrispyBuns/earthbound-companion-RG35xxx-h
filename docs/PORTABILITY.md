@@ -31,7 +31,7 @@ Desktop preview data is stored in `EarthBoundCompanionPreview` beneath the opera
 
 Install the ARM64 APK on a compatible Android 8.0+ device. The x64 APK is supplied for emulator testing. The preview application ID is `org.earthbound.companion.preview`. APK updates use a persistent project signing key.
 
-Use [Android preview.2](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.2), which explicitly preserves the launcher activity during orientation and screen changes. Desktop previews are listed on the [releases page](https://github.com/rages4calm/earthbound-companion/releases). The Android update keeps the same application ID and signing key so it can be installed over preview.1.
+Use [preview.5](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.5) for the current Android and desktop downloads. Android retains preview.2's orientation fix and the persistent application ID/signing key, so it can update an earlier preview without replacing its app data.
 
 1. Transfer your privately prepared Original or supported Redux pack to your device.
 2. In **Game & setup**, import the matching `assets.pak`, select the edition and press **Play**.

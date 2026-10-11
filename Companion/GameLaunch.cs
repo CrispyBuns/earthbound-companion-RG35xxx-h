@@ -11,6 +11,9 @@ static class GameLaunch {
    foreach(var marker in new[]{"settings.request","settings.applied"})if(File.Exists(Settings.PathTo(marker)))File.Delete(Settings.PathTo(marker));
    var start=new ProcessStartInfo(HostRuntime.Executable("earthbound")){WorkingDirectory=Settings.Game,UseShellExecute=false,CreateNoWindow=true};
    foreach(var argument in new[]{"--session-dir",Settings.Game,"--assets",seed?.Pak??settings.Pak,"--log-file",Path.Combine(Settings.Game,"game.log")})start.ArgumentList.Add(argument);
+   start.ArgumentList.Add("--achievements-dir");start.ArgumentList.Add(AchievementProfiles.Root);
+   if(seed!=null)start.ArgumentList.Add("--achievement-shuffle");
+   if(!settings.AchievementsEnabled || testArguments!=null)start.ArgumentList.Add("--no-achievements");
    if(ReduxProfileService.AllowDevelopmentLaunch(settings)){
     start.ArgumentList.Add("--allow-redux-development");
     if(settings.OriginalTitleScreen){start.ArgumentList.Add("--original-title-assets");start.ArgumentList.Add(Path.Combine(Settings.BaseGame,"assets.pak"));}

@@ -1,0 +1,14 @@
+{
+  "component": "CompanionAchievements",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Carl Prewitt Jr.",
+  "origin": "Original companion project; standalone source is maintained separately",
+  "files": {
+    "include/companion_achievements.h": "d3325dbc0cc475c40751b491ea2ff53974586e80c1fb83312d3492ee0fbfc4d3",
+    "src/companion_achievements.c": "e634b4cfdbe41f269a4b0cd21c269377af7389ff7a10e5c3a277d6453a672047",
+    "tests/core_test.c": "2709f834910bc72cab3ba27a4176e9c988f5ddd6c7242705126a52dee7cdae3e",
+    "CMakeLists.txt": "30a75a4f7a1dbc93cc95c5f7787b4679610808151353bca3d65385bbb622a49b",
+    "LICENSE": "82b02f59ce281ca7507fe08b4148cbb4c8ec6d0c6acaff5987f2af68efd71dec"
+  }
+}

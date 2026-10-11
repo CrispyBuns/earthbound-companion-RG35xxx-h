@@ -80,7 +80,7 @@ sealed partial class MainForm : Form {
  Settings settings=Settings.Load();readonly FlowLayoutPanel nav=new(),page=new();readonly Label status=new();
  readonly System.Windows.Forms.Timer timer=new(){Interval=350};readonly Dictionary<string,Button> navigation=[];readonly ToolTip navigationHelp=new(){AutoPopDelay=15000};
  Process? game;string current="Play";bool settingsRequested;bool captureMode;int captureIndex;string captureDir="",capturePython="",captureHelper="";bool capturePrepared;bool captureScrolled;
- readonly string[] pages=["Play","Randomizer","Game Mode","Display","Audio","Gameplay","Controls","Mods & saves"];
+ readonly string[] pages=["Play","Randomizer","Game Mode","Display","Audio","Gameplay","Controls","Mods & saves","Achievements"];
  readonly (string Short,string Help)[] pageHelp=[
   ("Play / resume story","Start or resume the normal story in your selected EarthBound edition. Choose its look and convenience preset here."),
   ("Create / replay seeds","Generate Story Shuffle adventures, choose what gets randomized, replay saved seeds and manage their separate saves."),
@@ -89,13 +89,14 @@ sealed partial class MainForm : Form {
   ("Music & volume","Enable MSU music, adjust game and soundtrack volume, install the soundtrack and view its credits."),
   ("Movement & assists","Set sprint, quick dialogue, homesickness, reminder calls, battle rewards and your quick-save bank."),
   ("Keyboard & gamepad","Rebind keyboard and controller inputs, tune the left-stick deadzone and choose controller face labels."),
-  ("Packs & save backups","Import or export settings profiles, choose compatible native asset packs and back up or restore saves.")];
+  ("Packs & save backups","Import or export settings profiles, choose compatible native asset packs and back up or restore saves."),
+  ("Local progress","View starter achievements and turn tracking on or off for the next game session.")];
  public MainForm(string[] args){
   AppIcon.Apply(this);
   Text="EarthBound Companion";Font=Theme.Font();BackColor=Theme.Canvas;ForeColor=Theme.Ink;ClientSize=new Size(1120,800);MinimumSize=new Size(990,760);StartPosition=FormStartPosition.CenterScreen;
   if(args.Contains("--compact"))ClientSize=new Size(990,760);
   var layout=new TableLayoutPanel(){Dock=DockStyle.Fill,ColumnCount=2,RowCount=2};layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,210));layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));layout.RowStyles.Add(new RowStyle(SizeType.Percent,100));layout.RowStyles.Add(new RowStyle(SizeType.Absolute,76));Controls.Add(layout);
-  nav.Dock=DockStyle.Fill;nav.FlowDirection=FlowDirection.TopDown;nav.WrapContents=false;nav.BackColor=Theme.Rail;nav.Padding=new Padding(24,24,18,20);layout.Controls.Add(nav,0,0);layout.SetRowSpan(nav,2);
+  nav.Dock=DockStyle.Fill;nav.FlowDirection=FlowDirection.TopDown;nav.WrapContents=false;nav.AutoScroll=true;nav.BackColor=Theme.Rail;nav.Padding=new Padding(24,24,18,20);layout.Controls.Add(nav,0,0);layout.SetRowSpan(nav,2);
   var brand=Theme.Text("EarthBound",17,Theme.Gold);brand.Font=Theme.Font(17,FontStyle.Bold);brand.AutoSize=false;brand.Size=new Size(166,34);nav.Controls.Add(brand);nav.Controls.Add(Theme.Text("Companion",12,Theme.Muted));nav.Controls.Add(new Panel(){Height=18,Width=160});
   for(int i=0;i<pages.Length;i++){string name=pages[i];var help=pageHelp[i];var b=new NavigationButton(){Text=name,Description=help.Short,AccessibleName=name,AccessibleDescription=help.Help,UseMnemonic=false,Size=new Size(166,58),FlatStyle=FlatStyle.Flat,BackColor=Theme.Rail,ForeColor=Theme.Muted,Font=Theme.Font(11,FontStyle.Bold),Cursor=Cursors.Hand,Margin=new Padding(0,0,0,6)};b.FlatAppearance.MouseOverBackColor=Color.FromArgb(63,55,89);b.Click+=(_,_)=>ShowPage(name);navigationHelp.SetToolTip(b,help.Help);navigation[name]=b;nav.Controls.Add(b);}
   nav.Controls.Add(new Panel(){Height=14,Width=160});nav.Controls.Add(Theme.Text("Windows PC edition",10,Theme.Muted));nav.Controls.Add(Theme.Text("Local. Yours to tune.",10,Theme.Muted));
@@ -125,7 +126,7 @@ sealed partial class MainForm : Form {
  void ShowPage(string name){
   current=name;page.SuspendLayout();foreach(Control c in page.Controls.Cast<Control>().ToArray())c.Dispose();page.Controls.Clear();page.AutoScrollPosition=Point.Empty;
   foreach(var (n,b) in navigation){b.BackColor=n==name?Theme.Surface:Theme.Rail;b.ForeColor=n==name?Theme.Gold:Theme.Muted;b.FlatAppearance.BorderColor=n==name?Theme.Line:Theme.Rail;}
-  switch(name){case "Play":PlayPage();break;case "Randomizer":RandomizerPage();break;case "Game Mode":MaternalBoundPage();break;case "Display":DisplayPage();break;case "Audio":AudioPage();break;case "Gameplay":GameplayPage();break;case "Controls":ControlsPage();break;default:ModsPage();break;}
+  switch(name){case "Play":PlayPage();break;case "Randomizer":RandomizerPage();break;case "Game Mode":MaternalBoundPage();break;case "Display":DisplayPage();break;case "Audio":AudioPage();break;case "Gameplay":GameplayPage();break;case "Controls":ControlsPage();break;case "Achievements":AchievementsPage();break;default:ModsPage();break;}
   page.Controls.Add(new Panel {Height=32,Margin=Padding.Empty});
   ResizePage();page.ResumeLayout();page.AutoScrollPosition=Point.Empty;
  }

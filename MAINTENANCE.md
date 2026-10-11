@@ -1,5 +1,10 @@
 # Feature freeze and maintenance
 
+October 11, 2026: the owner explicitly requested a reusable achievement system.
+The separate `feature/companion-achievements` branch contains a five-achievement
+local pilot; [implementation and coverage](docs/ACHIEVEMENTS-PILOT.md). Published
+releases and the rest of the maintenance scope remain unchanged.
+
 Effective October 8, 2026, active feature development is wrapped at **v0.5.0-redux-dev.32**. The project is in community testing and focused bug-fix maintenance. The existing experimental designation remains; closeout does not certify complete compatibility.
 
 [Frozen release](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.32) · [Community testing](docs/COMMUNITY-TESTING.md) · [Developer tools](docs/TESTING.md)

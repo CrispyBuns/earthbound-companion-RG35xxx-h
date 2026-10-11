@@ -26,6 +26,9 @@ public sealed class MainActivity : AvaloniaMainActivity<MobileApp> {
    settings.ShaderPreset="";settings.Save();Settings.Backup(true);
    foreach(var marker in new[]{"settings.request","settings.applied"})File.Delete(Settings.PathTo(marker));
    var args=new List<string>{"--session-dir",Settings.Game,"--assets",seed?.Pak??settings.Pak,"--log-file",Path.Combine(Settings.Game,"game.log")};
+   args.Add("--achievements-dir");args.Add(AchievementProfiles.Root);
+   if(seed!=null)args.Add("--achievement-shuffle");
+   if(!settings.AchievementsEnabled)args.Add("--no-achievements");
    if(ReduxProfileService.AllowDevelopmentLaunch(settings)){args.Add("--allow-redux-development");if(settings.OriginalTitleScreen){args.Add("--original-title-assets");args.Add(Path.Combine(Settings.BaseGame,"assets.pak"));}}
    if(resume)args.Add("--load-state");
    var intent=new Intent();intent.SetClassName(this,"org.earthbound.companion.GameActivity");intent.PutExtra("arguments",args.ToArray());gameClosed=new(TaskCreationOptions.RunContinuationsAsynchronously);StartActivity(intent);return gameClosed.Task;

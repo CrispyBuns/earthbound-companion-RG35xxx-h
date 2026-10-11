@@ -1,0 +1,505 @@
+diff --git a/port/unix/main.c b/port/unix/main.c
+index b2ce2ad4..fee7cbdb 100644
+--- a/port/unix/main.c
++++ b/port/unix/main.c
+@@ -6,6 +6,7 @@
+ #ifndef __ANDROID__
+ #define SDL_MAIN_HANDLED
+ #endif
++#include "game/eb_achievements.h"
+ #include <SDL.h>
+ #include <errno.h>
+ #include <stdio.h>
+@@ -388,7 +389,36 @@ static void migrate_legacy_saves_to_saves_folder(void) {
+     copy_file_if_missing("savestate.bin.1", "saves/savestate.bin.1");
+ }
+ 
++static const char *achievement_directory(void) {
++    static char path[4096];
++#ifdef _WIN32
++    char *base=SDL_GetBasePath();
++    if(base) {
++        size_t length=strlen(base);
++        while(length && (base[length-1]==47 || base[length-1]==92))base[--length]=0;
++        char *component=base+length;
++        while(component>base && component[-1]!=47 && component[-1]!=92)component--;
++        if(SDL_strcasecmp(component,"Game")==0 && component>base)component[-1]=0;
++        snprintf(path,sizeof(path),"%s/UserData/Achievements",base);
++        SDL_free(base);
++    }
++#elif defined(__ANDROID__)
++    char *base=SDL_GetPrefPath(NULL,"EarthBoundCompanionPreview");
++    if(base){snprintf(path,sizeof(path),"%sUserData/Achievements",base);SDL_free(base);}
++#elif defined(__APPLE__)
++    const char *base=getenv("HOME");
++    if(base)snprintf(path,sizeof(path),"%s/Library/Application Support/EarthBoundCompanionPreview/UserData/Achievements",base);
++#else
++    const char *base=getenv("XDG_DATA_HOME");
++    if(base && base[0]==47)snprintf(path,sizeof(path),"%s/EarthBoundCompanionPreview/UserData/Achievements",base);
++    else if((base=getenv("HOME")))snprintf(path,sizeof(path),"%s/.local/share/EarthBoundCompanionPreview/UserData/Achievements",base);
++#endif
++    return path[0]?path:NULL;
++}
+ int main(int argc, char *argv[]) {
++    const char *achievements_dir=NULL;
++    bool achievements_disabled=false, achievements_shuffle=false;
++    bool achievements_test=false, achievements_demo=false;
+ #ifndef __ANDROID__
+     chdir_to_executable_dir(); /* before anything below touches a relative path */
+ #else
+@@ -475,6 +505,16 @@ int main(int argc, char *argv[]) {
+     for (int i = 1; i < argc; i++) {
+         if (strcmp(argv[i], "--session-dir") == 0 && i + 1 < argc) {
+             ++i; /* already handled before any file access */
++        } else if (strcmp(argv[i], "--achievements-dir") == 0 && i + 1 < argc) {
++            achievements_dir=argv[++i];
++        } else if (strcmp(argv[i], "--no-achievements") == 0) {
++            achievements_disabled=true;
++        } else if (strcmp(argv[i], "--achievement-shuffle") == 0) {
++            achievements_shuffle=true;
++        } else if (strcmp(argv[i], "--selftest-achievements") == 0) {
++            achievements_test=true;platform_headless=true;
++        } else if (strcmp(argv[i], "--achievement-demo") == 0) {
++            achievements_demo=true;
+         } else if (strcmp(argv[i], "--config") == 0 && i + 1 < argc) {
+             pc_config_path=argv[++i];
+         } else if (strcmp(argv[i], "--inspect-shuffle") == 0) {
+@@ -725,7 +765,7 @@ int main(int argc, char *argv[]) {
+ #else
+                             " [--export-pak FILE]"
+ #endif
+-                            " [--session-dir DIRECTORY] [--selftest-savestate] [--selftest-keyitems] [--selftest-joinlevel]\n",
++                            " [--achievements-dir DIRECTORY] [--no-achievements] [--achievement-shuffle] [--selftest-achievements] [--session-dir DIRECTORY] [--selftest-savestate] [--selftest-keyitems] [--selftest-joinlevel]\n",
+                     argv[0]);
+             return 1;
+         }
+@@ -1180,6 +1220,19 @@ int main(int argc, char *argv[]) {
+         return 1;
+     }
+ 
++    if ((achievements_test || achievements_demo) && (!achievements_dir || achievements_disabled)) {
++        fprintf(stderr,"Achievement fixtures require an explicit private --achievements-dir.\n");return 1;
++    }
++    if (!achievements_disabled && (!platform_headless || achievements_dir)) {
++        if(!eb_achievements_init(achievements_dir?achievements_dir:achievement_directory(),achievements_shuffle))
++            fprintf(stderr,"Achievements are unavailable for this session (storage or profile lock). Gameplay can continue.\n");
++    }
++    if(achievements_test || achievements_demo) {
++        bool ok=eb_achievements_selftest();
++        fprintf(stderr,"Achievement production hooks: %s\n",ok?"PASS":"FAIL");
++        if(achievements_test || !ok)return ok?0:1;
++    }
++
+     /* Cross-language integration diagnostic: use the SAME gift getter and
+      * battler initialization as gameplay, not a second parser of the pak. */
+     if (inspect_shuffle) {
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f0a1b75e..06a19130 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -53,6 +53,9 @@ set_source_files_properties(
+ )
+ 
+ add_library(earthbound_game STATIC ${SOURCES} ${DATA_SOURCES})
++set(EB_ACHIEVEMENTS_CORE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../Achievements/Core" CACHE PATH "Companion achievement core")
++target_sources(earthbound_game PRIVATE "${EB_ACHIEVEMENTS_CORE_DIR}/src/companion_achievements.c")
++target_include_directories(earthbound_game PRIVATE "${EB_ACHIEVEMENTS_CORE_DIR}/include")
+ 
+ # libm: sin/cos/atan2/round etc. (entity.c, door.c, overworld_teleport.c,
+ # callroutine_movement.c). On glibc, GCC will also fuse adjacent sin()+cos()
+diff --git a/src/game/battle.c b/src/game/battle.c
+index 3027e63e..118a4110 100644
+--- a/src/game/battle.c
++++ b/src/game/battle.c
+@@ -1,3 +1,4 @@
++#include "game/eb_achievements.h"
+ #include "platform/pc_options.h"
+ /*
+  * Battle system core, utility functions for combat.
+@@ -5252,6 +5253,7 @@ StepResult mode_step_battle(ModeState *ms) {
+             break;
+ 
+         case BTL_VICTORY: {
++            eb_achievements_victory(bt.enemies_in_battle_ids, bt.enemies_in_battle);
+             maternalbound_battle_sprites_victory();
+             /* enemies_are_dead (lines 3050-3158) */
+             st->battle_result = 0;
+@@ -6050,6 +6052,7 @@ static const uint16_t iw_flash_colors[7] = {
+  * (verbatim from the blocking instant_win_handler): entity disable, the
+  * battle text window, the money deposit, battler re-init, and the EXP split. */
+ static void iw_victory_setup(void) {
++    eb_achievements_victory(bt.enemies_in_battle_ids, bt.enemies_in_battle);
+     /* Disable all entities during the victory sequence */
+     disable_all_entities();
+ 
+@@ -6105,6 +6108,32 @@ static void iw_victory_setup(void) {
+ 
+ /* CLI-only fixture: exercises the actual normal/instant victory reward paths
+  * before any player save is loaded. No story flags or loot are synthesized. */
++bool battle_achievements_selftest(bool victories) {
++    entity_system_init();window_system_init();
++    if(!map_loader_init())return false;
++    get_map_enemy_placement(0,0);
++    if(!enemy_config_table)return false;
++    memset(&bt,0,sizeof(bt));
++    if(!victories) {
++        bt.enemies_in_battle=1;bt.enemies_in_battle_ids[0]=214;
++        ModeState defeat={0};defeat.battle.phase=BTL_END_CHECK;
++        mode_step_battle(&defeat);
++        return defeat.battle.phase==BTL_DEFEAT_DONE && defeat.battle.battle_result==1;
++    }
++    memset(game_state.party_members,0,sizeof(game_state.party_members));
++    memset(party_characters,0,sizeof(party_characters));
++    game_state.party_count=game_state.player_controlled_party_count=1;
++    game_state.party_members[0]=1;party_characters[0].level=10;
++    party_characters[0].max_hp=party_characters[0].current_hp=party_characters[0].current_hp_target=100;
++    battle_init_player_stats(1,&bt.battlers_table[0]);
++    bt.enemies_in_battle=1;bt.enemies_in_battle_ids[0]=214;
++    ModeState fixture={0};fixture.battle.phase=BTL_VICTORY;
++    mode_step_battle(&fixture);
++    if(fixture.battle.phase!=BTL_VICTORY_DROP)return false;
++    bt.enemies_in_battle_ids[0]=7;
++    for(int i=0;i<4;i++)iw_victory_setup();
++    return true;
++}
+ bool battle_reward_selftest(void) {
+     entity_system_init();
+     window_system_init();
+diff --git a/src/game/companion_achievements.c b/src/game/companion_achievements.c
+new file mode 100644
+index 00000000..7557ec0e
+--- /dev/null
++++ b/src/game/companion_achievements.c
+@@ -0,0 +1,266 @@
++/* SPDX-License-Identifier: GPL-3.0-or-later
++ * EarthBound adapter. The reusable event engine is independently MIT licensed.
++ * This module is deliberately outside the serialized game state. */
++#include "eb_achievements.h"
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <time.h>
++#include <errno.h>
++#include <math.h>
++#include <companion_achievements.h>
++#include "cJSON.h"
++#include "game/game_state.h"
++#include "game/maternalbound.h"
++#include "game/text.h"
++#include "platform/platform.h"
++#include "include/constants.h"
++#ifdef _WIN32
++#include <windows.h>
++#include <io.h>
++#else
++#include <sys/stat.h>
++#include <sys/file.h>
++#include <unistd.h>
++#include <fcntl.h>
++#endif
++
++static const ca_definition definitions[] = {
++ {"morning-onett", "Morning, Onett", "See Onett wake up after the meteor adventure.", "story.daybreak", 1, CA_MILESTONE},
++ {"meteor-patrol", "Meteor Patrol", "Win the battle against Starman Junior.", "boss.starman-junior", 1, CA_MILESTONE},
++ {"arcade-peacekeeper", "Arcade Peacekeeper", "Finish Frank's challenge at the arcade.", "story.frank", 1, CA_MILESTONE},
++ {"first-fight", "First Fight, First Win", "Win a battle, including an instant victory.", "battle.won", 1, CA_COUNTER},
++ {"getting-the-hang", "Getting the Hang of It", "Win five battles. Replayed battles count too.", "battle.won", 5, CA_COUNTER}
++};
++static ca_engine engine;
++static bool enabled, quiet;
++static char profile[4096], edition[40];
++static const char *notices[CA_MAX_ACHIEVEMENTS];
++static size_t notice_read, notice_write;
++static const char *shown;
++static uint64_t notice_start;
++static int popup_width;
++#ifdef _WIN32
++static HANDLE lock_handle = INVALID_HANDLE_VALUE;
++static bool wide_path(const char *path, wchar_t *out) {
++ return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, out, 4096) != 0;
++}
++static FILE *open_file(const char *path, const char *mode) {
++ wchar_t p[4096], m[16];
++ if (!wide_path(path,p) || !MultiByteToWideChar(CP_UTF8,0,mode,-1,m,16)) return NULL;
++ return _wfopen(p,m);
++}
++#else
++static int lock_handle = -1;
++#define open_file fopen
++#endif
++static void close_store(void) {
++#ifdef _WIN32
++ if (lock_handle != INVALID_HANDLE_VALUE) CloseHandle(lock_handle);
++ lock_handle = INVALID_HANDLE_VALUE;
++#else
++ if (lock_handle >= 0) close(lock_handle);
++ lock_handle = -1;
++#endif
++ enabled = false;
++}
++static bool directory_one(const char *p) {
++#ifdef _WIN32
++ wchar_t w[4096];
++ return wide_path(p,w) && (CreateDirectoryW(w,NULL) || GetLastError()==ERROR_ALREADY_EXISTS);
++#else
++ return mkdir(p,0700)==0 || errno==EEXIST;
++#endif
++}
++static bool directories(const char *path) {
++ char p[4096]; size_t length=strlen(path);
++ if (!length || length>=sizeof(p)-64) return false;
++ memcpy(p,path,length+1);
++ for (size_t i=1;i<length;i++) if (p[i]=='/' || p[i]=='\\') {
++  char c=p[i]; p[i]=0;
++  /* Skip the drive prefix and the leading UNC separators. */
++  if (!(i==2 && p[1]==':') && p[i-1]!='/' && p[i-1]!='\\' && !directory_one(p)) return false;
++  p[i]=c;
++ }
++ return directory_one(p);
++}
++static bool store(void *context, const ca_state *states, size_t count) {
++ (void)context;
++ cJSON *root=cJSON_CreateObject(), *items=cJSON_CreateArray();
++ if (!root || !items) {cJSON_Delete(root);cJSON_Delete(items);return false;}
++ cJSON_AddNumberToObject(root,"schema",1);
++ cJSON_AddStringToObject(root,"gameId","earthbound");
++ cJSON_AddStringToObject(root,"edition",edition);
++ cJSON_AddItemToObject(root,"achievements",items);
++ for(size_t i=0;i<count;i++) {
++  cJSON *item=cJSON_CreateObject();
++  if (!item) {cJSON_Delete(root);return false;}
++  cJSON_AddStringToObject(item,"id",definitions[i].id);
++  cJSON_AddNumberToObject(item,"progress",states[i].progress);
++  cJSON_AddNumberToObject(item,"unlockedAt",(double)states[i].unlocked_at);
++  cJSON_AddItemToArray(items,item);
++ }
++ char *json=cJSON_Print(root); cJSON_Delete(root);
++ if(!json)return false;
++ char temp[4102]; snprintf(temp,sizeof(temp),"%s.tmp",profile);
++ FILE *f=open_file(temp,"wb"); bool ok=false;
++ if(f) {
++  size_t length=strlen(json);
++  ok=fwrite(json,1,length,f)==length && fflush(f)==0;
++#ifdef _WIN32
++  if(ok)ok=_commit(_fileno(f))==0;
++#else
++  if(ok)ok=fsync(fileno(f))==0;
++#endif
++  if(fclose(f)!=0)ok=false;
++  if(ok) {
++#ifdef _WIN32
++   wchar_t src[4096],dst[4096];
++   ok=wide_path(temp,src)&&wide_path(profile,dst)&&MoveFileExW(src,dst,MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH);
++#else
++   ok=rename(temp,profile)==0;
++#endif
++  }
++ }
++ cJSON_free(json);
++ if(!ok)fprintf(stderr,"Achievements: could not save progress; no unlock notification was issued.\n");
++ return ok;
++}
++static void notify(void *context,const ca_definition *d,const ca_state *s) {
++ (void)context;(void)s;
++ fprintf(stderr,"Achievement unlocked: %s%s\n",d->title,quiet?" (existing story progress)":"");
++ if(!quiet && notice_write<CA_MAX_ACHIEVEMENTS)notices[notice_write++]=d->title;
++}
++static bool number(cJSON *n, double maximum) {
++ return cJSON_IsNumber(n) && isfinite(n->valuedouble) && n->valuedouble>=0 && n->valuedouble<=maximum && floor(n->valuedouble)==n->valuedouble;
++}
++static bool restore(FILE *f) {
++ char text[16385]; size_t length=fread(text,1,sizeof(text)-1,f);
++ if(ferror(f) || !feof(f) || length==sizeof(text)-1)return false;
++ text[length]=0;
++ const char *end=NULL; cJSON *root=cJSON_ParseWithLengthOpts(text,length+1,&end,1);
++ if(!root)return false;
++ cJSON *schema=cJSON_GetObjectItemCaseSensitive(root,"schema"), *game=cJSON_GetObjectItemCaseSensitive(root,"gameId"), *mode=cJSON_GetObjectItemCaseSensitive(root,"edition"), *items=cJSON_GetObjectItemCaseSensitive(root,"achievements");
++ bool ok=cJSON_IsObject(root)&&number(schema,1)&&schema->valuedouble==1&&cJSON_IsString(game)&&strcmp(game->valuestring,"earthbound")==0&&cJSON_IsString(mode)&&strcmp(mode->valuestring,edition)==0&&cJSON_IsArray(items);
++ bool seen[sizeof(definitions)/sizeof(definitions[0])]={0};
++ cJSON *item;
++ cJSON_ArrayForEach(item,items) {
++  if(!ok)break;
++  cJSON *id=cJSON_GetObjectItemCaseSensitive(item,"id"), *p=cJSON_GetObjectItemCaseSensitive(item,"progress"), *t=cJSON_GetObjectItemCaseSensitive(item,"unlockedAt");
++  ok=cJSON_IsObject(item)&&cJSON_IsString(id)&&number(p,UINT32_MAX)&&number(t,253402300799.0);
++  size_t i=0;
++  if(ok)for(;i<engine.count;i++)if(strcmp(id->valuestring,definitions[i].id)==0)break;
++  if(!ok || i==engine.count || seen[i]){ok=false;break;}
++  seen[i]=true;ok=ca_restore(&engine,id->valuestring,(uint32_t)p->valuedouble,(uint64_t)t->valuedouble);
++ }
++ cJSON_Delete(root);return ok;
++}
++bool eb_achievements_init(const char *directory,bool shuffle) {
++ close_store();notice_read=notice_write=0;shown=NULL;
++ if(!directory || !directories(directory))return false;
++ snprintf(edition,sizeof(edition),"%s%s",shuffle?"shuffle-":"",maternalbound_enabled()?"redux":"original");
++ snprintf(profile,sizeof(profile),"%s/earthbound-%s.json",directory,edition);
++ char lock[4102];snprintf(lock,sizeof(lock),"%s.lock",profile);
++#ifdef _WIN32
++ wchar_t p[4096];if(!wide_path(lock,p))return false;
++ lock_handle=CreateFileW(p,GENERIC_READ|GENERIC_WRITE,0,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
++ if(lock_handle==INVALID_HANDLE_VALUE)return false;
++#else
++ lock_handle=open(lock,O_RDWR|O_CREAT,0600);
++ if(lock_handle<0)return false;
++ if(flock(lock_handle,LOCK_EX|LOCK_NB)!=0){close_store();return false;}
++#endif
++ if(!ca_init(&engine,definitions,sizeof(definitions)/sizeof(definitions[0]),store,notify,NULL)){close_store();return false;}
++ errno=0; FILE *f=open_file(profile,"rb");
++ bool ok=f?restore(f):errno==ENOENT;
++ if(f)fclose(f);
++ if(!ok){fprintf(stderr,"Achievements: profile is unreadable or unsupported; left untouched: %s\n",profile);close_store();return false;}
++ if(!f && !store(NULL,engine.states,engine.count)){close_store();return false;}
++ enabled=true;atexit(close_store);
++ fprintf(stderr,"Achievements: local profile %s (%zu/%zu unlocked)\n",profile,ca_unlocked(&engine),engine.count);
++ return true;
++}
++static void event(const char *name,uint32_t amount) {
++ time_t now=time(NULL);
++ if(enabled && now>0)ca_event(&engine,name,amount,(uint64_t)now);
++}
++void eb_achievements_flag(uint16_t flag) {
++ if(flag==422)event("story.daybreak",1);
++ else if(flag==64)event("story.frank",1);
++}
++void eb_achievements_victory(const uint16_t *enemies,uint16_t count) {
++ event("battle.won",1);
++ for(uint16_t i=0;i<count;i++)if(enemies[i]==214){event("boss.starman-junior",1);break;}
++}
++static int text_width(const char *text) {
++ int result=0;for(;*text;text++)result+=font_get_width(FONT_ID_TINY,ascii_to_eb_char(*text)-0x50)+1;
++ return result;
++}
++void eb_achievements_prepare(bool gameplay) {
++ if(!enabled)return;
++ if(gameplay) {
++  quiet=true;
++  if(event_flag_get(422))eb_achievements_flag(422);
++  if(event_flag_get(64))eb_achievements_flag(64);
++  quiet=false;
++ }
++ uint64_t now=platform_timer_ticks(), frequency=platform_timer_ticks_per_sec();
++ if(shown && frequency && now-notice_start>=frequency*4)shown=NULL;
++ if(!shown && notice_read<notice_write) {
++  shown=notices[notice_read++];notice_start=now;
++  popup_width=text_width(shown)+20;
++  if(popup_width<180)popup_width=180;
++  if(popup_width>234)popup_width=234;
++ }
++}
++static void draw_text(int y,int top,int left,const char *text,pixel_t *pixels) {
++ int row=y-top;
++ if(row<0 || row>=font_get_height(FONT_ID_TINY))return;
++ for(;*text;text++) {
++  uint8_t idx=ascii_to_eb_char(*text)-0x50;
++  const uint8_t *glyph=font_get_glyph(FONT_ID_TINY,idx);
++  int width=font_get_width(FONT_ID_TINY,idx);
++  if(glyph)for(int col=0;col<width && col<8;col++)if(!(glyph[row]&(0x80>>col))) {
++   int x=left+col;if(x>=0 && x<EB_VIEWPORT_WIDTH)pixels[x]=PIXEL_RGB(245,231,186);
++  }
++  left+=width+1;
++ }
++}
++void eb_achievements_draw_scanline(int y,pixel_t *pixels) {
++ if(!shown || !font_get_glyph(FONT_ID_TINY,0))return;
++ /* The tightest supported crop is Zoom In's 179-row center window.
++  * Keep the entire toast inside it as well as the 224-row 4:3 crop. */
++ int top=(EB_VIEWPORT_HEIGHT-179)/2+8,height=font_get_height(FONT_ID_TINY)*2+14;
++ if(y<top || y>=top+height)return;
++ int left=(EB_VIEWPORT_WIDTH-popup_width)/2;
++ for(int x=left;x<left+popup_width;x++)if(x>=0 && x<EB_VIEWPORT_WIDTH)
++  pixels[x]=(y==top || y==top+height-1 || x==left || x==left+popup_width-1)?PIXEL_RGB(203,172,90):PIXEL_RGB(15,19,26);
++ draw_text(y,top+5,(EB_VIEWPORT_WIDTH-text_width("ACHIEVEMENT UNLOCKED"))/2,"ACHIEVEMENT UNLOCKED",pixels);
++ draw_text(y,top+8+font_get_height(FONT_ID_TINY),(EB_VIEWPORT_WIDTH-text_width(shown))/2,shown,pixels);
++}
++/* Invoked only by the opt-in, isolated native test entry point. */
++bool eb_achievements_selftest(void) {
++ if(!enabled || ca_unlocked(&engine)!=0)return false;
++ event_flag_set(421);if(ca_unlocked(&engine))return false;
++ event_flag_set(422);event_flag_set(422);
++ if(ca_unlocked(&engine)!=1)return false;
++ event_flag_set(515);if(ca_unlocked(&engine)!=1)return false;
++ event_flag_set(64);if(ca_unlocked(&engine)!=2)return false;
++ extern bool battle_achievements_selftest(bool victories);
++ if(!battle_achievements_selftest(false) || ca_unlocked(&engine)!=2 || engine.states[4].progress!=0)return false;
++ if(!battle_achievements_selftest(true) || ca_unlocked(&engine)!=5 || engine.states[4].progress!=5)return false;
++ event_flag_clear(422);event_flag_set(422);
++ if(ca_unlocked(&engine)!=5)return false;
++ eb_achievements_prepare(false);
++ pixel_t line[EB_VIEWPORT_WIDTH+16];unsigned changed=0;
++ for(int y=-1;y<=EB_VIEWPORT_HEIGHT;y++) {
++  for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++)line[x]=0x4321;
++  eb_achievements_draw_scanline(y,line+8);
++  for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++) {
++   if(line[x]==0x4321)continue;
++   if(x<8+(EB_VIEWPORT_WIDTH-234)/2 || x>=8+(EB_VIEWPORT_WIDTH+234)/2 || y<0 || y>=EB_VIEWPORT_HEIGHT)return false;
++   changed++;
++  }
++ }
++ return changed>0;
++}
+diff --git a/src/game/eb_achievements.h b/src/game/eb_achievements.h
+new file mode 100644
+index 00000000..06e221ea
+--- /dev/null
++++ b/src/game/eb_achievements.h
+@@ -0,0 +1,11 @@
++/* SPDX-License-Identifier: GPL-3.0-or-later */
++#ifndef EB_COMPANION_ACHIEVEMENTS_H
++#define EB_COMPANION_ACHIEVEMENTS_H
++#include "core/types.h"
++bool eb_achievements_init(const char *directory, bool shuffle);
++void eb_achievements_flag(uint16_t flag);
++void eb_achievements_victory(const uint16_t *enemies, uint16_t count);
++void eb_achievements_prepare(bool gameplay);
++void eb_achievements_draw_scanline(int y, pixel_t *pixels);
++bool eb_achievements_selftest(void);
++#endif
+diff --git a/src/game/game_state.c b/src/game/game_state.c
+index f6d0dccf..9879ce16 100644
+--- a/src/game/game_state.c
++++ b/src/game/game_state.c
+@@ -1,3 +1,4 @@
++#include "game/eb_achievements.h"
+ #include "game/game_state.h"
+ #include "game/battle.h"
+ #include "game/inventory.h"
+@@ -48,8 +49,11 @@ void event_flag_set(uint16_t flag) {
+     /* Assembly SET_EVENT_FLAG (set_event_flag.asm:15) does DEC first:
+      * flag IDs are 1-based (0 = EVENT_FLAG::NONE sentinel). */
+     if (flag == 0 || flag > EVENT_FLAG_COUNT) return;
++    bool already_set = event_flag_get(flag);
++    uint16_t achievement_flag = flag;
+     flag--;
+     event_flags[flag / 8] |= (1 << (flag % 8));
++    if (!already_set) eb_achievements_flag(achievement_flag);
+ }
+ 
+ void event_flag_clear(uint16_t flag) {
+diff --git a/src/game_main.c b/src/game_main.c
+index 48dec61a..c832cac1 100644
+--- a/src/game_main.c
++++ b/src/game_main.c
+@@ -1,3 +1,4 @@
++#include "game/eb_achievements.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -398,6 +399,7 @@ static bool version_overlay_show = false;
+  * collide on screen: FPS sits in the top-right corner, version overlay in
+  * the bottom-right. */
+ static void combined_overlay_stamp_scanline(int y, pixel_t *pixels) {
++    eb_achievements_draw_scanline(y, pixels);
+     if (show_fps && font_get_glyph(FONT_ID_TINY, 0))
+         fps_overlay_stamp_scanline(y, pixels);
+     if (version_overlay_show)
+@@ -603,8 +605,8 @@ void host_process_frame(void) {
+              * function (same pair the fx-suppression check below tests). */
+             version_overlay_show = (ow.zoom_mode == EB_ZOOM_OFF) && in_title_or_file_select;
+ 
+-            if (want_fps || version_overlay_show)
+-                fps_cb = combined_overlay_stamp_scanline;
++            eb_achievements_prepare(mode_stack_has_any(GAME_MODE_OVERWORLD, GAME_MODE_BATTLE));
++            fps_cb = combined_overlay_stamp_scanline;
+             platform_render_frame(fps_cb);
+         }
+ 

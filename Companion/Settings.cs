@@ -10,6 +10,7 @@ public sealed class Settings {
  public string ShaderPreset{get;set;}="";
  public bool Scanlines{get;set;} public bool TiltShift{get;set;}=true;
  public bool OriginalTitleScreen{get;set;}
+ public bool AchievementsEnabled{get;set;}=true;
  public bool WideFov{get;set;}=true;public bool ColorGrading{get;set;}=true;
  public bool NintendoFaceLabels{get;set;}
  public bool HqAudio{get;set;}=true;public int Volume{get;set;}=80;public int MusicVolume{get;set;}=75;

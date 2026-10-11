@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.0-redux-dev.35 / v0.5.0-ports-preview.6
+
+- Keep the overworld's fractional camera phase during ordinary dialogue and
+  menu routines, fixing the small scenery jump when an interaction opens/closes.
+- Composite text and window pixels at fixed screen coordinates with the party;
+  preserve layer priority, opaque window fill and text colors.
+- Preserve separate framing for battles, transitions and dedicated screens.
+  Pack identities, saves, achievement IDs and randomizer recipes are unchanged.
+
 ## v0.5.0-redux-dev.34 / v0.5.0-ports-preview.5
 
 - Add 46 original offline achievements spanning Onett through the credits,

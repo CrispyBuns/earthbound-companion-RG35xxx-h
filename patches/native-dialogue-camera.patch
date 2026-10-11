@@ -1,0 +1,187 @@
+diff --git a/port/unix/platform/sdl2_video.c b/port/unix/platform/sdl2_video.c
+index e2a60cf1..10539625 100644
+--- a/port/unix/platform/sdl2_video.c
++++ b/port/unix/platform/sdl2_video.c
+@@ -83,20 +83,48 @@ static uint32_t motion_party_rgba[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT * 4];
+ 
+ /* Presentation only: original positions, scripts, collision and save ABI stay
+  * unchanged. Fractional camera phase moves scenery at output-pixel precision;
+- * visible party pixels are composited separately so Ness does not wobble as
+- * the scene moves below him. The renderer's original occlusion determines the
+- * party mask (including pixels with the same colour as the background). */
++ * visible party and window pixels are composited separately so Ness and text
++ * stay fixed while scenery retains its fractional phase. The original layer
++ * priority determines the mask, including matching foreground/background colors. */
+ float platform_video_motion_offset(int axis) {
+     return motion_active ? (axis ? motion_offset_y : motion_offset_x) : 0.0f;
+ }
+ 
++static bool motion_overworld_mode(void) {
++    if (g_mode_stack.depth == 0 || g_mode_stack.mode[0] != GAME_MODE_OVERWORLD)
++        return false;
++    /* Ordinary window/interaction cascades retain the world's camera phase.
++     * Dedicated battle, transition, map and cinematic modes keep their own framing. */
++    for (unsigned at = 1; at < g_mode_stack.depth; at++) {
++        switch (g_mode_stack.mode[at]) {
++        case GAME_MODE_PROCESS_INTERACTION: case GAME_MODE_TEXT_WAIT_FADE:
++        case GAME_MODE_DISPLAY_TEXT: case GAME_MODE_TEXT_DELAY:
++        case GAME_MODE_TEXT_PROMPT: case GAME_MODE_ENTITY_FADE_WAIT:
++        case GAME_MODE_ACTIONSCRIPT_FRAME: case GAME_MODE_WAIT_FRAMES:
++        case GAME_MODE_QUICK_CHECKTALK: case GAME_MODE_PAUSE_MENU:
++        case GAME_MODE_SELECTION_MENU: case GAME_MODE_NUMBER_SELECT:
++        case GAME_MODE_CHAR_SELECT: case GAME_MODE_EQUIP_MENU:
++        case GAME_MODE_STATUS_MENU: case GAME_MODE_HPPP_DISPLAY:
++        case GAME_MODE_PSI_MENU: case GAME_MODE_USE_ITEM:
++        case GAME_MODE_DETERMINE_TARGETING: case GAME_MODE_TELEPORT_MENU:
++        case GAME_MODE_STORE_MENU: case GAME_MODE_ESCARGO_MENU:
++        case GAME_MODE_TELEPHONE_MENU: case GAME_MODE_WINDOW_BORDER_ANIM:
++        case GAME_MODE_SETTINGS_MENU: case GAME_MODE_KEY_ITEMS_MENU:
++        case GAME_MODE_BICYCLE_DISMOUNT: case GAME_MODE_HP_ALERT:
++            break;
++        default:
++            return false;
++        }
++    }
++    return true;
++}
++
+ static void motion_prepare(void) {
+     motion_active = false;
+-    ppu_track_party_pixels = false;
++    ppu_track_party_pixels = ppu_track_window_pixels = false;
+     memset(ppu_party_oam, 0, sizeof(ppu_party_oam));
+     if (!motion_party_texture || static_screen ||
+-        any_window_open() || g_mode_stack.depth != 1 ||
+-        g_mode_stack.mode[0] != GAME_MODE_OVERWORLD || game_state.camera_mode ||
++        !motion_overworld_mode() || game_state.camera_mode ||
+         (ppu.inidisp & 0x8F) != 15 || (ppu.bgmode & 7) != 1 ||
+         presentation_oam_frame != core.frame_counter ||
+         ppu.bg_hofs[0] != (uint16_t)(game_state.leader_x_coord - EB_VIEWPORT_CENTER_X) ||
+@@ -115,6 +143,7 @@ static void motion_prepare(void) {
+     }
+     if (!have_party) return;
+     motion_active = ppu_track_party_pixels = true;
++    ppu_track_window_pixels = any_window_open();
+     motion_offset_x = game_state.leader_x_frac / 65536.0f;
+     motion_offset_y = game_state.leader_y_frac / 65536.0f;
+ }
+@@ -126,11 +155,31 @@ static void motion_background_scanline(int y, const pixel_t *pixels) {
+ 
+ static void motion_render_background(void) {
+     int16_t saved_y[128];
++    uint8_t saved_tm = ppu.tm, saved_ts = ppu.ts;
++    uint8_t saved_tm_lines[EB_VIEWPORT_HEIGHT], saved_ts_lines[EB_VIEWPORT_HEIGHT];
++    bool hide_windows = ppu_track_window_pixels;
++    if (hide_windows) {
++        /* Render scenery behind the fixed BG3 text pixels, including opaque
++         * black window fill that can equal the background color. Restore all
++         * derived layer masks before leaving this presentation-only pass. */
++        memcpy(saved_tm_lines, ppu.tm_per_scanline, sizeof(saved_tm_lines));
++        memcpy(saved_ts_lines, ppu.ts_per_scanline, sizeof(saved_ts_lines));
++        ppu.tm &= (uint8_t)~0x04; ppu.ts &= (uint8_t)~0x04;
++        for (unsigned y = 0; y < EB_VIEWPORT_HEIGHT; y++) {
++            ppu.tm_per_scanline[y] &= (uint8_t)~0x04;
++            ppu.ts_per_scanline[y] &= (uint8_t)~0x04;
++        }
++    }
+     memcpy(saved_y, ppu.oam_full_y, sizeof(saved_y));
+     for (unsigned at = 0; at < 128; at++)
+         if (ppu_party_oam[at]) ppu.oam_full_y[at] = EB_VIEWPORT_HEIGHT;
+     ppu_track_party_pixels = false; /* retain mask from the complete first pass */
+     ppu_render_frame(motion_background_scanline);
++    if (hide_windows) {
++        ppu.tm = saved_tm; ppu.ts = saved_ts;
++        memcpy(ppu.tm_per_scanline, saved_tm_lines, sizeof(saved_tm_lines));
++        memcpy(ppu.ts_per_scanline, saved_ts_lines, sizeof(saved_ts_lines));
++    }
+     memcpy(ppu.oam_full_y, saved_y, sizeof(saved_y));
+ }
+ 
+@@ -840,7 +889,7 @@ void platform_video_shutdown(void) {
+     pc_shader_shutdown();
+     if (motion_party_texture) SDL_DestroyTexture(motion_party_texture);
+     motion_party_texture = NULL;
+-    motion_active = ppu_track_party_pixels = false;
++    motion_active = ppu_track_party_pixels = ppu_track_window_pixels = false;
+     if (texture)    SDL_DestroyTexture(texture);
+     if (aa_texture) SDL_DestroyTexture(aa_texture);
+     if (renderer)   SDL_DestroyRenderer(renderer);
+@@ -1013,6 +1062,13 @@ void platform_video_end_frame(void) {
+                     out[x] = 0;
+                     if (ppu_party_pixels[y / factor][x / factor] || full[x] != background[x]) {
+                         uint8_t r, g, b; fx_unpack(full[x], &r, &g, &b);
++                        if (ppu_party_pixels[y / factor][x / factor] == 2) {
++                            /* Match SDL's BGR565 expansion for fixed text, rather
++                             * than the intentionally different FX bit replication. */
++                            r = (uint8_t)((full[x] & 31u) * 255u / 31u);
++                            g = (uint8_t)(((full[x] >> 5) & 63u) * 255u / 63u);
++                            b = (uint8_t)(((full[x] >> 11) & 31u) * 255u / 31u);
++                        }
+                         out[x] = 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+                     }
+                 }
+diff --git a/src/snes/ppu.h b/src/snes/ppu.h
+index f217348f..2f385863 100644
+--- a/src/snes/ppu.h
++++ b/src/snes/ppu.h
+@@ -237,8 +237,9 @@ typedef struct {
+ extern PPUProfile ppu_profile;
+ #endif
+ 
+-/* Desktop-derived output mask; deliberately outside PPUState/save ABI. */
++/* Desktop-derived output mask; outside PPUState/save ABI. 1 = party, 2 = text. */
+ extern bool ppu_track_party_pixels;
++extern bool ppu_track_window_pixels;
+ extern bool ppu_party_oam[128];
+ extern uint8_t ppu_party_pixels[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
+ 
+diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
+index d46fe751..2c06c014 100644
+--- a/src/snes/ppu_render.c
++++ b/src/snes/ppu_render.c
+@@ -8,6 +8,7 @@
+ 
+ /* Optional desktop mask of visible party pixels, outside serialized PPUState. */
+ bool ppu_track_party_pixels;
++bool ppu_track_window_pixels;
+ bool ppu_party_oam[128];
+ uint8_t ppu_party_pixels[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
+ static uint8_t party_obj_line[EB_VIEWPORT_WIDTH];
+@@ -2113,8 +2114,12 @@ merge_done:
+                         else
+                             color = backdrop;
+                         line_out[x + fb_x_offset] = color;
+-                        if (ppu_track_party_pixels && obj_pk > 0 && bg_gp_val < obj_thresh[obj_pk])
+-                            ppu_party_pixels[out_y][x + fb_x_offset] = party_obj_line[x];
++                        if (ppu_track_party_pixels)
++                            ppu_party_pixels[out_y][x + fb_x_offset] =
++                                (obj_pk > 0 && bg_gp_val < obj_thresh[obj_pk])
++                                    ? party_obj_line[x]
++                                    : ((ppu_track_window_pixels && bg_gp_val > 0 &&
++                                        GP_LM_LM(bg_w) == LAYER_BG3) ? 2 : 0);
+                     }
+                 } else {
+                     for (int x = x_start; x < x_end; x++) {
+@@ -2123,6 +2128,9 @@ merge_done:
+                         line_out[x + fb_x_offset] =
+                             GP_LM_GP(bg_w) > 0 ? MAIN_COLOR(bg_w)
+                                                : backdrop;
++                        if (ppu_track_party_pixels && ppu_track_window_pixels &&
++                            GP_LM_GP(bg_w) > 0 && GP_LM_LM(bg_w) == LAYER_BG3)
++                            ppu_party_pixels[out_y][x + fb_x_offset] = 2;
+                     }
+                 }
+                 goto composite_tail;
+@@ -2157,8 +2165,10 @@ merge_done:
+                     main_layer = 0x20;
+                 }
+ 
+-                if (ppu_track_party_pixels && main_layer == LAYER_OBJ)
+-                    ppu_party_pixels[out_y][x + fb_x_offset] = party_obj_line[x];
++                if (ppu_track_party_pixels)
++                    ppu_party_pixels[out_y][x + fb_x_offset] =
++                        main_layer == LAYER_OBJ ? party_obj_line[x] :
++                        ((ppu_track_window_pixels && main_layer == LAYER_BG3) ? 2 : 0);
+ 
+                 /* Color math eligibility */
+                 bool math_eligible = (main_layer & math_layers) != 0;

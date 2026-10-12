@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.0-redux-dev.36 / v0.5.0-ports-preview.7
+
+- Fix party/NPC overlap masks by retaining each sprite's original OAM slot through renderer optimization.
+- Retain fractional scenery position through ordinary door/teleport fades while the overworld camera remains active.
+- Make the controller fast-forward binding work while held, including L2/LT and R2/RT; keyboard toggle behavior is unchanged.
+- Add a 46-entry in-game achievement browser under Set Up, with earned icons, progress, dates and paging.
+- Add an optional generated unlock chime. Existing progress loads silently; saves, achievement IDs and recorded dates are preserved.
+
+
 ## v0.5.0-redux-dev.35 / v0.5.0-ports-preview.6
 
 - Keep the overworld's fractional camera phase during ordinary dialogue and

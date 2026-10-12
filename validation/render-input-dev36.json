@@ -1,0 +1,180 @@
+{
+  "release": "v0.5.0-redux-dev.36",
+  "platformRelease": "v0.5.0-ports-preview.7",
+  "windowsNativeSha256": "bbb84c523d9da9e2072ae7bdf63fd8a55e6856c0395176bcd6fad8aa8042ab5f",
+  "renderFixtures": [
+    {
+      "kind": "door",
+      "filter": 2,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "phaseChecks": 118,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/32/",
+        "61/32/17/",
+        "61/32/72/"
+      ],
+      "nativeSha256": "7ef428ff6a5b191c201aa5c47b8aaaa179b9cec352fbc692635a94da381485b3",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ]
+    },
+    {
+      "kind": "fade",
+      "filter": 1,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "phaseChecks": 118,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/"
+      ],
+      "nativeSha256": "7ef428ff6a5b191c201aa5c47b8aaaa179b9cec352fbc692635a94da381485b3",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ]
+    },
+    {
+      "kind": "mask",
+      "filter": 0,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "phaseChecks": 120,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/"
+      ],
+      "nativeSha256": "7ef428ff6a5b191c201aa5c47b8aaaa179b9cec352fbc692635a94da381485b3",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ]
+    },
+    {
+      "kind": "achievements",
+      "filter": 1,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "phaseChecks": 120,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/75/",
+        "61/75/7/"
+      ],
+      "nativeSha256": "7ef428ff6a5b191c201aa5c47b8aaaa179b9cec352fbc692635a94da381485b3",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ]
+    },
+    {
+      "kind": "teleport",
+      "filter": 0,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "phaseChecks": 118,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/64/",
+        "61/64/17/",
+        "61/64/72/"
+      ],
+      "nativeSha256": "7ef428ff6a5b191c201aa5c47b8aaaa179b9cec352fbc692635a94da381485b3",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ]
+    },
+    {
+      "kind": "achievements",
+      "filter": 0,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "phaseChecks": 120,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/75/",
+        "61/75/7/"
+      ],
+      "nativeSha256": "7ef428ff6a5b191c201aa5c47b8aaaa179b9cec352fbc692635a94da381485b3",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ]
+    }
+  ],
+  "previousSparseMask": {
+    "checks": 384,
+    "errors": 192
+  },
+  "achievementConsumers": {
+    "editions": [
+      "original",
+      "redux"
+    ],
+    "definitions": 46,
+    "allSelectionsBounds": true,
+    "lockedAndEarned": true,
+    "copiedEarnedDatesPreserved": 5
+  },
+  "inputAndAudio": {
+    "bothTriggersHoldAndRelease": true,
+    "keyboardLatch": true,
+    "focusLoss": true,
+    "chimeBothNotesStereoAmplitudeCompletion": true,
+    "physicalControllerTested": false,
+    "listeningTested": false
+  },
+  "regressions": [
+    {
+      "edition": "original",
+      "test": "savestate",
+      "passed": true
+    },
+    {
+      "edition": "original",
+      "test": "screen-transitions",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "test": "savestate",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "test": "screen-transitions",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "test": "redux-movement",
+      "passed": true
+    },
+    {
+      "edition": "redux",
+      "test": "redux-psi",
+      "passed": true
+    }
+  ],
+  "sourceReconstruction": "Five public patches apply to pinned upstream and match changed native files",
+  "launcher": {
+    "windowsBuild": true,
+    "portableTests": true,
+    "soundPreferencePersistenceAndIni": true
+  },
+  "packages": "pending",
+  "platformCI": "pending",
+  "limits": [
+    "Windows prepared scenes and copied saves; not a full campaign or every NPC and transition.",
+    "Rendered fixture SHA predates a change confined to the chime self-test; production rendering code is unchanged.",
+    "New-platform gameplay requires community testing."
+  ]
+}

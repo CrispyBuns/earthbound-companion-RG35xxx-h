@@ -6,6 +6,7 @@ sealed partial class MainForm {
  int achievementCategory;
  void AchievementsPage() {
   Header("A journey worth remembering.","46 achievements from Onett to the ending. Earned achievements stay unlocked when you reload a save.");
+  page.Controls.Add(Theme.Text("In the game: open the command menu, choose Set Up, then Achievements. Gold stars show earned entries. Use Up/Down to select, Left/Right to change pages, and B/Select to go back. Unlock sounds can be switched off under Audio.",11,Theme.Muted));
   Check("Track achievements","Local progress and in-game notifications. Changes apply the next time you launch the game.",settings.AchievementsEnabled,v=>settings.AchievementsEnabled=v);
   Choice("Game edition","Each edition has its own progress. Story Shuffle progress is shared across seeds.",AchievementProfiles.EditionLabels,achievementEdition,i=>{achievementEdition=i;ShowPage("Achievements");});
   Choice("Show","Browse the full set or choose a category.",AchievementProfiles.Categories,achievementCategory,i=>{achievementCategory=i;ShowPage("Achievements");});

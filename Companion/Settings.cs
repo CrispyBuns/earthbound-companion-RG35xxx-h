@@ -11,6 +11,7 @@ public sealed class Settings {
  public bool Scanlines{get;set;} public bool TiltShift{get;set;}=true;
  public bool OriginalTitleScreen{get;set;}
  public bool AchievementsEnabled{get;set;}=true;
+ public bool AchievementSound{get;set;}=true;
  public bool WideFov{get;set;}=true;public bool ColorGrading{get;set;}=true;
  public bool NintendoFaceLabels{get;set;}
  public bool HqAudio{get;set;}=true;public int Volume{get;set;}=80;public int MusicVolume{get;set;}=75;
@@ -84,6 +85,7 @@ public sealed class Settings {
   Atomic(Path.Combine(directory,"settings.dat"),b);
   var ini=new StringBuilder($"# Managed by EarthBound Companion\ncompanion=1\nwidth={Width}\nheight={Height}\nfullscreen={(Fullscreen?1:0)}\ninteger_scale={(IntegerScale?1:0)}\nfilter={Filter}\nvolume={Volume}\nmusic_volume={MusicVolume}\ninstant_text={(InstantText?1:0)}\nno_homesickness={(NoHomesickness?1:0)}\nno_dad_calls={(NoDadCalls?1:0)}\nexp_multiplier={Exp}\nmoney_multiplier={Money}\nfast_forward_multiplier={FastForward}\nquick_slot={QuickSlot}\ndeadzone={Deadzone}\nmsu_dir={Path.GetFullPath(Path.Combine(Root,"msu"))}\n");
   ini.AppendLine($"shader_preset={ShaderPreset}");
+  ini.AppendLine($"achievement_sound={(AchievementSound?1:0)}");
   for(int i=0;i<21;i++)ini.AppendLine($"key.{i}={Keys[i]}\nbutton.{i}={Buttons[i]}");
   Atomic(Path.Combine(directory,"earthbound.ini"),Encoding.UTF8.GetBytes(ini.ToString()));
  }

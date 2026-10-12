@@ -174,6 +174,7 @@ sealed partial class MainForm : Form {
   Check("MSU soundtrack","Use the installed fan soundtrack; missing tracks fall back to SPC audio.",settings.HqAudio,v=>settings.HqAudio=v);
   Slider("Master volume","Music and sound effects.",settings.Volume,100,v=>settings.Volume=v);
   Slider("MSU music volume","Balance the upgraded soundtrack against game sound effects.",settings.MusicVolume,100,v=>settings.MusicVolume=v);
+  Check("Achievement unlock sound","Play a short chime for newly earned achievements. Existing progress loads silently.",settings.AchievementSound,v=>settings.AchievementSound=v);
   Section("Installed soundtrack");page.Controls.Add(Theme.Text("EarthBound MSU-1 fan pack",15));
   int count=Directory.Exists(Path.Combine(Settings.Root,"msu"))?Directory.GetFiles(Path.Combine(Settings.Root,"msu"),"*.pcm").Length:0;
   page.Controls.Add(Theme.Text($"{count} PCM tracks · 44.1 kHz stereo\nLoop points, one-shot jingles and music fades are handled natively.",11,Theme.Muted));
@@ -188,7 +189,7 @@ sealed partial class MainForm : Form {
   Check("Disable Dad's reminder calls","Suppress unsolicited playtime reminders; phone saving stays available.",settings.NoDadCalls,v=>settings.NoDadCalls=v);
   Choice("Experience rewards","Future battles only. High values speed testing and change battle balance.",Enumerable.Range(1,16).Select(i=>i==1?"Original rewards":$"{i}× experience").ToArray(),settings.Exp-1,i=>settings.Exp=i+1);
   Choice("Battle money","Multiply future battle ATM deposits; shop prices and quest gifts stay unchanged.",Enumerable.Range(1,16).Select(i=>i==1?"Original rewards":$"{i}× money").ToArray(),settings.Money-1,i=>settings.Money=i+1);
-  Choice("Tab fast-forward speed","Tap Tab to toggle; tap again for normal speed. Target depends on PC performance.",Enumerable.Range(2,15).Select(i=>$"{i}× speed{(i==3?" (original)":"")}").ToArray(),settings.FastForward-2,i=>settings.FastForward=i+2);
+  Choice("Fast-forward speed","Tap the keyboard binding to toggle. Hold the controller binding for temporary fast-forward; release for normal speed. Target depends on PC performance.",Enumerable.Range(2,15).Select(i=>$"{i}× speed{(i==3?" (original)":"")}").ToArray(),settings.FastForward-2,i=>settings.FastForward=i+2);
   Actions(Theme.Button("Fast playtest settings",()=>{settings.Exp=settings.Money=16;settings.FastForward=8;settings.Sprint=2;settings.InstantText=settings.NoHomesickness=settings.NoDadCalls=true;ShowPage("Gameplay");Notify("16× rewards and 8× Tab speed selected. Apply settings to enable.");}));
   Choice("Quick-save bank","Each bank has two crash-safe generations. F6 saves; F7 loads.",["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5"],settings.QuickSlot,i=>settings.QuickSlot=i);
   Section("Playtest coverage");page.Controls.Add(Theme.Text("High rewards help reach later story content. They change combat balance.\nFast-forward advances normal game frames; it does not skip quests or grant key items.\nReduce rewards for battle-balance checks; tap Tab off to inspect glitches or audio.",11,Theme.Muted));
@@ -196,7 +197,7 @@ sealed partial class MainForm : Form {
  }
  void ControlsPage(){
   Header("Your hands. Your controls.","Select a keyboard or controller binding, then press the input you want to use.");
-  string[] actions=["Command menu / confirm","Cancel / status","Town map","Sprint","Talk / interact / confirm","Bicycle bell","Start / title confirm","Select / status","Move up","Move down","Move left","Move right","Fast-forward toggle","Quick save","Load quick save","Fullscreen","Pause","Screenshot","Show FPS","Open PC settings","Cycle field of view"];
+  string[] actions=["Command menu / confirm","Cancel / status","Town map","Sprint","Talk / interact / confirm","Bicycle bell","Start / title confirm","Select / status","Move up","Move down","Move left","Move right","Fast-forward (controller: hold)","Quick save","Load quick save","Fullscreen","Pause","Screenshot","Show FPS","Open PC settings","Cycle field of view"];
   var grid=new DataGridView(){Height=400,BackgroundColor=Theme.Canvas,BorderStyle=BorderStyle.None,AllowUserToAddRows=false,AllowUserToDeleteRows=false,AllowUserToResizeRows=false,RowHeadersVisible=false,ReadOnly=true,AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill,SelectionMode=DataGridViewSelectionMode.CellSelect,MultiSelect=false,Font=Theme.Font(10),EnableHeadersVisualStyles=false,AccessibleName="Input bindings"};
   grid.DefaultCellStyle.BackColor=Theme.Canvas;grid.DefaultCellStyle.ForeColor=Theme.Ink;grid.DefaultCellStyle.SelectionBackColor=Theme.Surface;grid.DefaultCellStyle.SelectionForeColor=Theme.Gold;grid.DefaultCellStyle.Padding=new Padding(7,4,7,4);grid.GridColor=Theme.Line;grid.RowTemplate.Height=32;
   grid.ColumnHeadersDefaultCellStyle.BackColor=Theme.Rail;grid.ColumnHeadersDefaultCellStyle.ForeColor=Theme.Muted;grid.ColumnHeadersHeight=36;
@@ -207,7 +208,7 @@ sealed partial class MainForm : Form {
   Actions(Theme.Button("Reset bindings",()=>{var d=new Settings();settings.Keys=d.Keys;settings.Buttons=d.Buttons;ShowPage("Controls");Notify("Default bindings selected. Apply settings to save.");}));
   Slider("Left-stick deadzone","Percentage of travel before a direction registers.",settings.Deadzone*100/32767,90,v=>settings.Deadzone=Math.Clamp(v*32767/100,2000,30000));
   Check("Nintendo face labels","Swap south/east and west/north after applying bindings.",settings.NintendoFaceLabels,v=>settings.NintendoFaceLabels=v);
-  page.Controls.Add(Theme.Text("By default: south talks, east cancels, north opens the map, west sprints.\nThe left stick moves independently of the D-pad bindings.",10,Theme.Muted));
+  page.Controls.Add(Theme.Text("By default: south talks, east cancels, north opens the map, west sprints.\nThe left stick moves independently of the D-pad bindings.\nBind Fast-forward to L2/LT or R2/RT to speed up only while held. Choose the speed under Gameplay.",10,Theme.Muted));
  }
  void ModsPage(){
   Header("Make room for the extras.","Import or export settings profiles, select compatible native game data, and back up or restore your story saves. Randomizer manages seed saves.");

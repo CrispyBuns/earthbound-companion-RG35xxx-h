@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 $repoRoot=Split-Path $PSScriptRoot -Parent
 $upstream='https://github.com/seanstaggsQU/earthboundRecompLinux2026.git'
 $commit='76eacab54b05766b82c98da9c55d94d1236ece03'
-$patches=@('native-companion.patch','native-portable.patch','native-achievements.patch','native-dialogue-camera.patch')
+$patches=@('native-companion.patch','native-portable.patch','native-achievements.patch','native-dialogue-camera.patch','native-render-input.patch')
 
 if(Test-Path -LiteralPath $Destination){
  throw "Choose a new native-source directory. Existing checkouts are never reset: $Destination"

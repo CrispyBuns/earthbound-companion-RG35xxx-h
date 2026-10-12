@@ -1,0 +1,621 @@
+diff --git a/port/unix/main.c b/port/unix/main.c
+index fee7cbdb..83ac66e8 100644
+--- a/port/unix/main.c
++++ b/port/unix/main.c
+@@ -530,7 +530,7 @@ int main(int argc, char *argv[]) {
+             pc_input_script_path=argv[++i];
+         } else if (strcmp(argv[i], "--selftest-pc") == 0) {
+             SDL_Init(SDL_INIT_TIMER|SDL_INIT_EVENTS);
+-            bool ok=pc_input_selftest() && pc_msu_selftest();
++            bool ok=pc_input_selftest() && pc_msu_selftest() && platform_audio_achievement_chime_selftest();
+ #ifdef __ANDROID__
+             SDL_Log("Companion ROM-free native selftest: %s",ok?"PASS":"FAIL");
+ #endif
+diff --git a/port/unix/platform/sdl2_audio.c b/port/unix/platform/sdl2_audio.c
+index 409d215f..e7f7e577 100644
+--- a/port/unix/platform/sdl2_audio.c
++++ b/port/unix/platform/sdl2_audio.c
+@@ -8,6 +8,7 @@
+ #include <SDL.h>
+ #include <stdio.h>
+ #include <string.h>
++#include <math.h>
+ 
+ #define AUDIO_SAMPLE_RATE 32000
+ #define AUDIO_BUFFER_SAMPLES 1024
+@@ -22,6 +23,47 @@ static SDL_mutex *audio_mutex;
+    a non-multiple of SAMPLES_PER_FRAME, leftover samples are buffered here. */
+ static int16_t overflow_buf[SAMPLES_PER_FRAME * 2];  /* stereo */
+ static int overflow_count = 0;
++static _Atomic bool chime_requested;
++static unsigned chime_sample = AUDIO_SAMPLE_RATE / 3;
++
++/* Independent, generated two-note chime: no borrowed sound asset or game SFX
++ * channel is needed. The audio callback owns the sample cursor. */
++void platform_audio_achievement_chime(void) {
++    if (audio_device) atomic_store(&chime_requested, true);
++}
++static void mix_achievement_chime(int16_t *out, int frames) {
++    if (atomic_exchange(&chime_requested, false)) chime_sample = 0;
++    const unsigned length = AUDIO_SAMPLE_RATE / 3, note = length / 2;
++    for (int frame = 0; frame < frames && chime_sample < length; frame++, chime_sample++) {
++        unsigned at = chime_sample % note;
++        double envelope = (double)(note - at) / note;
++        if (at < 160) envelope *= at / 160.0;
++        double frequency = chime_sample < note ? 659.255 : 880.0;
++        int sound = (int)(2400 * envelope * sin(6.283185307179586 * frequency * at / AUDIO_SAMPLE_RATE));
++        for (int channel = 0; channel < 2; channel++) {
++            int mixed = out[frame * 2 + channel] + sound;
++            out[frame * 2 + channel] = (int16_t)(mixed > 32767 ? 32767 : mixed < -32768 ? -32768 : mixed);
++        }
++    }
++}
++bool platform_audio_achievement_chime_selftest(void) {
++    int16_t samples[1024];bool audible[2] = {false,false};
++    atomic_store(&chime_requested, true);
++    for(unsigned chunk=0;chunk<22;chunk++) {
++        memset(samples,0,sizeof(samples));mix_achievement_chime(samples,512);
++        for(unsigned at=0;at<512;at++) {
++            if(samples[at*2]!=samples[at*2+1] || samples[at*2]>2400 || samples[at*2]<-2400)return false;
++            if(chunk<10)audible[0] |= samples[at*2]!=0;
++            if(chunk>=11)audible[1] |= samples[at*2]!=0;
++        }
++    }
++    if(chime_sample!=AUDIO_SAMPLE_RATE/3)return false;
++    memset(samples,0,sizeof(samples));
++    mix_achievement_chime(samples,512);
++    for(unsigned at=0;at<1024;at++)if(samples[at])return false;
++    fprintf(stderr,"Achievement chime: both notes, stereo, bounded amplitude and completion %s\n",audible[0]&&audible[1]?"PASS":"FAIL");
++    return audible[0]&&audible[1];
++}
+ 
+ /* Optional MSU1 PCM player (msu_audio.c) -- mixed on top of the SPC700/DSP
+  * output below. A no-op when no pack was loaded via --msu-dir/--msu-name. */
+@@ -78,6 +120,7 @@ static void audio_callback(void *userdata, Uint8 *stream, int len) {
+      * music track -- see the platform_audio_msu_play() call in
+      * game/audio.c's change_music()). */
+     platform_audio_msu_mix(out, total_samples, AUDIO_SAMPLE_RATE);
++    mix_achievement_chime(out, total_samples);
+     for(int i=0;i<total_samples*2;i++)out[i]=(int16_t)((int32_t)out[i]*pc_options.volume/100);
+ }
+ 
+@@ -130,6 +173,8 @@ void platform_audio_unlock(void) {
+ }
+ 
+ #else /* !EB_ENABLE_AUDIO */
++void platform_audio_achievement_chime(void) {}
++bool platform_audio_achievement_chime_selftest(void) { return true; }
+ 
+ bool platform_audio_init(void) { return true; }
+ void platform_audio_shutdown(void) {}
+diff --git a/port/unix/platform/sdl2_input.c b/port/unix/platform/sdl2_input.c
+index 57032632..dc57b057 100644
+--- a/port/unix/platform/sdl2_input.c
++++ b/port/unix/platform/sdl2_input.c
+@@ -1,5 +1,6 @@
+ #include "game/audio.h"
+ #include "game/settings.h"
++#include "game_main.h"
+ #include "include/pad.h"
+ #include "platform/pc_options.h"
+ #include "platform/platform.h"
+@@ -93,7 +94,9 @@ static void assemble(void) {
+         int k = pc_options.keys[i], b = pc_options.buttons[i];
+         if (engine_alt_controls == ALT_CONTROLS_ON && b >= 0 && b < 4)
+             b ^= 1;
+-        bool held = (k > 0 && k < SDL_NUM_SCANCODES && keys[k]) || (b >= 0 && b < 21 && buttons[b]);
++        bool keyboard_held = k > 0 && k < SDL_NUM_SCANCODES && keys[k];
++        bool controller_held = b >= 0 && b < 21 && buttons[b];
++        bool held = keyboard_held || controller_held;
+ #ifdef __ANDROID__
+         held = held || pc_mobile_held(i);
+ #endif
+@@ -101,8 +104,13 @@ static void assemble(void) {
+         last[i] = held;
+         if (i < 12 && held)
+             pad |= bits[i];
+-        if (i == PC_FAST && held)
+-            aux |= AUX_FAST_FORWARD;
++        if (i == PC_FAST) {
++            if (keyboard_held) aux |= AUX_FAST_FORWARD;
++            if (controller_held) aux |= AUX_FAST_FORWARD_HOLD;
++#ifdef __ANDROID__
++            if (pc_mobile_held(i)) aux |= AUX_FAST_FORWARD;
++#endif
++        }
+         if (i == PC_SAVE && held)
+             aux |= AUX_SAVESTATE;
+         if (i == PC_LOAD && held)
+@@ -284,6 +292,32 @@ bool pc_input_selftest(void) {
+     keys[pc_options.keys[PC_SAVE]] = true;
+     assemble();
+     ok = ok && (aux & AUX_SAVESTATE);
++    keys[pc_options.keys[PC_SAVE]] = false;
++    pc_options.fast_forward_multiplier = 8;
++    for (int trigger = 15; trigger <= 16; trigger++) {
++        pc_options.buttons[PC_FAST] = trigger;
++        game_set_fast_forward(false);
++        buttons[trigger] = true;
++        assemble();
++        ok = ok && (aux & AUX_FAST_FORWARD_HOLD) && !(aux & AUX_FAST_FORWARD);
++        game_process_fast_forward_input(aux, aux);
++        ok = ok && game_is_fast_forward() && game_fast_forward_multiplier() == 8;
++        assemble();game_process_fast_forward_input(aux, 0);
++        ok = ok && game_is_fast_forward();
++        buttons[trigger] = false;
++        assemble();game_process_fast_forward_input(aux, 0);
++        ok = ok && !game_is_fast_forward();
++    }
++    keys[pc_options.keys[PC_FAST]] = true;
++    assemble();game_process_fast_forward_input(aux, aux);
++    ok = ok && game_is_fast_forward();
++    keys[pc_options.keys[PC_FAST]] = false;
++    assemble();game_process_fast_forward_input(aux, 0);
++    ok = ok && game_is_fast_forward(); /* keyboard latch survives release */
++    game_set_fast_forward(false);
++    buttons[16] = true;
++    assemble();game_process_fast_forward_input(aux, aux);
++    ok = ok && game_is_fast_forward();
+     SDL_Event e;
+     memset(&e, 0, sizeof(e));
+     e.type = SDL_WINDOWEVENT;
+@@ -291,6 +325,8 @@ bool pc_input_selftest(void) {
+     SDL_PushEvent(&e);
+     platform_input_poll();
+     ok = ok && pad == 0 && aux == 0;
++    game_process_fast_forward_input(aux, 0);
++    ok = ok && !game_is_fast_forward();
+     platform_input_shutdown();
+     fprintf(stderr, "PC input remap / overlapping sources / deadzone / hotkey / focus-loss: %s\n",
+             ok ? "PASS" : "FAIL");
+diff --git a/port/unix/platform/sdl2_video.c b/port/unix/platform/sdl2_video.c
+index 10539625..85e10f22 100644
+--- a/port/unix/platform/sdl2_video.c
++++ b/port/unix/platform/sdl2_video.c
+@@ -94,7 +94,8 @@ static bool motion_overworld_mode(void) {
+     if (g_mode_stack.depth == 0 || g_mode_stack.mode[0] != GAME_MODE_OVERWORLD)
+         return false;
+     /* Ordinary window/interaction cascades retain the world's camera phase.
+-     * Dedicated battle, transition, map and cinematic modes keep their own framing. */
++     * Door/teleport fades retain it too while the PPU still uses the overworld
++     * camera. Dedicated battle, map and cinematic modes keep their own framing. */
+     for (unsigned at = 1; at < g_mode_stack.depth; at++) {
+         switch (g_mode_stack.mode[at]) {
+         case GAME_MODE_PROCESS_INTERACTION: case GAME_MODE_TEXT_WAIT_FADE:
+@@ -111,6 +112,9 @@ static bool motion_overworld_mode(void) {
+         case GAME_MODE_TELEPHONE_MENU: case GAME_MODE_WINDOW_BORDER_ANIM:
+         case GAME_MODE_SETTINGS_MENU: case GAME_MODE_KEY_ITEMS_MENU:
+         case GAME_MODE_BICYCLE_DISMOUNT: case GAME_MODE_HP_ALERT:
++        case GAME_MODE_DOOR_TRANSITION: case GAME_MODE_SCREEN_TRANSITION:
++        case GAME_MODE_TELEPORT_TO: case GAME_MODE_FADE_WAIT:
++        case GAME_MODE_PALETTE_FADE: case GAME_MODE_MAP_PALETTE_FADE:
+             break;
+         default:
+             return false;
+@@ -125,7 +129,7 @@ static void motion_prepare(void) {
+     memset(ppu_party_oam, 0, sizeof(ppu_party_oam));
+     if (!motion_party_texture || static_screen ||
+         !motion_overworld_mode() || game_state.camera_mode ||
+-        (ppu.inidisp & 0x8F) != 15 || (ppu.bgmode & 7) != 1 ||
++        (ppu.inidisp & 0x80) || (ppu.bgmode & 7) != 1 ||
+         presentation_oam_frame != core.frame_counter ||
+         ppu.bg_hofs[0] != (uint16_t)(game_state.leader_x_coord - EB_VIEWPORT_CENTER_X) ||
+         ppu.bg_vofs[0] != (uint16_t)(game_state.leader_y_coord - EB_VIEWPORT_CENTER_Y))
+diff --git a/src/entity/entity.h b/src/entity/entity.h
+index 101ea3cf..5fee11a3 100644
+--- a/src/entity/entity.h
++++ b/src/entity/entity.h
+@@ -636,6 +636,7 @@ void queue_sprite_draw(uint16_t smap_id, int16_t x, int16_t y,
+ 
+ /* RENDER_ALL_PRIORITY_SPRITES (C08B8E), flush all priority queues to OAM. */
+ void render_all_priority_sprites(void);
++void build_entity_draw_list(void);
+ 
+ /* --- Entity fade state system (wipe/dissolve effects) ---
+  *
+diff --git a/src/game/companion_achievements.c b/src/game/companion_achievements.c
+index 8959ce77..bdc68d39 100644
+--- a/src/game/companion_achievements.c
++++ b/src/game/companion_achievements.c
+@@ -18,6 +18,9 @@
+ #include "data/assets.h"
+ #include "include/binary.h"
+ #include "platform/platform.h"
++#include "platform/pc_options.h"
++#include "snes/ppu.h"
++#include "include/pad.h"
+ #include "include/constants.h"
+ #ifdef _WIN32
+ #include <windows.h>
+@@ -38,6 +41,8 @@ static size_t notice_read, notice_write;
+ static const char *shown;
+ static uint64_t notice_start;
+ static int popup_width;
++static bool browser_active;
++static size_t browser_selection;
+ #ifdef _WIN32
+ static HANDLE lock_handle = INVALID_HANDLE_VALUE;
+ static bool wide_path(const char *path, wchar_t *out) {
+@@ -169,7 +174,7 @@ static bool restore(FILE *f) {
+  cJSON_Delete(root);return ok;
+ }
+ bool eb_achievements_init(const char *directory,bool shuffle) {
+- close_store();notice_read=notice_write=0;shown=NULL;reconciled=false;expanded_profile=false;
++ close_store();notice_read=notice_write=0;shown=NULL;reconciled=false;expanded_profile=false;browser_active=false;
+  if(!directory || !directories(directory))return false;
+  snprintf(edition,sizeof(edition),"%s%s",shuffle?"shuffle-":"",maternalbound_enabled()?"redux":"original");
+  snprintf(profile,sizeof(profile),"%s/earthbound-%s.json",directory,edition);
+@@ -206,7 +211,7 @@ void eb_achievements_victory(const uint16_t *enemies,uint16_t count) {
+  for(size_t r=0;r<sizeof(enemy_rules)/sizeof(enemy_rules[0]);r++)
+   for(uint16_t i=0;i<count;i++)if(enemies[i]==enemy_rules[r].enemy){event(enemy_rules[r].event,1);break;}
+ }
+-void eb_achievements_loaded(void) {reconciled=false;}
++void eb_achievements_loaded(void) {reconciled=false;browser_active=false;}
+ void eb_achievements_credits(void) {
+  bool previous=quiet;quiet=!reconciled;
+  if(event_flag_get(EVENT_FLAG_WIN_GIEGU))event("ending.credits",1);
+@@ -259,12 +264,13 @@ void eb_achievements_prepare(bool gameplay) {
+  if(shown && frequency && now-notice_start>=frequency*4)shown=NULL;
+  if(!shown && notice_read<notice_write) {
+   shown=notices[notice_read++];notice_start=now;
++  if(pc_options.achievement_sound)platform_audio_achievement_chime();
+   popup_width=text_width(shown)+20;
+   if(popup_width<180)popup_width=180;
+   if(popup_width>234)popup_width=234;
+  }
+ }
+-static void draw_text(int y,int top,int left,const char *text,pixel_t *pixels) {
++static void draw_text_color(int y,int top,int left,const char *text,pixel_t color,pixel_t *pixels) {
+  int row=y-top;
+  if(row<0 || row>=font_get_height(FONT_ID_TINY))return;
+  for(;*text;text++) {
+@@ -272,20 +278,96 @@ static void draw_text(int y,int top,int left,const char *text,pixel_t *pixels) {
+   const uint8_t *glyph=font_get_glyph(FONT_ID_TINY,idx);
+   int width=font_get_width(FONT_ID_TINY,idx);
+   if(glyph)for(int col=0;col<width && col<8;col++)if(!(glyph[row]&(0x80>>col))) {
+-   int x=left+col;if(x>=0 && x<EB_VIEWPORT_WIDTH)pixels[x]=PIXEL_RGB(245,231,186);
++   int x=left+col;if(x>=0 && x<EB_VIEWPORT_WIDTH)pixels[x]=color;
+   }
+   left+=width+1;
+  }
+ }
++static void draw_text(int y,int top,int left,const char *text,pixel_t *pixels) {
++ draw_text_color(y,top,left,text,PIXEL_RGB(245,231,186),pixels);
++}
++bool eb_achievements_browser_active(void) {return browser_active;}
++void eb_achievements_browser_open(void) {browser_active=true;browser_selection=0;}
++void eb_achievements_browser_input(uint16_t pressed) {
++ if(pressed&PAD_CANCEL){browser_active=false;return;}
++ size_t count=sizeof(definitions)/sizeof(definitions[0]);
++ if((pressed&PAD_UP) && browser_selection)browser_selection--;
++ if((pressed&PAD_DOWN) && browser_selection+1<count)browser_selection++;
++ if(pressed&PAD_LEFT)browser_selection=browser_selection>=5?browser_selection-5:0;
++ if(pressed&PAD_RIGHT)browser_selection=browser_selection+5<count?browser_selection+5:count-1;
++}
++static void draw_description(int y,int top,int left,const char *text,pixel_t *pixels) {
++ char line[128];int width=0;size_t used=0;unsigned row=0;
++ while(*text && row<3) {
++  const char *word=text;while(*text && *text!=' ')text++;
++  size_t length=(size_t)(text-word);char part[128];
++  if(length>=sizeof(part))length=sizeof(part)-1;
++  memcpy(part,word,length);part[length]=0;
++  int next=text_width(part)+(used?text_width(" "):0);
++  if(used && width+next>216) {
++   line[used]=0;draw_text(y,top+(int)row*10,left,line,pixels);
++   row++;used=0;width=0;
++  }
++  if(row>=3)break;
++  if(used && used+1<sizeof(line)){line[used++]=' ';width+=text_width(" ");}
++  if(used+length<sizeof(line)){memcpy(line+used,part,length);used+=length;width+=text_width(part);}
++  while(*text==' ')text++;
++ }
++ if(used && row<3){line[used]=0;draw_text(y,top+(int)row*10,left,line,pixels);}
++}
++static void draw_browser(int y,pixel_t *pixels) {
++ const int top=(EB_VIEWPORT_HEIGHT-164)/2,left=(EB_VIEWPORT_WIDTH-240)/2;
++ if(y<top || y>=top+164)return;
++ pixel_t gold=PIXEL_RGB(236,195,89),dim=PIXEL_RGB(150,153,160);
++ for(int x=left;x<left+240;x++) {
++  pixels[x]=(y==top || y==top+163 || x==left || x==left+239)?gold:PIXEL_RGB(15,19,26);
++  /* Host UI stays in screen space when the scenery moves fractionally. */
++  if(ppu_track_party_pixels)ppu_party_pixels[y][x]=2;
++ }
++ char label[96];size_t count=sizeof(definitions)/sizeof(definitions[0]);
++ snprintf(label,sizeof(label),"ACHIEVEMENTS %zu / %zu",enabled?ca_unlocked(&engine):0,count);
++ draw_text(y,top+7,left+10,label,pixels);
++ size_t start=(browser_selection/5)*5;
++ static const uint8_t star[8]={0x18,0x18,0x7e,0x3c,0x3c,0x66,0x42,0x00};
++ static const uint8_t lock[8]={0x3c,0x42,0x42,0x7e,0x7e,0x66,0x7e,0x00};
++ for(size_t i=start;i<count && i<start+5;i++) {
++  int rowtop=top+24+(int)(i-start)*13;
++  bool unlocked=enabled && engine.states[i].unlocked_at;
++  if(i==browser_selection && y>=rowtop-2 && y<rowtop+10)
++   for(int x=left+5;x<left+235;x++)pixels[x]=PIXEL_RGB(42,48,58);
++  int iconrow=y-rowtop;
++  if(iconrow>=0 && iconrow<8)for(int col=0;col<8;col++)
++   if((unlocked?star:lock)[iconrow]&(0x80>>col))pixels[left+10+col]=unlocked?gold:dim;
++  draw_text_color(y,rowtop,left+25,definitions[i].title,unlocked?gold:dim,pixels);
++ }
++ if(!enabled)draw_text(y,top+95,left+10,"Tracking is disabled for this session.",pixels);
++ else {
++  const ca_state *state=&engine.states[browser_selection];
++  if(state->unlocked_at) {
++   time_t stamp=(time_t)state->unlocked_at;struct tm *date=localtime(&stamp);
++   if(date)strftime(label,sizeof(label),"Earned %Y-%m-%d",date);
++   else snprintf(label,sizeof(label),"Earned");
++  } else snprintf(label,sizeof(label),"Progress %u / %u",state->progress,definitions[browser_selection].target);
++  draw_text(y,top+94,left+10,label,pixels);
++ }
++ draw_description(y,top+108,left+10,definitions[browser_selection].description,pixels);
++ snprintf(label,sizeof(label),"%zu-%zu / %zu",start+1,start+5<count?start+5:count,count);
++ draw_text_color(y,top+148,left+10,label,dim,pixels);
++ draw_text_color(y,top+140,left+10,"Up/Down select  Left/Right page",dim,pixels);
++ draw_text_color(y,top+150,left+110,"B / Select back",dim,pixels);
++}
+ void eb_achievements_draw_scanline(int y,pixel_t *pixels) {
++ if(browser_active && font_get_glyph(FONT_ID_TINY,0)){draw_browser(y,pixels);return;}
+  if(!shown || !font_get_glyph(FONT_ID_TINY,0))return;
+  /* The tightest supported crop is Zoom In's 179-row center window.
+   * Keep the entire toast inside it as well as the 224-row 4:3 crop. */
+  int top=(EB_VIEWPORT_HEIGHT-179)/2+8,height=font_get_height(FONT_ID_TINY)*2+14;
+  if(y<top || y>=top+height)return;
+  int left=(EB_VIEWPORT_WIDTH-popup_width)/2;
+- for(int x=left;x<left+popup_width;x++)if(x>=0 && x<EB_VIEWPORT_WIDTH)
++ for(int x=left;x<left+popup_width;x++)if(x>=0 && x<EB_VIEWPORT_WIDTH) {
+   pixels[x]=(y==top || y==top+height-1 || x==left || x==left+popup_width-1)?PIXEL_RGB(203,172,90):PIXEL_RGB(15,19,26);
++  if(ppu_track_party_pixels)ppu_party_pixels[y][x]=2;
++ }
+  draw_text(y,top+5,(EB_VIEWPORT_WIDTH-text_width("ACHIEVEMENT UNLOCKED"))/2,"ACHIEVEMENT UNLOCKED",pixels);
+  draw_text(y,top+8+font_get_height(FONT_ID_TINY),(EB_VIEWPORT_WIDTH-text_width(shown))/2,shown,pixels);
+ }
+@@ -355,7 +437,28 @@ bool eb_achievements_selftest(void) {
+    }
+   }
+  }
++ /* The browser is read-only, navigates the last partial page, and fits every
++  * selection inside the tightest supported crop without touching guards. */
++ ca_state saved[CA_MAX_ACHIEVEMENTS];memcpy(saved,engine.states,sizeof(saved));
++ engine.states[0].unlocked_at=0;engine.states[0].progress=0;
++ eb_achievements_browser_open();
++ for(size_t i=0;i<engine.count;i++) {
++  browser_selection=i;
++  for(int y=-1;y<=EB_VIEWPORT_HEIGHT;y++) {
++   for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++)line[x]=0x4321;
++   eb_achievements_draw_scanline(y,line+8);
++   for(size_t x=0;x<sizeof(line)/sizeof(line[0]);x++)if(line[x]!=0x4321) {
++    if(x<8+(EB_VIEWPORT_WIDTH-240)/2 || x>=8+(EB_VIEWPORT_WIDTH+240)/2 || y<(EB_VIEWPORT_HEIGHT-179)/2 || y>=(EB_VIEWPORT_HEIGHT+179)/2){fprintf(stderr,"Achievement browser bounds: entry=%zu x=%zu y=%d\n",i,x,y);return false;}
++   }
++  }
++ }
++ eb_achievements_browser_input(PAD_RIGHT|PAD_DOWN);if(browser_selection!=engine.count-1)return false;
++ eb_achievements_browser_input(PAD_LEFT);if(browser_selection!=engine.count-6)return false;
++ eb_achievements_browser_input(PAD_CANCEL);if(browser_active)return false;
++ if(memcmp(saved+1,engine.states+1,sizeof(saved)-sizeof(saved[0])))return false;
++ memcpy(engine.states,saved,sizeof(saved));
+  shown=NULL;notice_read=0;eb_achievements_prepare(false);
++ fprintf(stderr,"Achievement browser: all 46 selections, locked/earned icons, cropped bounds, paging and cancel PASS\n");
+  fprintf(stderr,"Achievement full set: %zu definitions, story setters, normal/instant/defeat consumers, credits guard, unique photos, levels, rollback and all popup bounds PASS\n",engine.count);
+  return changed>0;
+ }
+diff --git a/src/game/eb_achievements.h b/src/game/eb_achievements.h
+index 3bf6dd1e..265c13ec 100644
+--- a/src/game/eb_achievements.h
++++ b/src/game/eb_achievements.h
+@@ -9,5 +9,8 @@ void eb_achievements_prepare(bool gameplay);
+ void eb_achievements_loaded(void);
+ void eb_achievements_credits(void);
+ void eb_achievements_draw_scanline(int y, pixel_t *pixels);
++bool eb_achievements_browser_active(void);
++void eb_achievements_browser_open(void);
++void eb_achievements_browser_input(uint16_t pressed);
+ bool eb_achievements_selftest(void);
+ #endif
+diff --git a/src/game/text.c b/src/game/text.c
+index f48e9b45..aec7fe7a 100644
+--- a/src/game/text.c
++++ b/src/game/text.c
+@@ -5,6 +5,7 @@
+ #include "game/game_state.h"
+ #include "game/settings.h"
+ #include "game/maternalbound.h"
++#include "game/eb_achievements.h"
+ #include "game/inventory.h"
+ #include "game/overworld.h"
+ #include "game/audio.h"
+@@ -3829,6 +3830,14 @@ static const char *window_style_labels[6] = {
+ StepResult mode_step_settings_menu(ModeState *ms) {
+     SettingsMenuState *st = &ms->settings_menu;
+ 
++    if (eb_achievements_browser_active()) {
++        eb_achievements_browser_input(core.pad1_pressed);
++        oam_clear();
++        build_entity_draw_list();
++        update_screen();
++        return STEP_RESULT_CONTINUE();
++    }
++
+     switch ((SettingsMenuPhase)st->phase) {
+     case SET_BUILD: {
+         create_window(WINDOW_SETTINGS_MENU);
+@@ -3861,11 +3870,12 @@ StepResult mode_step_settings_menu(ModeState *ms) {
+             add_menu_item(sound_labels[sc], 12, 0, 11);
+             add_menu_item(window_style_labels[fl], 13, 0, 12);
+         }
++        add_menu_item("Achievements", 14, 0, 13);
+         /* layout_and_print_menu_at_selection over open_window_and_print_menu:
+          * re-selects st->cursor (the row just toggled, see SettingsMenuState's
+          * doc comment) instead of always landing back on row 0. Safe here
+          * unlike file-select's Tweaks screen (see fm_tweaks_build()) because
+-         * every one of this menu's 13 rows is a plain sequential row with no
++         * every one of this menu's 14 rows is a plain sequential row with no
+          * hand-placed gap, exactly what that helper's row = i/columns layout
+          * assumes. */
+         layout_and_print_menu_at_selection(1, 0, st->cursor);
+@@ -3875,11 +3885,11 @@ StepResult mode_step_settings_menu(ModeState *ms) {
+ 
+     case SET_RESULT: {
+         uint16_t selection = menu_take_result(&st->result_ready, &st->result);
+-        /* Rows 1-13 all confirm-and-rebuild (see the branches below); capture
++        /* Rows 1-14 all confirm-and-rebuild (see the branches below); capture
+          * the toggled row once here instead of repeating this assignment in
+-         * all 13 branches. Cancel/other leaves st->cursor untouched, which is
++         * all 14 branches. Cancel/other leaves st->cursor untouched, which is
+          * fine -- SET_CLEANUP closes the window on that path regardless. */
+-        if (selection >= 1 && selection <= 13)
++        if (selection >= 1 && selection <= 14)
+             st->cursor = (uint16_t)(selection - 1);
+         if (selection == 1) {
+             /* Sprint Speed row confirmed: cycle Off -> Medium -> Stinky -> Off. */
+@@ -4053,6 +4063,14 @@ StepResult mode_step_settings_menu(ModeState *ms) {
+             st->phase = SET_BUILD;
+             return STEP_RESULT_CONTINUE();
+         }
++        if (selection == 14) {
++            eb_achievements_browser_open();
++            oam_clear();
++            build_entity_draw_list();
++            update_screen();
++            st->phase = SET_BUILD;
++            return STEP_RESULT_CONTINUE();
++        }
+         /* Cancel (B/Select) or unrecognized -> close. */
+         st->phase = SET_CLEANUP;
+         return STEP_RESULT_CONTINUE();
+diff --git a/src/game_main.c b/src/game_main.c
+index 090431cd..55bb0b4d 100644
+--- a/src/game_main.c
++++ b/src/game_main.c
+@@ -53,6 +53,7 @@ int debug_auto_dump_requested = 0;
+ 
+ static bool show_fps = false;
+ static bool fast_forward_active = false;
++static bool fast_forward_latched = false;
+ static bool debug_menu_requested = false;
+ static uint16_t aux_prev = 0;
+ 
+@@ -836,9 +837,7 @@ void host_process_frame(void) {
+      * opened during ordinary gameplay -- reported live, right after
+      * battle specifically, where post-battle text is near-guaranteed. */
+     platform_video_set_static_screen(in_static_screen);
+-    if (aux_new & AUX_FAST_FORWARD) {
+-        game_set_fast_forward(!fast_forward_active);
+-    }
++    game_process_fast_forward_input(aux, aux_new);
+     /* F6 (save) / F7 (load): request the action rather than performing it here, 
+      * this host_process_frame() may be reached while a mode-step or a synchronous
+      * blocking helper is mid-execution, where a save would be torn and a load
+@@ -2035,10 +2034,20 @@ int game_fast_forward_multiplier(void) {
+ }
+ 
+ void game_set_fast_forward(bool active) {
++    fast_forward_latched = active;
+     fast_forward_active = active;
+     platform_video_set_vsync(!active);
+ }
+ 
++void game_process_fast_forward_input(uint16_t held, uint16_t pressed) {
++    if (pressed & AUX_FAST_FORWARD) fast_forward_latched = !fast_forward_latched;
++    bool active = fast_forward_latched || (held & AUX_FAST_FORWARD_HOLD);
++    if (active != fast_forward_active) {
++        fast_forward_active = active;
++        platform_video_set_vsync(!active);
++    }
++}
++
+ void game_init(void) {
+     memory_init();
+     ppu_init();
+diff --git a/src/game_main.h b/src/game_main.h
+index 33184234..128ce08e 100644
+--- a/src/game_main.h
++++ b/src/game_main.h
+@@ -34,6 +34,7 @@ bool wait_frames_or_button(uint16_t count, uint16_t button_mask);
+ bool game_is_fast_forward(void);
+ int game_fast_forward_multiplier(void);
+ void game_set_fast_forward(bool active);
++void game_process_fast_forward_input(uint16_t held, uint16_t pressed);
+ 
+ /* ── Capture-safety gate (savestate-anywhere; docs/plans/savestate-unified-loop.md,
+  * "recommended build order" item #1) ─────────────────────────────────────────────
+diff --git a/src/platform/pc_options.c b/src/platform/pc_options.c
+index 7e2cf3e2..b4e24c24 100644
+--- a/src/platform/pc_options.c
++++ b/src/platform/pc_options.c
+@@ -18,6 +18,7 @@ void pc_options_defaults(void) {
+     pc_options.exp_multiplier = 1;
+     pc_options.money_multiplier = 1;
+     pc_options.fast_forward_multiplier = EB_FAST_FORWARD_MULTIPLIER;
++    pc_options.achievement_sound = 1;
+     pc_options.deadzone = 8000;
+     const int keys[PC_ACTIONS] = {40, 29, 22, 225, 27, 26, 40, 229, 82, 81, 80,
+                                   79, 43, 63, 64,  68, 66, 69, 60,  58, 6};
+@@ -73,6 +74,7 @@ bool pc_options_load(const char *path) {
+                                          {"exp_multiplier", &pc_options.exp_multiplier, 1, 16},
+                                          {"money_multiplier", &pc_options.money_multiplier, 1, 16},
+                                          {"fast_forward_multiplier", &pc_options.fast_forward_multiplier, 2, 16},
++                                         {"achievement_sound", &pc_options.achievement_sound, 0, 1},
+                                          {"quick_slot", &pc_options.quick_slot, 0, 4},
+                                          {"deadzone", &pc_options.deadzone, 2000, 30000}};
+         bool found = false;
+diff --git a/src/platform/pc_options.h b/src/platform/pc_options.h
+index d14c8c66..44ebdac9 100644
+--- a/src/platform/pc_options.h
++++ b/src/platform/pc_options.h
+@@ -32,6 +32,7 @@ typedef struct {
+     _Atomic int volume, music_volume;
+     int instant_text, no_homesickness, no_dad_calls;
+     int exp_multiplier, money_multiplier, quick_slot, deadzone, fast_forward_multiplier;
++    int achievement_sound;
+     int keys[PC_ACTIONS], buttons[PC_ACTIONS];
+     char msu_dir[1024];
+     char shader_preset[1024];
+diff --git a/src/platform/platform.h b/src/platform/platform.h
+index dc1a16ad..47b9b676 100644
+--- a/src/platform/platform.h
++++ b/src/platform/platform.h
+@@ -187,6 +187,7 @@ void platform_log_set_enabled(bool enabled);
+ #define AUX_FPS_TOGGLE   (1 << 2)   /* F3: toggle FPS overlay */
+ #define AUX_ZOOM_TOGGLE  (1 << 3)   /* R3: cycle the overworld FOV/zoom mode (see game_main.c) */
+ #define AUX_FAST_FORWARD (1 << 4)   /* Tab: toggle configured fast-forward */
++#define AUX_FAST_FORWARD_HOLD (1 << 10) /* controller: fast-forward only while held */
+ #define AUX_DEBUG_TOGGLE (1 << 5)   /* `: toggle debug mode */
+ #define AUX_SAVESTATE    (1 << 6)   /* F6: request a torn-safe savestate capture */
+ #define AUX_LOAD_STATE   (1 << 7)   /* F7: restore the last savestate */
+@@ -212,6 +213,8 @@ void platform_request_quit(void);                     /* programmatic quit (e.g.
+  * callback thread and the main game thread (e.g. when writing APU ports).
+  */
+ bool platform_audio_init(void);
++void platform_audio_achievement_chime(void);
++bool platform_audio_achievement_chime_selftest(void);
+ void platform_audio_shutdown(void);
+ void platform_audio_lock(void);                       /* acquire audio mutex (pairs with unlock) */
+ void platform_audio_unlock(void);
+diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
+index 2c06c014..51ffeb16 100644
+--- a/src/snes/ppu_render.c
++++ b/src/snes/ppu_render.c
+@@ -800,6 +800,7 @@ typedef struct {
+     int16_t  y;          /* spr_y (scanline space, incl. sprite_y_offset) */
+     uint8_t  w, h;
+     uint8_t  attr;       /* raw OAM attr (vflip/hflip/prio/pal/tile-hi) */
++    uint8_t  oam_index;  /* original slot, not the packed active-list index */
+     uint16_t tile_num;   /* spr->tile | ((attr & 1) << 8) */
+ } ObjActive;
+ static ObjActive obj_active[128];
+@@ -841,6 +842,7 @@ static void PPU_HOT_FUNC(build_obj_buckets)(void) {
+         obj_active[slot].w        = (uint8_t)w;
+         obj_active[slot].h        = (uint8_t)h;
+         obj_active[slot].attr     = spr->attr;
++        obj_active[slot].oam_index = (uint8_t)i;
+         obj_active[slot].tile_num = spr->tile | ((uint16_t)(spr->attr & 1) << 8);
+ 
+         int bstart = y0 < 0 ? 0 : (y0 >> OBJ_BAND_SHIFT);
+@@ -893,7 +895,7 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
+     /* Iterate only sprites that overlap this band (priority order preserved). */
+     for (int k = 0; k < bcnt; k++) {
+         const ObjActive *a = &obj_active[blist[k]];
+-        unsigned presentation_index = blist[k];
++        unsigned presentation_index = a->oam_index;
+ 
+         int spr_x = a->x;
+         int spr_y = a->y;

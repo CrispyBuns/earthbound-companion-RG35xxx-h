@@ -11,6 +11,19 @@ state. Replayed victories count toward battle goals. Photos count distinct
 photographer locations, so repeating one photo does not fill the album. Level
 progress remembers the highest level reached by any party member.
 
+## View progress while playing
+
+Open the command menu, choose **Set Up**, then **Achievements**. Gold stars mark
+earned entries; dim locks mark entries still to earn. Up/Down selects an entry,
+Left/Right changes pages, and B/Select returns to Set Up. The selected entry shows
+its description, progress or earned date. The browser uses the same local profile
+as the launcher and fits the supported 4:3, widescreen and Zoom In crops.
+
+New unlocks play a short generated chime. Switch **Achievement unlock sound** off
+in the launcher Audio page (Sound & gameplay in platform previews) to mute it.
+Existing progress reconciles silently. The chime follows master volume and normal
+fast-forward/pause audio suppression.
+
 ## Existing progress
 
 The five-achievement pilot upgrades automatically, retaining its IDs, progress

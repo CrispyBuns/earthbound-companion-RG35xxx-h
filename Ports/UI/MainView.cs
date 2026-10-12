@@ -79,12 +79,13 @@ public sealed partial class MainView : UserControl {
   p.Children.Add(Text("External Slang presets are Windows-only in this first preview. The built-in display effects above remain available."));return p;
  }
  StackPanel Gameplay(){var p=Page();
+  Check(p,"Achievement unlock sound",()=>settings.AchievementSound,v=>settings.AchievementSound=v);
   Number(p,"Sound volume",0,100,()=>settings.Volume,v=>settings.Volume=v);Number(p,"Music volume",0,100,()=>settings.MusicVolume,v=>settings.MusicVolume=v);Check(p,"HQ audio",()=>settings.HqAudio,v=>settings.HqAudio=v);
   p.Children.Add(Action("Install / verify MSU soundtrack",async()=>{await SetupService.InstallAsync(null,true,new Progress<SetupProgress>(v=>status.Text=v.Detail));status.Text="Music installation verified.";}));
   Choice(p,"Hold Y to sprint",["Off","1.5×","2×"],()=>settings.Sprint,v=>settings.Sprint=v);Check(p,"Instant text",()=>settings.InstantText,v=>settings.InstantText=v);Check(p,"Disable homesickness",()=>settings.NoHomesickness,v=>settings.NoHomesickness=v);Check(p,"Disable Dad calls",()=>settings.NoDadCalls,v=>settings.NoDadCalls=v);
   Number(p,"Experience multiplier",1,16,()=>settings.Exp,v=>settings.Exp=v);Number(p,"Money multiplier",1,16,()=>settings.Money,v=>settings.Money=v);Number(p,"Fast-forward multiplier",2,16,()=>settings.FastForward,v=>settings.FastForward=v);Number(p,"Quick-save slot (0–4)",0,4,()=>settings.QuickSlot,v=>settings.QuickSlot=v);return p;
  }
- StackPanel Controls(){var p=Page();p.Children.Add(Text("SDL keyboard scancodes and controller button IDs match the Windows game's configuration. Keyboard: Enter confirm, Z cancel, arrows move, Left Shift sprint, Tab fast-forward, F6/F7 save/load. Controllers are read by the game."));
+ StackPanel Controls(){var p=Page();p.Children.Add(Text("SDL keyboard scancodes and controller button IDs match the Windows game's configuration. Keyboard: Enter confirm, Z cancel, arrows move, Left Shift sprint, Tab toggles fast-forward, F6/F7 save/load. The controller fast-forward binding works while held; release to return to normal speed. Controller IDs 15 and 16 are L2/LT and R2/RT. Controllers are read by the game."));
   Check(p,"Nintendo face-button labels",()=>settings.NintendoFaceLabels,v=>settings.NintendoFaceLabels=v);Number(p,"Stick deadzone",2000,30000,()=>settings.Deadzone,v=>settings.Deadzone=v);
   string[] names=["A","B","X","Y","L","R","Start","Select","Up","Down","Left","Right","Fast-forward","Save","Load","FPS","Zoom","Fullscreen","Screenshot","Pause","Settings"];
   for(int i=0;i<names.Length;i++){int n=i;Number(p,names[i]+" keyboard scancode",0,511,()=>settings.Keys[n],v=>settings.Keys[n]=v);Number(p,names[i]+" controller button (-1 disables)",-1,16,()=>settings.Buttons[n],v=>settings.Buttons[n]=v);}return p;

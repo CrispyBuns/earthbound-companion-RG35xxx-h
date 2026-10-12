@@ -1,5 +1,7 @@
 # Feature freeze and maintenance
 
+October 11, 2026: dev.36 addresses community sprite-overlap and doorway/fade camera reports, and adds the requested controller hold-fast-forward and in-game achievement browser with optional sound. The 46-entry set is unchanged. [Focused checks](docs/RELEASE-dev36.md).
+
 October 11 maintenance: dev.35 fixes a tester-reported fractional-camera snap
 when overworld dialogue opens/closes. This is a focused display regression fix;
 the feature freeze and achievement set remain unchanged. See docs/RELEASE-dev35.md.

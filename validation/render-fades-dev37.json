@@ -285,5 +285,113 @@
     "Prepared fixtures and a copied checkpoint, not every natural NPC/event or another campaign.",
     "The copied checkpoint is not modified.",
     "Platform build/startup checks do not certify every device or natural gameplay route."
-  ]
+  ],
+  "runtimeSourceCommit": "dbc8d8fe35447cb65e649abe618ad16f895f9354",
+  "windowsPackage": {
+    "zip": "EarthBound-Companion-Redux-Tester-v0.5.0-redux-dev.37.zip",
+    "sha256": "744abcf8ad1296fa1458afe8a87b9fa48077187a1da3d2d04ad30d0ee8db2549",
+    "manifestFiles": 50,
+    "privateContentAbsentFromZip": true,
+    "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+    "tests": [
+      {
+        "test": "launcher-selftest",
+        "passed": true
+      },
+      {
+        "test": "launcher-profiles",
+        "passed": true
+      },
+      {
+        "test": "achievement-consumers",
+        "edition": "original",
+        "passed": true
+      },
+      {
+        "test": "achievement-consumers",
+        "edition": "redux",
+        "passed": true
+      }
+    ],
+    "limits": [
+      "Private assets were supplied after archive validation. No campaign or setup rebuild is claimed."
+    ]
+  },
+  "installation": {
+    "installedCopies": 2,
+    "protectedFilesUnchanged": 103,
+    "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+    "copiedCheckpointLoadConfirmed": true,
+    "earnedProgressPreserved": true
+  },
+  "platformPackages": [
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "bytes": 37783234,
+      "sha256": "8121d686318872ac44825a9391279f2d98817153597bdcdf246fd10f26bbae86",
+      "kind": "android",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "bytes": 38643349,
+      "sha256": "dcd7561d073cf17ae1b57c3a49342944b43231077fa87045fc10ad4302bf7dce",
+      "kind": "android",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "bytes": 124644545,
+      "sha256": "547d2084006c86baf1e4edbc87a17b4165352ba2a5c94e9626e4fe8bdb53c9c1",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "bytes": 90010233,
+      "sha256": "250b42034db33e4536ddff4417a3cc42da6adb172c445d26251cb525c75c8eb0",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "bytes": 94896180,
+      "sha256": "3c9518b06890ca540fa15ddb43aaa612d98ba89aa92b011b8ddc76072a67f482",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    }
+  ],
+  "platformCI": {
+    "run": 38283386450,
+    "runtimeSourceCommit": "dbc8d8fe35447cb65e649abe618ad16f895f9354",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "android",
+        "conclusion": "success"
+      },
+      {
+        "name": "desktop (macos-15-intel, osx-x64)",
+        "conclusion": "success"
+      },
+      {
+        "name": "desktop (macos-15, osx-arm64)",
+        "conclusion": "success"
+      },
+      {
+        "name": "windows-guard",
+        "conclusion": "success"
+      },
+      {
+        "name": "desktop (ubuntu-24.04, linux-x64)",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "allUploadedDigestsVerified": true
 }

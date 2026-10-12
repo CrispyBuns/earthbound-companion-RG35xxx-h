@@ -38,3 +38,14 @@ and Redux playthroughs; they are useful feedback, not exhaustive certification.
 Linux, macOS and Android remain community previews.
 
 [Recorded results](../validation/render-fades-dev37.json).
+
+The extracted Windows ZIP passes all 50 manifest hashes, launcher self-tests,
+six launcher profile scenarios and achievement consumers in both editions.
+Both local installations receive the tested programs; all 103 protected files
+remain unchanged. The installed player cold-loads a copied completed-game state.
+Windows ZIP SHA-256: 744abcf8ad1296fa1458afe8a87b9fa48077187a1da3d2d04ad30d0ee8db2549.
+
+All five [platform CI jobs](https://github.com/rages4calm/earthbound-companion/actions/runs/38283386450)
+pass at runtime commit `dbc8d8fe35447cb65e649abe618ad16f895f9354`. All five downloaded platform packages pass
+content/path and native architecture checks; all six uploaded release digests
+match the tested files. These remain community previews with the limits above.

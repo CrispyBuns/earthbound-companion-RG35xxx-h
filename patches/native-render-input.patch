@@ -169,10 +169,18 @@ index 57032632..dc57b057 100644
      fprintf(stderr, "PC input remap / overlapping sources / deadzone / hotkey / focus-loss: %s\n",
              ok ? "PASS" : "FAIL");
 diff --git a/port/unix/platform/sdl2_video.c b/port/unix/platform/sdl2_video.c
-index 10539625..85e10f22 100644
+index 10539625..2a0467d6 100644
 --- a/port/unix/platform/sdl2_video.c
 +++ b/port/unix/platform/sdl2_video.c
-@@ -94,7 +94,8 @@ static bool motion_overworld_mode(void) {
+@@ -5,6 +5,7 @@
+ #include "core/memory.h"
+ #include "core/mode_stack.h"
+ #include "game/game_state.h"
++#include "game/fade.h"
+ #include "game/window.h"
+ #include "entity/entity.h"
+ #include "snes/ppu.h"
+@@ -94,7 +95,8 @@ static bool motion_overworld_mode(void) {
      if (g_mode_stack.depth == 0 || g_mode_stack.mode[0] != GAME_MODE_OVERWORLD)
          return false;
      /* Ordinary window/interaction cascades retain the world's camera phase.
@@ -182,25 +190,76 @@ index 10539625..85e10f22 100644
      for (unsigned at = 1; at < g_mode_stack.depth; at++) {
          switch (g_mode_stack.mode[at]) {
          case GAME_MODE_PROCESS_INTERACTION: case GAME_MODE_TEXT_WAIT_FADE:
-@@ -111,6 +112,9 @@ static bool motion_overworld_mode(void) {
+@@ -111,6 +113,22 @@ static bool motion_overworld_mode(void) {
          case GAME_MODE_TELEPHONE_MENU: case GAME_MODE_WINDOW_BORDER_ANIM:
          case GAME_MODE_SETTINGS_MENU: case GAME_MODE_KEY_ITEMS_MENU:
          case GAME_MODE_BICYCLE_DISMOUNT: case GAME_MODE_HP_ALERT:
 +        case GAME_MODE_DOOR_TRANSITION: case GAME_MODE_SCREEN_TRANSITION:
 +        case GAME_MODE_TELEPORT_TO: case GAME_MODE_FADE_WAIT:
 +        case GAME_MODE_PALETTE_FADE: case GAME_MODE_MAP_PALETTE_FADE:
++        case GAME_MODE_MOSAIC_FADE: case GAME_MODE_ACTIONSCRIPT_WAIT:
++            break;
++        case GAME_MODE_SPECIAL_EVENT:
++            if (g_mode_stack.state[at].special_event.event_id != 1 &&
++                g_mode_stack.state[at].special_event.event_id != 2)
++                return false;
++            break;
++        case GAME_MODE_FLYOVER:
++            /* Coffee/tea first fades the unchanged world out. Its later
++             * animated text screen has independent framing. */
++            if (g_mode_stack.state[at].flyover.kind != FO_COFFEETEA ||
++                g_mode_stack.state[at].flyover.phase != FOP_CT_FADEOUT1)
++                return false;
              break;
          default:
              return false;
-@@ -125,7 +129,7 @@ static void motion_prepare(void) {
+@@ -123,25 +141,31 @@ static void motion_prepare(void) {
+     motion_active = false;
+     ppu_track_party_pixels = ppu_track_window_pixels = false;
      memset(ppu_party_oam, 0, sizeof(ppu_party_oam));
++    bool retained_fade = fade_active();
++    for (unsigned at = 1; at < g_mode_stack.depth; at++)
++        retained_fade |= g_mode_stack.mode[at] == GAME_MODE_MOSAIC_FADE ||
++            (g_mode_stack.mode[at] == GAME_MODE_FLYOVER &&
++             g_mode_stack.state[at].flyover.kind == FO_COFFEETEA &&
++             g_mode_stack.state[at].flyover.phase == FOP_CT_FADEOUT1);
      if (!motion_party_texture || static_screen ||
          !motion_overworld_mode() || game_state.camera_mode ||
 -        (ppu.inidisp & 0x8F) != 15 || (ppu.bgmode & 7) != 1 ||
+-        presentation_oam_frame != core.frame_counter ||
 +        (ppu.inidisp & 0x80) || (ppu.bgmode & 7) != 1 ||
-         presentation_oam_frame != core.frame_counter ||
++        (presentation_oam_frame != core.frame_counter && !retained_fade) ||
          ppu.bg_hofs[0] != (uint16_t)(game_state.leader_x_coord - EB_VIEWPORT_CENTER_X) ||
          ppu.bg_vofs[0] != (uint16_t)(game_state.leader_y_coord - EB_VIEWPORT_CENTER_Y))
+         return;
+-    bool have_party = false;
+     for (unsigned at = 0; at < 128; at++) {
+         int ent = presentation_oam_entity[at];
+         if (ent < 0) continue;
+         for (unsigned member = 0; member < game_state.party_count && member < TOTAL_PARTY_COUNT; member++) {
+             if ((uint16_t)ent == read_u16_le(&game_state.party_entity_slots[member * 2])) {
+                 ppu_party_oam[at] = true;
+-                have_party = true;
+             }
+         }
+     }
+-    if (!have_party) return;
++    /* Event fades can retain the displayed OAM or intentionally omit sprites.
++     * Neither changes the scenery's camera phase. Mode and scroll guards above
++     * still keep dedicated screens and scripted camera moves separate. */
+     motion_active = ppu_track_party_pixels = true;
+     ppu_track_window_pixels = any_window_open();
+     motion_offset_x = game_state.leader_x_frac / 65536.0f;
+@@ -1060,6 +1084,9 @@ void platform_video_end_frame(void) {
+                 uint32_t *out = motion_party_rgba + y * w;
+                 for (int x = 0; x < w; x++) {
+                     out[x] = 0;
++                    /* Type 3 is the winning non-party sprite over a party pixel.
++                     * Preserve its opaque coverage even when both passes have
++                     * identical RGB (especially shared black outlines). */
+                     if (ppu_party_pixels[y / factor][x / factor] || full[x] != background[x]) {
+                         uint8_t r, g, b; fx_unpack(full[x], &r, &g, &b);
+                         if (ppu_party_pixels[y / factor][x / factor] == 2) {
 diff --git a/src/entity/entity.h b/src/entity/entity.h
 index 101ea3cf..5fee11a3 100644
 --- a/src/entity/entity.h
@@ -590,11 +649,36 @@ index dc1a16ad..47b9b676 100644
  void platform_audio_shutdown(void);
  void platform_audio_lock(void);                       /* acquire audio mutex (pairs with unlock) */
  void platform_audio_unlock(void);
+diff --git a/src/snes/ppu.h b/src/snes/ppu.h
+index 2f385863..a4308830 100644
+--- a/src/snes/ppu.h
++++ b/src/snes/ppu.h
+@@ -237,7 +237,8 @@ typedef struct {
+ extern PPUProfile ppu_profile;
+ #endif
+ 
+-/* Desktop-derived output mask; outside PPUState/save ABI. 1 = party, 2 = text. */
++/* Presentation mask outside PPUState/save ABI: 1 = party, 2 = text,
++ * 3 = winning non-party OBJ occluding an opaque party pixel. RGB is not alpha. */
+ extern bool ppu_track_party_pixels;
+ extern bool ppu_track_window_pixels;
+ extern bool ppu_party_oam[128];
 diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
-index 2c06c014..51ffeb16 100644
+index 2c06c014..3bcad8b9 100644
 --- a/src/snes/ppu_render.c
 +++ b/src/snes/ppu_render.c
-@@ -800,6 +800,7 @@ typedef struct {
+@@ -12,6 +12,10 @@ bool ppu_track_window_pixels;
+ bool ppu_party_oam[128];
+ uint8_t ppu_party_pixels[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
+ static uint8_t party_obj_line[EB_VIEWPORT_WIDTH];
++/* The winner alone loses same-colored foreground OBJ pixels in the two-pass
++ * presentation mask. Keep opaque party coverage beneath that winner too;
++ * color index zero remains transparent, while a black palette entry does not. */
++static uint8_t party_coverage_line[EB_VIEWPORT_WIDTH];
+ 
+ /* Embedded ports can define these at build time to optimize rendering:
+  *
+@@ -800,6 +804,7 @@ typedef struct {
      int16_t  y;          /* spr_y (scanline space, incl. sprite_y_offset) */
      uint8_t  w, h;
      uint8_t  attr;       /* raw OAM attr (vflip/hflip/prio/pal/tile-hi) */
@@ -602,7 +686,7 @@ index 2c06c014..51ffeb16 100644
      uint16_t tile_num;   /* spr->tile | ((attr & 1) << 8) */
  } ObjActive;
  static ObjActive obj_active[128];
-@@ -841,6 +842,7 @@ static void PPU_HOT_FUNC(build_obj_buckets)(void) {
+@@ -841,6 +846,7 @@ static void PPU_HOT_FUNC(build_obj_buckets)(void) {
          obj_active[slot].w        = (uint8_t)w;
          obj_active[slot].h        = (uint8_t)h;
          obj_active[slot].attr     = spr->attr;
@@ -610,7 +694,16 @@ index 2c06c014..51ffeb16 100644
          obj_active[slot].tile_num = spr->tile | ((uint16_t)(spr->attr & 1) << 8);
  
          int bstart = y0 < 0 ? 0 : (y0 >> OBJ_BAND_SHIFT);
-@@ -893,7 +895,7 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
+@@ -869,6 +875,8 @@ static int obj_prio_dirty_hi = LINE_BUF_WIDTH;
+ #endif
+ 
+ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color, uint8_t *obj_prio, TileRowCacheEntry *tile_cache) {
++    if (ppu_track_party_pixels)
++        memset(party_coverage_line, 0, sizeof(party_coverage_line));
+     /* When vertical centering is active, sprites only render within the
+      * SNES-visible scanline range. The border scanlines (above/below the
+      * centered area) show only BG content, no sprites. This prevents
+@@ -893,7 +901,7 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
      /* Iterate only sprites that overlap this band (priority order preserved). */
      for (int k = 0; k < bcnt; k++) {
          const ObjActive *a = &obj_active[blist[k]];
@@ -619,3 +712,34 @@ index 2c06c014..51ffeb16 100644
  
          int spr_x = a->x;
          int spr_y = a->y;
+@@ -1018,7 +1026,10 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
+                  * 127â†’0, later (lower-index) sprites unconditionally overwrite. */
+                 obj_color[screen_x] = rgb;
+                 obj_prio[screen_x] = spr_prio + 1;
+-                if (ppu_track_party_pixels) party_obj_line[screen_x] = ppu_party_oam[presentation_index];
++                if (ppu_track_party_pixels) {
++                    party_obj_line[screen_x] = ppu_party_oam[presentation_index];
++                    party_coverage_line[screen_x] |= ppu_party_oam[presentation_index];
++                }
+             }
+         }
+     }
+@@ -2117,7 +2128,7 @@ merge_done:
+                         if (ppu_track_party_pixels)
+                             ppu_party_pixels[out_y][x + fb_x_offset] =
+                                 (obj_pk > 0 && bg_gp_val < obj_thresh[obj_pk])
+-                                    ? party_obj_line[x]
++                                    ? (party_obj_line[x] ? 1 : party_coverage_line[x] ? 3 : 0)
+                                     : ((ppu_track_window_pixels && bg_gp_val > 0 &&
+                                         GP_LM_LM(bg_w) == LAYER_BG3) ? 2 : 0);
+                     }
+@@ -2167,7 +2178,8 @@ merge_done:
+ 
+                 if (ppu_track_party_pixels)
+                     ppu_party_pixels[out_y][x + fb_x_offset] =
+-                        main_layer == LAYER_OBJ ? party_obj_line[x] :
++                        main_layer == LAYER_OBJ ?
++                            (party_obj_line[x] ? 1 : party_coverage_line[x] ? 3 : 0) :
+                         ((ppu_track_window_pixels && main_layer == LAYER_BG3) ? 2 : 0);
+ 
+                 /* Color math eligibility */

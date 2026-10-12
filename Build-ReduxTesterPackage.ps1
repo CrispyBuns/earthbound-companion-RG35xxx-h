@@ -1,4 +1,4 @@
-param([string]$Version='0.5.0-redux-dev.36', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
+param([string]$Version='0.5.0-redux-dev.37', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
 $ErrorActionPreference='Stop'
 $projectRoot=[IO.Path]::GetFullPath($WorkspaceRoot)
 $releaseRoot=Join-Path $projectRoot 'release'

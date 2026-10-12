@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.0-redux-dev.37 / v0.5.0-ports-preview.8
+
+- Preserve shared black outlines on foreground sprites overlapping Ness or the party.
+- Keep fractional scenery position while scripted event fades reuse the displayed sprite frame, including the initial coffee/tea fade.
+- Preserve ordinary building/dialogue transitions, independent cutscene framing, saves and achievement progress.
+
 ## v0.5.0-redux-dev.36 / v0.5.0-ports-preview.7
 
 - Fix party/NPC overlap masks by retaining each sprite's original OAM slot through renderer optimization.

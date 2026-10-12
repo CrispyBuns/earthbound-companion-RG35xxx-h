@@ -1,0 +1,289 @@
+{
+  "release": "v0.5.0-redux-dev.37",
+  "platformRelease": "v0.5.0-ports-preview.8",
+  "native": {
+    "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+    "patchReconstructionFiles": [
+      "port/unix/main.c",
+      "port/unix/platform/sdl2_audio.c",
+      "port/unix/platform/sdl2_input.c",
+      "port/unix/platform/sdl2_video.c",
+      "src/entity/entity.h",
+      "src/game/companion_achievements.c",
+      "src/game/eb_achievements.h",
+      "src/game/text.c",
+      "src/game_main.c",
+      "src/game_main.h",
+      "src/platform/pc_options.c",
+      "src/platform/pc_options.h",
+      "src/platform/platform.h",
+      "src/snes/ppu.h",
+      "src/snes/ppu_render.c"
+    ],
+    "patchesApplied": 5,
+    "tests": [
+      {
+        "edition": "original",
+        "test": "savestate",
+        "exitCode": 0,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nsavestate round-trip self-test: PASS\r\nsavestate perturb (cold-load) self-test: PASS\r\nsavestate crash-safe self-test: PASS\r\nsavestate asset-pointer self-test: PASS\r\n"
+      },
+      {
+        "edition": "original",
+        "test": "screen-transitions",
+        "exitCode": 0,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nNative screen transitions: 21 exit/palette/brightness cases, timer step 1, PASS\r\n"
+      },
+      {
+        "edition": "redux",
+        "test": "savestate",
+        "exitCode": 0,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nsavestate round-trip self-test: PASS\r\nsavestate perturb (cold-load) self-test: PASS\r\nsavestate crash-safe self-test: PASS\r\nsavestate asset-pointer self-test: PASS\r\n"
+      },
+      {
+        "edition": "redux",
+        "test": "screen-transitions",
+        "exitCode": 0,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nNative screen transitions: 21 exit/palette/brightness cases, timer step 2, PASS\r\n"
+      }
+    ]
+  },
+  "renderFixtures": [
+    {
+      "kind": "event-fade",
+      "filter": 0,
+      "copiedCheckpointSha256": null,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 98,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/20/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 0,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "a3a73484af98e0e3b51df174ae9dabcac5c9e150f675eef04f754dcd291e8d1e"
+    },
+    {
+      "kind": "door",
+      "filter": 2,
+      "copiedCheckpointSha256": null,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 118,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/32/",
+        "61/32/17/",
+        "61/32/72/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 0,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "b73e8bc1997c216284cb2e609f9039953aab3fccc88923dd580cde8ed2f98ca6"
+    },
+    {
+      "kind": "event-window-fade",
+      "filter": 1,
+      "copiedCheckpointSha256": null,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 108,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/1/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 0,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "a3a73484af98e0e3b51df174ae9dabcac5c9e150f675eef04f754dcd291e8d1e"
+    },
+    {
+      "kind": "mask",
+      "filter": 2,
+      "copiedCheckpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 120,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 0,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "a3a73484af98e0e3b51df174ae9dabcac5c9e150f675eef04f754dcd291e8d1e"
+    },
+    {
+      "kind": "coffee-fade",
+      "filter": 2,
+      "copiedCheckpointSha256": null,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 40,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/66/",
+        "61/66/21/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 55,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "bac106294c8b33d0dd5540d32548036a2205748df3a9e4d7f66001d4367eafe2"
+    },
+    {
+      "kind": "achievements",
+      "filter": 1,
+      "copiedCheckpointSha256": null,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 120,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/75/",
+        "61/75/7/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 0,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "120346a3405b938771fefacd8d2e2b6c70c9c42256041373581ed1c7562b577e"
+    },
+    {
+      "kind": "teleport",
+      "filter": 0,
+      "copiedCheckpointSha256": null,
+      "baselineMask": false,
+      "maskChecks": 384,
+      "maskErrors": 0,
+      "outlineChecks": 384,
+      "outlineErrors": 0,
+      "phaseChecks": 118,
+      "phaseErrors": 0,
+      "modeStacks": [
+        "61/",
+        "61/64/",
+        "61/64/17/",
+        "61/64/72/"
+      ],
+      "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "limits": [
+        "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+      ],
+      "referenceRenderer": false,
+      "outlineColorChecks": 146,
+      "outlineColorErrors": 0,
+      "dedicatedSceneChecks": 0,
+      "dedicatedSceneErrors": 0,
+      "qaHostSha256": "27c6d46b245445a4a70b2c812d674cd2eabc0292a83cff151b0a9c32bf74f4b3"
+    }
+  ],
+  "dev36Reference": {
+    "kind": "event-fade",
+    "filter": 2,
+    "copiedCheckpointSha256": null,
+    "baselineMask": false,
+    "maskChecks": 384,
+    "maskErrors": 64,
+    "outlineChecks": 384,
+    "outlineErrors": 96,
+    "phaseChecks": 98,
+    "phaseErrors": 56,
+    "modeStacks": [
+      "61/",
+      "61/20/"
+    ],
+    "nativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+    "limits": [
+      "Synthetic sparse/overlapping sprites and prepared Onett transition drivers; not a natural campaign or every map."
+    ],
+    "referenceRenderer": true,
+    "outlineColorChecks": 146,
+    "outlineColorErrors": 0,
+    "dedicatedSceneChecks": 0,
+    "dedicatedSceneErrors": 0,
+    "qaHostSha256": "2184f82aca2eaf74402c16b14b44a7c78a5c329b8571652da3b69e4715a63e62",
+    "referenceSourceSha256": {
+      "dev36-ppu.c": "18a6c05020886a66ba6fa4e6e8ac55ee0584c712d40621a521712c43cfaa302f",
+      "dev36-video.c": "ce3d107cd18a914b81784d7b6b4099ce38ab84f291486552fbf4611f2b4a7146"
+    }
+  },
+  "dialogue": {
+    "cameraPhaseUnchanged": true,
+    "fixture": "pause-menu",
+    "filter": 1,
+    "aspect": 1,
+    "preparedScene": true,
+    "copiedColdRestore": false,
+    "sourceCheckpointSha256": null,
+    "productionNativeSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+    "observerSha256": "4261f7f233d36ab7f91fdb09d21a003b6221d59c01ca0688260ee3162a5b4e4e",
+    "limits": [
+      "Prepared Onett window/text fixture; not every NPC/map or physical monitor scanout."
+    ]
+  },
+  "limits": [
+    "Prepared fixtures and a copied checkpoint, not every natural NPC/event or another campaign.",
+    "The copied checkpoint is not modified.",
+    "Platform build/startup checks do not certify every device or natural gameplay route."
+  ]
+}

@@ -16,7 +16,7 @@ broad gameplay/patch audit or require another owner full playthrough.
 
 Effective October 8, 2026, active feature development is wrapped at **v0.5.0-redux-dev.32**. The project is in community testing and focused bug-fix maintenance. The existing experimental designation remains; closeout does not certify complete compatibility.
 
-[Frozen release](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.32) · [Community testing](docs/COMMUNITY-TESTING.md) · [Developer tools](docs/TESTING.md)
+[Latest Windows release](https://github.com/rages4calm/earthbound-companion/releases/latest) · [Other platforms](docs/PORTABILITY.md) · [Frozen baseline](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.32) · [Community testing](docs/COMMUNITY-TESTING.md) · [Developer tools](docs/TESTING.md)
 
 October 9 maintenance update: **dev.33** implements the owner-requested scrolling, widescreen encounter and shader preset work. The original freeze and campaign limits remain; [dev.33 evidence](docs/RELEASE-dev33.md) records the new bounded tests.
 

@@ -69,6 +69,9 @@ Run this from a complete installation containing `Game/earthbound.exe` and SDL2.
 
 ## Release checks
 
+After package verification, use the [publishing procedure](PUBLISHING.md) to set
+and verify GitHub's Latest designation and current download links.
+
 `verify_redux_package.py` extracts a fresh ZIP, checks its file manifest and absence of ROM/game/save payloads, performs actual setup from a headered owner ROM without Python on PATH, repairs a corrupt MSU track, checks all 164 tracks, runs story/seed openings and validates save-profile isolation. Its optional `--legacy-original-pack` checks the real Original data-upgrade path.
 
 Each accepted content pack also runs 1,000 deterministic seeds and all 30 option/preset combinations, with independent rejected mutations of protected story assets, stock and scripted enemies. These preservation checks do not establish a full randomized playthrough.

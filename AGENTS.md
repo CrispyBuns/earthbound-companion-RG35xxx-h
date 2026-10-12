@@ -12,5 +12,6 @@ set in dev.34; see docs/RELEASE-dev34.md. This is a narrow feature exception.
 - Keep ROMs, extracted packs, soundtrack payloads and personal saves private. Follow existing issue attachment rules.
 - In the owner's workspace, github-repo is canonical; adjacent native-source is intentionally modified. Never reset, clean or bootstrap over that dirty source tree.
 - Research and future-tool proposals are references, not requirements before closeout.
+- After verifying uploaded packages, publish through `scripts/publish_tested_release.py`. Windows development releases must be non-prereleases and explicitly Latest; platform releases remain prereleases. Run its `--check` for both tags and update the current version labels/platform links before reporting publication complete. Preserve historical release identities.
 
 Later explicit user instructions can reopen or change this scope.

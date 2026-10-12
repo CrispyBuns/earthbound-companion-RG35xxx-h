@@ -2,7 +2,7 @@
 
 Features are frozen at **v0.5.0-redux-dev.32**. Help is welcome with bugs encountered during ordinary play. Testing one short section is useful; another complete campaign is not required.
 
-[Download](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.32) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml) · [Coverage limits](../MAINTENANCE.md#what-the-evidence-supports)
+[Latest Windows download](https://github.com/rages4calm/earthbound-companion/releases/latest) · [Other platforms](PORTABILITY.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml) · [Coverage limits](../MAINTENANCE.md#what-the-evidence-supports)
 
 You can contact the project owner on Discord as **`chrono.trigger`**. Use GitHub Issues for bug reports that need tracking.
 

@@ -1,6 +1,6 @@
 # Linux, macOS and Android previews
 
-Dev.36 is the current Windows release; preview.8 supplies Linux, macOS and Android
+[Dev.37](https://github.com/rages4calm/earthbound-companion/releases/latest) is the current Windows release; preview.8 supplies Linux, macOS and Android
 builds with the same 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).

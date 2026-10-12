@@ -8,7 +8,7 @@
 
 | Platform | Latest release | Package to choose |
 |---|---|---|
-| Windows x64 | [Redux dev.37](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.37) | Windows tester ZIP — main release |
+| Windows x64 | [Redux dev.37](https://github.com/rages4calm/earthbound-companion/releases/latest) | Windows tester ZIP — main release |
 | Linux x64 / SteamOS | [Desktop preview.8](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.8) | `linux-x64` archive |
 | macOS Apple Silicon (ARM64) | [Desktop preview.8](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.8) | `osx-arm64` archive |
 | macOS Intel (x64) | [Desktop preview.8](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.8) | `osx-x64` archive |
@@ -24,7 +24,7 @@ Desktop builds set up Original and Redux from your own clean USA ROM. Android im
 **Discord contact:** `chrono.trigger`
 
 > [!NOTE]
-> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Preview.7 downloads](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.8) · [setup and coverage](docs/PORTABILITY.md). New-platform gameplay still needs community testing.
+> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Preview.8 downloads](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.8) · [setup and coverage](docs/PORTABILITY.md). New-platform gameplay still needs community testing.
 
 > [!NOTE]
 > **Feature-frozen; community testing and focused bug-fix maintenance.** The dev.32 feature freeze remains in place, with the requested display update and dev.34 standalone achievements. The rest of the feature set remains frozen. [Scope and coverage](MAINTENANCE.md) · [Short testing guide](docs/COMMUNITY-TESTING.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml). Another full playthrough is not required.
@@ -95,7 +95,7 @@ The target is one polished PC edition: MaternalBound Redux's restored writing, a
 > [!IMPORTANT]
 > This project does **not** contain an EarthBound ROM, extracted Nintendo assets, soundtrack audio or saves. The documentation includes clearly labeled development screenshots. You must provide your own legally obtained clean **EarthBound (USA)** ROM. Companion verifies it and builds the required native data locally. We do not condone piracy.
 
-[Developer testing tools](docs/TESTING.md) · [Latest tester release](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.34) · [MaternalBound native port status](MATERNALBOUND-NATIVE.md) · [Randomizer rules](RANDOMIZER.md) · [Research and compatibility](RESEARCH.md) · [Credits](CREDITS.md) · [Source lineage](UPSTREAM.md)
+[Developer testing tools](docs/TESTING.md) · [Latest tester release](https://github.com/rages4calm/earthbound-companion/releases/latest) · [MaternalBound native port status](MATERNALBOUND-NATIVE.md) · [Randomizer rules](RANDOMIZER.md) · [Research and compatibility](RESEARCH.md) · [Credits](CREDITS.md) · [Source lineage](UPSTREAM.md)
 
 Maintenance addresses reported defects in the frozen scope. Current fixes cover the completed user-reported campaign, including the museum quest, Sound Stone/Magicant presentation, Giygas artwork, credits and widescreen PSI. Historical fixes and verification scope remain in the [changelog](CHANGELOG.md) and [release evidence](docs/RELEASE-dev30.md). Untested natural story branches, randomized progression, all combat combinations and broader physical audio/display/controller coverage are documented limits, not a required broad-audit queue.
 
@@ -158,7 +158,7 @@ The player-facing setup separates code/tools from player-supplied game data. Set
 
 ## Quick start
 
-1. Download the Redux development package from [Releases](https://github.com/rages4calm/earthbound-companion/releases) for experimental MaternalBound testing, or v0.4.0 for the older original-story preview.
+1. Download the Redux development package from the [latest Windows release](https://github.com/rages4calm/earthbound-companion/releases/latest) for experimental MaternalBound testing, or v0.4.0 for the older original-story preview. [Other platforms](docs/PORTABILITY.md) use the community preview packages.
 2. Extract the complete ZIP to a normal folder.
 3. Run **EarthBound Companion.exe**.
 4. Select your clean EarthBound (USA) `.sfc` or `.smc` ROM.

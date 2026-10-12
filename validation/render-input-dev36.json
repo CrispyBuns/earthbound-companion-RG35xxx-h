@@ -283,5 +283,11 @@
     "limits": [
       "Prepared Onett window/text fixture; not every NPC/map or physical monitor scanout."
     ]
+  },
+  "publication": {
+    "windows": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.36",
+    "platforms": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.7",
+    "taggedSourceCommit": "b64535bacd54a82062876e9b6dfac59f43126373",
+    "allSixUploadedAssetDigestsMatched": true
   }
 }

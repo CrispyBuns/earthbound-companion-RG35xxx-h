@@ -36,6 +36,8 @@ Dev.35 fixes the slight overworld camera jump when conversations and textboxes o
 
 Dev.34 adds **46 offline achievements** across the story, all Sanctuaries, photography and battle goals, with native popups and a launcher list. Existing pilot unlocks and saves are preserved. [Full set and progress rules](docs/ACHIEVEMENTS.md) · [Focused checks](docs/RELEASE-dev34.md).
 
+Dev.36 fixes sprite-overlap masks and ordinary door/fade camera jumps, adds controller hold-fast-forward, and puts the achievement list inside **Set Up** with earned icons and an optional unlock chime. [Update and focused checks](docs/RELEASE-dev36.md).
+
 Dev.33 corrects fractional camera scrolling and frame pacing, extends enemy spawning to the widescreen viewport, and adds optional Slang finishing shader presets. [Changes and focused verification](docs/RELEASE-dev33.md).
 
 Dev.32 broadens Story Shuffle: ordinary gifts and drops mix item types, priceless equipment enters the loot pool, shop baselines can change, and wild encounters now change enemy lineups. Story keys, quest helpers, required trade supplies and scripted boss lineups remain intact. V3 recipes still reproduce their original algorithm. [Rules and verification](docs/RELEASE-dev32.md).
@@ -46,7 +48,7 @@ Dev.30 fixes striped/corrupted credits photographs and repeating PSI effects in 
 
 ## Game features
 
-- **Standalone achievements:** 46 original local goals, in-game notifications, category browsing and persistent per-edition progress. No account or server.
+- **Standalone achievements:** 46 original local goals, an in-game list with earned icons, progress and dates, optional unlock sound, launcher categories and persistent per-edition progress. No account or server.
 
 - **Native Windows x64 gameplay:** compiled C/SDL2 game code with a self-contained PC launcher and guided setup from your own clean USA ROM.
 - **Two game modes:** original EarthBound and the pinned MaternalBound Redux native adaptation, with separate story saves.
@@ -62,7 +64,7 @@ Dev.30 fixes striped/corrupted credits photographs and repeating PSI effects in 
 - **Audio controls:** master volume and separate MSU music volume.
 - **Keyboard and controller support:** rebinding, analog movement, controller hotplug, adjustable stick deadzone and Nintendo/Xbox face-button labels.
 - **Sprint:** selectable Off, 1.5× or 2× movement; Redux includes its stamina, exhaustion and recovery mechanics and running sprites.
-- **Faster play:** quick dialogue and a configurable 2×–16× Tab fast-forward toggle, subject to PC performance.
+- **Faster play:** quick dialogue and configurable 2×–16× fast-forward: Tab toggles it; a bound controller button or trigger works while held. Subject to PC performance.
 - **Convenience switches:** optional suppression of Ness's homesickness and Dad's unsolicited reminder calls.
 - **Reward controls:** independent 1×–16× battle EXP and money multipliers, plus a one-click fast-playtest preset.
 - **Redux controls and menus:** quick Talk/Check, HP/PP toggle, Town Maps and the Redux command-menu layout.

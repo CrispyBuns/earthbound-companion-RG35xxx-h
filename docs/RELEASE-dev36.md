@@ -41,6 +41,17 @@ game assets and randomizer recipes unchanged.
   persistence and native INI output. The five public native patches reconstruct
   the changed files exactly from the pinned upstream source.
 
+- The extracted Windows ZIP passes launcher self-tests, all six production
+  launcher scenarios and the full 46-achievement consumers in both editions.
+  Every packaged file matches its manifest; no game content is present in the ZIP.
+  Both retained installs receive the tested programs. All 29 protected asset,
+  save, settings and progress hashes remain unchanged, and the installed player
+  cold-loads a copied endgame checkpoint.
+
+- All five [platform CI jobs](https://github.com/rages4calm/earthbound-companion/actions/runs/38193083711) pass, including shared native input/chime tests, portable launcher tests, desktop startup, and Android emulator startup. Runtime code is verified at `33dcd11`; later changes record documentation and package evidence.
+
+- All five downloaded platform packages pass content/path and native architecture checks. Desktop archives include their setup helpers and required license notices; both APKs contain the expected native/SDL/managed runtime libraries. Package hashes are recorded below.
+
 These are focused fixtures on Windows, not a new campaign or every NPC/map.
 Linux, macOS and Android remain community previews; build/startup evidence does
 not establish natural gameplay on every platform or device.

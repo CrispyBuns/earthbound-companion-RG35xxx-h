@@ -7,7 +7,7 @@
 | Patch | `patches/native-companion.patch` |
 | Lineage | seanstaggsQU fork → BrianPugh/earthbound → Herringway/ebsrc |
 
-Run `powershell -ExecutionPolicy Bypass -File .\scripts\Bootstrap-Native.ps1` to clone that exact revision, initialize its Tamp submodule, and apply the Companion patch.
+Run `powershell -ExecutionPolicy Bypass -File .\scripts\Bootstrap-Native.ps1` to clone that exact revision, initialize its Tamp submodule, and apply the ordered native patches: Companion, portability, achievements, dialogue camera, then render/input maintenance. `scripts/prepare_port_sources.py` uses the same sequence for platform builds.
 
 ## What is still used
 

@@ -170,11 +170,118 @@
     "portableTests": true,
     "soundPreferencePersistenceAndIni": true
   },
-  "packages": "pending",
-  "platformCI": "pending",
+  "packages": {
+    "windows": {
+      "zip": "EarthBound-Companion-Redux-Tester-v0.5.0-redux-dev.36.zip",
+      "sha256": "f4be7ff12e83783bac5eb883efb297bf77d0efa580b18f99566288234b45ce49",
+      "manifestFiles": 50,
+      "privateContentAbsentFromZip": true,
+      "nativeSha256": "bbb84c523d9da9e2072ae7bdf63fd8a55e6856c0395176bcd6fad8aa8042ab5f",
+      "tests": [
+        {
+          "test": "launcher-selftest",
+          "passed": true
+        },
+        {
+          "test": "launcher-profiles",
+          "passed": true
+        },
+        {
+          "test": "achievement-consumers",
+          "edition": "original",
+          "passed": true
+        },
+        {
+          "test": "achievement-consumers",
+          "edition": "redux",
+          "passed": true
+        }
+      ],
+      "limits": [
+        "Local private assets were supplied only after archive validation; no setup rebuild or campaign is claimed."
+      ]
+    },
+    "platforms": [
+      {
+        "name": "EarthBound-Companion-android-arm64-preview.apk",
+        "bytes": 37783234,
+        "sha256": "979c07c64ac952b9210abc8ab8505fd52eaa85d5c266111856a96fd06d604793",
+        "kind": "android",
+        "gameContentIncluded": false,
+        "nativeArchitectureChecked": true
+      },
+      {
+        "name": "EarthBound-Companion-android-x64-preview.apk",
+        "bytes": 38639253,
+        "sha256": "c9b7fa7fcb78717124434066feef14a14ac1af53b1547a4ea602d8af195c49c1",
+        "kind": "android",
+        "gameContentIncluded": false,
+        "nativeArchitectureChecked": true
+      },
+      {
+        "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+        "bytes": 124646451,
+        "sha256": "e7defce466b0a28873a0eae007872d6b1d241d6b256376b2171e3aaa332b65d9",
+        "kind": "desktop",
+        "gameContentIncluded": false,
+        "nativeArchitectureChecked": true
+      },
+      {
+        "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+        "bytes": 90009450,
+        "sha256": "b82181ae8dd0119b0caf755231f0ad295723c7c5074c537cab14e2bc61e6cea1",
+        "kind": "desktop",
+        "gameContentIncluded": false,
+        "nativeArchitectureChecked": true
+      },
+      {
+        "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+        "bytes": 94893668,
+        "sha256": "03bcbdb846018335fa6eeef39a1228009dcacc3df033f791070be07d1166e5a0",
+        "kind": "desktop",
+        "gameContentIncluded": false,
+        "nativeArchitectureChecked": true
+      }
+    ]
+  },
+  "platformCI": {
+    "url": "https://github.com/rages4calm/earthbound-companion/actions/runs/38193083711",
+    "verifiedCodeCommit": "33dcd11fdb5185910ba04c8abc4f13d111eb569b",
+    "passed": true,
+    "jobs": [
+      "windows-guard",
+      "linux-x64",
+      "osx-arm64",
+      "osx-x64",
+      "android"
+    ],
+    "androidEmulatorStartup": true
+  },
   "limits": [
     "Windows prepared scenes and copied saves; not a full campaign or every NPC and transition.",
     "Rendered fixture SHA predates a change confined to the chime self-test; production rendering code is unchanged.",
     "New-platform gameplay requires community testing."
-  ]
+  ],
+  "installation": {
+    "installedCopies": 2,
+    "protectedFilesUnchanged": 29,
+    "coldCopiedCheckpointExit": 0,
+    "nativeSha256": "bbb84c523d9da9e2072ae7bdf63fd8a55e6856c0395176bcd6fad8aa8042ab5f",
+    "earnedDatesPreserved": 5,
+    "copiedCheckpointLoadConfirmed": true
+  },
+  "dialogueRegression": {
+    "cameraPhaseUnchanged": true,
+    "fixture": "pause-menu",
+    "filter": 1,
+    "aspect": 1,
+    "preparedScene": true,
+    "copiedColdRestore": false,
+    "sourceCheckpointSha256": null,
+    "productionNativeSha256": "bbb84c523d9da9e2072ae7bdf63fd8a55e6856c0395176bcd6fad8aa8042ab5f",
+    "observerSha256": "62ac6b756ae980bcf51c855ab219dc3a0aa5cb95ce6da49cac2f230c63562285",
+    "limits": [
+      "Prepared Onett window/text fixture; not every NPC/map or physical monitor scanout."
+    ]
+  }
 }

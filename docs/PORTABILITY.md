@@ -1,7 +1,7 @@
 # Linux, macOS and Android previews
 
-[Dev.38](https://github.com/rages4calm/earthbound-companion/releases/latest) is the current Windows release; preview.9 supplies Linux, macOS and Android
-builds with the same 46-achievement catalog. Windows retains its Windows Forms
+[Windows 1.0.0](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.9 supplies Linux, macOS and Android
+builds with the same tested dev.38 game core and 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).
 
@@ -17,6 +17,12 @@ External Slang shader presets are currently Windows-only. Built-in scanlines, co
 
 1. Extract the archive. On Linux launch `EarthBoundCompanion.Portable` from its folder and keep `Game` beside it. On macOS 12+ open **EarthBound Companion Preview.app** from Finder.
 2. Select **Game & setup**, then **Set up Original from ROM** and choose your clean USA EarthBound ROM. To use Redux, build Original first, then **Build Redux from ROM**. Alternatively import packs prepared by your own existing Companion installation.
+
+**The import buttons are for an already generated `assets.pak`, not a ROM.**
+If you have a `.sfc` or `.smc` ROM, use the ROM setup buttons above. Do not patch
+it with Redux first; Companion builds Redux from the same clean USA ROM. Wait
+for setup to finish, choose **Select Original** or **Select Redux**, then press
+**Play**. If setup fails, report the displayed error before trying Play.
 3. Select Original or Redux and press **Play**. Story Shuffle seeds are generated under **Story Shuffle** and keep their own saves.
 
 The Linux binary is built on Ubuntu 24.04 and requires glibc 2.38 or newer, a desktop session and normal X11/OpenGL/fontconfig/audio libraries. Older distributions need a local build. If macOS blocks the unnotarized preview, first try opening the app, then use **System Settings > Privacy & Security > Open Anyway** for this app, following [Apple's instructions](https://support.apple.com/en-us/102445). A trusted local build is also supported; do not disable system security globally.

@@ -46,11 +46,22 @@
     "finalApkEmbeddedImportsAndCompilerOrdering": "passed",
     "android15FilePickerOriginalAndRedux": "passed",
     "android17ExactConversion": "passed",
-    "androidFilePickerLogExport": "passed"
+    "androidFilePickerLogExport": "passed",
+    "protectedOwnerDataUnchanged": 103
   },
   "limitations": [
     "Physical ARM64 device gameplay and controllers pending",
     "Audio quality, long sessions and full Android campaign pending",
     "Existing graphics dependencies use compatibility mode on 16KB page-size systems"
-  ]
+  ],
+  "status": "published-verified",
+  "publication": {
+    "ciRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38471101115",
+    "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.10",
+    "ciConclusion": "success",
+    "uploadedDigestsMatchLocal": true,
+    "latestWindows": "v1.0.0",
+    "sourceCommit": "85a92b6be1fb8fdca0aff28e483bcf81d55f26e1",
+    "desktopPreview": "v0.5.0-ports-preview.9"
+  }
 }

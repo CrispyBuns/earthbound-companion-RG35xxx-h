@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.0 — official Windows release
+
+- Complete the supported Companion feature set and move to focused bug-fix maintenance.
+- Retain the tested dev.38 native player, setup helpers, pinned Redux data, save formats, Story Shuffle recipes and achievement progress.
+- Update launcher release status, setup wording and Story Shuffle v4 information.
+- Keep Linux, macOS and Android on community preview.9; newer upstream Redux changes are separate updates.
+- [Release verification and scope](docs/RELEASE-1.0.0.md).
+
 ## v0.5.0-redux-dev.38 / v0.5.0-ports-preview.9
 
 - Restore upstream padding and sprite priority for Redux battle portraits; the HP/PP box covers the lower body. Thanks to **raid_rgb (Discord)** for reporting it.

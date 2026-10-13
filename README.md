@@ -8,7 +8,7 @@
 
 | Platform | Latest release | Package to choose |
 |---|---|---|
-| Windows x64 | [Redux dev.38](https://github.com/rages4calm/earthbound-companion/releases/latest) | Windows tester ZIP — main release |
+| Windows x64 | [Companion 1.0.0](https://github.com/rages4calm/earthbound-companion/releases/latest) | Windows ZIP — official release |
 | Linux x64 / SteamOS | [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `linux-x64` archive |
 | macOS Apple Silicon (ARM64) | [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `osx-arm64` archive |
 | macOS Intel (x64) | [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `osx-x64` archive |
@@ -27,10 +27,10 @@ Desktop builds set up Original and Redux from your own clean USA ROM. Android im
 > **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Preview.9 downloads](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) · [setup and coverage](docs/PORTABILITY.md). New-platform gameplay still needs community testing.
 
 > [!NOTE]
-> **Feature-frozen; community testing and focused bug-fix maintenance.** The dev.32 feature freeze remains in place, with the requested display update and dev.34 standalone achievements. The rest of the feature set remains frozen. [Scope and coverage](MAINTENANCE.md) · [Short testing guide](docs/COMMUNITY-TESTING.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml). Another full playthrough is not required.
+> **1.0.0 official release — the supported feature set is complete.** Future updates focus on reported bugs. [Release notes](docs/RELEASE-1.0.0.md) · [Scope and coverage](MAINTENANCE.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml).
 
-> [!WARNING]
-> **Current Windows release: `v0.5.0-redux-dev.38`, an experimental native Redux adaptation. Further playtesting is needed.** The older v0.4.0 preview contains original EarthBound. The Redux development edition compiles the pinned upstream source from your clean ROM, converts it into a native pack, and implements explicit native gameplay adaptations. Opening gameplay, shops, equipment, all 11 Tools, title/narration and ending fixtures pass. The owner completed Redux through the credits with equipment/stat boosts for final testing, and additional community testers report completing Original and Redux. Automated full-campaign certification, randomized playthroughs, all combat combinations and every story/music transition remain unverified. See [MATERNALBOUND-NATIVE.md](MATERNALBOUND-NATIVE.md).
+> [!NOTE]
+> **Windows 1.0.0 uses the tested dev.38 game runtime.** It supports Original EarthBound and Companion's pinned native MaternalBound Redux adaptation. The owner completed Redux through the credits, with equipment/stat boosts for final testing; community testers also report completing both editions. The Redux input remains `897d0083`, rather than automatically following newer upstream changes. Exhaustive campaign parity, full randomized progression and every combat/music combination remain unverified. [Redux version and coverage](MATERNALBOUND-NATIVE.md).
 
 Dev.38 corrects Redux battle portrait padding and priority so the lower body stays behind the HP/PP box. Reported by **raid_rgb on Discord**. [Fix and focused checks](docs/RELEASE-dev38.md).
 
@@ -56,7 +56,7 @@ Dev.30 fixes striped/corrupted credits photographs and repeating PSI effects in 
 
 - **Native Windows x64 gameplay:** compiled C/SDL2 game code with a self-contained PC launcher and guided setup from your own clean USA ROM.
 - **Two game modes:** original EarthBound and the pinned MaternalBound Redux native adaptation, with separate story saves.
-- **Redux story and presentation:** restored writing, sprites, naming, maps, enemy/battle art, PSI effects, intro and ending presentation, plus native adaptations of its gameplay fixes. Compatibility is still under playtest.
+- **Redux story and presentation:** restored writing, sprites, naming, maps, enemy/battle art, PSI effects, intro and ending presentation, plus native adaptations of the supported version's gameplay fixes.
 - **Choose your title screen:** keep Redux gameplay while selecting the original EarthBound logo and animation in **Game Mode**; the Redux title remains the default.
 - **HD output:** 720p, 1080p, 1440p, 4K and 3440×1440, with borderless fullscreen and a windowed option.
 - **Expanded world view:** 4:3, 16:9 and 21:9 framing, wider native scenery and adjustable field of view.
@@ -160,12 +160,12 @@ The player-facing setup separates code/tools from player-supplied game data. Set
 
 ## Quick start
 
-1. Download the Redux development package from the [latest Windows release](https://github.com/rages4calm/earthbound-companion/releases/latest) for experimental MaternalBound testing, or v0.4.0 for the older original-story preview. [Other platforms](docs/PORTABILITY.md) use the community preview packages.
+1. Download the Windows ZIP from the [latest official release](https://github.com/rages4calm/earthbound-companion/releases/latest). It supports Original EarthBound and MaternalBound Redux. [Other platforms](docs/PORTABILITY.md) use the community preview packages.
 2. Extract the complete ZIP to a normal folder.
 3. Run **EarthBound Companion.exe**.
 4. Select your clean EarthBound (USA) `.sfc` or `.smc` ROM.
 5. Leave **Install the complete MSU soundtrack** checked for enhanced music, or clear it to use SPC music. Internet access is needed for the pinned source and soundtrack downloads; testers need no Python, Git, .NET installation or compiler.
-6. When setup finishes, choose **Play EarthBound**. The Redux package identifies itself as a development profile. **Game Mode → Use original EarthBound** returns to the original story without changing either edition's saves.
+6. When setup finishes, choose **Play EarthBound**. **Game Mode** switches between Original EarthBound and MaternalBound Redux without changing either edition's saves.
 
 The application accepts the clean 3 MiB USA ROM, with or without a 512-byte copier header. A different revision or modified ROM is rejected before extraction.
 
@@ -222,7 +222,7 @@ This generator is inspired by the EarthBound randomizer community but does not c
 - One user-reported Redux campaign reached Giygas and credits, with equipment/stat boosts for final testing. An automated or unboosted full campaign and full randomized progression are not certified.
 - [MaternalBound Redux](https://github.com/ShadowOne333/MaternalBound-Redux) targets a pinned active-source snapshot, rather than the official v1.1 BPS release. Conversion includes 7,397 dialogue spans, 17 routine adapters and all 898 movement-script roots. Title scenes, 191 SPC tracks, 68 PSI effects, shops/equipment, all 11 battle Tools and all 32 photo-credit branches have bounded checks on the builds identified in their reports. Untested natural story branches, all combat-effect combinations and complete music-transition coverage remain unverified. See [detailed coverage](MATERNALBOUND-NATIVE.md).
 - Arbitrary IPS, BPS and EBP patches cannot be loaded as native mods; their game-code changes require explicit ports.
-- The Windows x64 release remains experimental and is now in maintenance. Include reproduction steps and relevant redacted lines from the active edition/seed session's `game.log`. Keep phone/quick saves locally; do not upload them to public issues. [Reporting guide](docs/COMMUNITY-TESTING.md).
+- Windows 1.0.0 is the official release of the completed feature set; future updates focus on reported bugs. Include reproduction steps and relevant redacted lines from the active edition/seed session's `game.log`. Keep phone/quick saves locally; do not upload them to public issues. [Reporting guide](docs/COMMUNITY-TESTING.md).
 
 ## Source layout
 

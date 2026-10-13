@@ -1,6 +1,9 @@
 # Maintenance scope
 
-Feature-frozen at v0.5.0-redux-dev.32 as of October 8, 2026. The explicit dev.33 display request is documented in docs/RELEASE-dev33.md. Read MAINTENANCE.md for current scope/coverage; historical audit notes do not reopen development.
+The supported feature set is complete at Windows v1.0.0 as of October 13, 2026,
+using the tested dev.38 native runtime and pinned Redux input. Linux/macOS/Android
+remain community previews. Read MAINTENANCE.md for scope/coverage; historical
+audit notes do not reopen development.
 
 The explicit October 11 owner request adds the full-game standalone achievement
 set in dev.34; see docs/RELEASE-dev34.md. This is a narrow feature exception.
@@ -12,6 +15,6 @@ set in dev.34; see docs/RELEASE-dev34.md. This is a narrow feature exception.
 - Keep ROMs, extracted packs, soundtrack payloads and personal saves private. Follow existing issue attachment rules.
 - In the owner's workspace, github-repo is canonical; adjacent native-source is intentionally modified. Never reset, clean or bootstrap over that dirty source tree.
 - Research and future-tool proposals are references, not requirements before closeout.
-- After verifying uploaded packages, publish through `scripts/publish_tested_release.py`. Windows development releases must be non-prereleases and explicitly Latest; platform releases remain prereleases. Run its `--check` for both tags and update the current version labels/platform links before reporting publication complete. Preserve historical release identities.
+- After verifying uploaded packages, publish through `scripts/publish_tested_release.py`. Official Windows and Windows development releases must be non-prereleases and explicitly Latest; platform releases remain prereleases. Run its `--check` for the current Windows/platform tags and update version labels/platform links before reporting publication complete. Preserve historical release identities.
 
 Later explicit user instructions can reopen or change this scope.

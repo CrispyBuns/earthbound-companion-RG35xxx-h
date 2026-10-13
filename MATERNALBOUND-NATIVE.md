@@ -2,13 +2,20 @@
 
 Companion is adapting MaternalBound Redux into the BrianPugh-derived native x64 C/SDL engine, through Sean Staggs's pinned fork, alongside HD and ultrawide output, MSU music, PC controls, save recovery and Story Shuffle. Gameplay runs as compiled C; patched SNES CPU code requires explicit native implementations. The native foundation remains a current dependency; see [UPSTREAM.md](UPSTREAM.md).
 
-**Feature-frozen at dev.32; community testing and focused bug-fix maintenance. Full Redux compatibility is not certified.** Setup builds a separate native Redux profile locally from your clean ROM; Original mode retains its own saves. One user-reported Redux campaign reached the ending and credits, with equipment/stat boosts for final testing. Automated full-campaign certification and randomized playthroughs remain unverified. ROMs and extracted packs are excluded from the repository and ZIP. [Scope](MAINTENANCE.md) · [Community testing](docs/COMMUNITY-TESTING.md).
+**Windows 1.0.0 is the official release of Companion's completed feature set;
+future updates focus on reported bugs.** Setup builds a separate native Redux
+profile locally from your clean ROM; Original mode retains its own saves. The
+owner completed Redux through the credits, with equipment/stat boosts for final
+testing; community testers also report completing both editions. Exhaustive
+Redux compatibility and full randomized progression remain unverified. ROMs and
+extracted packs are excluded from the repository and ZIP. [Release](docs/RELEASE-1.0.0.md)
+· [Scope](MAINTENANCE.md) · [Community testing](docs/COMMUNITY-TESTING.md).
 
 ## Exact upstream target
 
 This checkpoint targets the active upstream source at `897d00833f4a08a0a92f106abf631629a6a6a041`, compiled locally with CoilSnake into a verified 6 MiB ROM. It is not the official v1.1 release. The v1.1 BPS was separately checksum-verified and tested during initial extraction research; supporting that release requires a separate conversion map and validation record.
 
-The bridge records 191 reachable CCS files, 1,018 import edges, 190 compiler modules, 7,840 labels and source checksums. An exact ROM/source mismatch stops conversion. This is a deterministic porting input, not a claim that every upstream assembly feature has been implemented. **Current Windows release: [dev.38](https://github.com/rages4calm/earthbound-companion/releases/latest).** It retains Story Shuffle v4 and the cast-name, credits, PSI, Giygas/Porky, Sound Stone and Magicant fixes, with later scrolling, achievement, input and sprite-overlap fixes. [Current checks and limits](docs/RELEASE-dev38.md).
+The bridge records 191 reachable CCS files, 1,018 import edges, 190 compiler modules, 7,840 labels and source checksums. An exact ROM/source mismatch stops conversion. This is a deterministic porting input, not a claim that every upstream assembly feature has been implemented. **Current Windows release: [1.0.0](https://github.com/rages4calm/earthbound-companion/releases/latest).** Its native runtime is unchanged from dev.38. It retains Story Shuffle v4 and the cast-name, credits, PSI, Giygas/Porky, Sound Stone and Magicant fixes, with later scrolling, achievement, input and sprite-overlap fixes. [Current checks and limits](docs/RELEASE-1.0.0.md).
 
 The source audit resumed after dev.30 and produced dev.31 photographer/cast and evolving-battle checks. That history is retained; a broad audit is not currently scheduled. No whole normal-play Redux feature is currently confirmed absent, but complete compatibility remains unverified.
 

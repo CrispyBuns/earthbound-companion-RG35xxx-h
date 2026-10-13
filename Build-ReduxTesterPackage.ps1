@@ -1,5 +1,6 @@
-param([string]$Version='0.5.0-redux-dev.38', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
+param([string]$Version='1.0.0', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
 $ErrorActionPreference='Stop'
+$isOfficial=$Version -match '^\d+\.\d+\.\d+$'
 $projectRoot=[IO.Path]::GetFullPath($WorkspaceRoot)
 $releaseRoot=Join-Path $projectRoot 'release'
 $stamp=(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)
@@ -63,20 +64,51 @@ F12 screenshot | Tab fast-forward
 Credits, source and development updates:
 https://github.com/rages4calm/earthbound-companion
 '@ | Set-Content -LiteralPath (Join-Path $app 'START HERE.txt') -Encoding utf8
+if($isOfficial){
+@'
+EarthBound Companion — official Windows release
+
+1. Extract this entire folder and run EarthBound Companion.exe.
+2. Choose your clean EarthBound (USA) .sfc or .smc ROM.
+3. Leave the complete MSU soundtrack selected for enhanced music.
+4. Setup downloads the pinned Redux source and soundtrack, checks them,
+   and builds the native game data locally. No Python installation is needed.
+5. Play either edition, or generate a Story Shuffle adventure.
+
+The supported feature set is complete. Future updates focus on reported bugs.
+The owner and community completed campaigns; exhaustive compatibility and
+full randomized progression remain unverified. Read MATERNALBOUND-NATIVE.md.
+Game Mode selects Original or MaternalBound Redux. Each edition and seed keeps
+separate saves. Existing saves, seeds and earned achievements remain compatible.
+
+This ZIP contains no ROM, playable game asset pack, soundtrack or saves.
+No game files are uploaded. MSU files download during setup; missing tracks
+fall back to the converted SPC soundtrack.
+
+F1 settings | F6 save | F7 load | F9 pause | F11 fullscreen
+F12 screenshot | Tab fast-forward | Hold the bound controller button to fast-forward
+
+Credits, source and bug reports:
+https://github.com/rages4calm/earthbound-companion
+'@ | Set-Content -LiteralPath (Join-Path $app 'START HERE.txt') -Encoding utf8
+}
 $forbidden=@('.sfc','.smc','.fig','.swc','.rom','.pak','.pcm','.srm','.sav','.state','.bmp','.png','.replay')
 $bad=Get-ChildItem -LiteralPath $app -File -Recurse | Where-Object {$_.Extension -in $forbidden -or $_.Name -match '^quicksave_'}
 if($bad){throw 'Game-derived content entered the package staging folder.'}
 $manifest=Get-ChildItem -LiteralPath $app -File -Recurse | Sort-Object FullName | ForEach-Object {
  [pscustomobject]@{Path=$_.FullName.Substring($app.Length+1).Replace('\','/');Bytes=$_.Length;SHA256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 }
-@{Version=$Version;Status='development-only';FullPlaythroughVerified=$false;Files=$manifest} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $app 'PACKAGE-MANIFEST.json') -Encoding utf8
-$zip=Join-Path $releaseRoot ("EarthBound-Companion-Redux-Tester-v$Version.zip")
-if(Test-Path -LiteralPath $zip){$zip=Join-Path $releaseRoot ("EarthBound-Companion-Redux-Tester-v$Version-$stamp.zip")}
+$packageStatus=if($isOfficial){'official-feature-complete'}else{'development-only'}
+@{Version=$Version;Status=$packageStatus;FullPlaythroughVerified=$false;Files=$manifest} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $app 'PACKAGE-MANIFEST.json') -Encoding utf8
+$packageName=if($isOfficial){'EarthBound-Companion-Windows'}else{'EarthBound-Companion-Redux-Tester'}
+$zip=Join-Path $releaseRoot ("$packageName-v$Version.zip")
+if(Test-Path -LiteralPath $zip){$zip=Join-Path $releaseRoot ("$packageName-v$Version-$stamp.zip")}
 Compress-Archive -LiteralPath $app -DestinationPath $zip -CompressionLevel Optimal
 $archive=[IO.Compression.ZipFile]::OpenRead($zip)
 try{
  foreach($entry in $archive.Entries){if([IO.Path]::GetExtension($entry.Name) -in $forbidden -or $entry.Name -match '^quicksave_'){throw 'Forbidden game data entered the ZIP.'}}
 }finally{$archive.Dispose()}
 $result=[pscustomobject]@{Zip=$zip;Bytes=(Get-Item -LiteralPath $zip).Length;SHA256=(Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash;Staging=$app;FullPlaythroughVerified=$false}
-$result | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $releaseRoot 'redux-development-package.json') -Encoding utf8
+$receiptName=if($isOfficial){'official-package.json'}else{'redux-development-package.json'}
+$result | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $releaseRoot $receiptName) -Encoding utf8
 $result

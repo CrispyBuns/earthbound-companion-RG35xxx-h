@@ -22,7 +22,7 @@ static class ReduxProfileService {
   ProgressionPolicy policy;
   try{policy=ProgressionGuard.CheckBase(bytes);}catch(InvalidDataException){return false;}
   if(policy.ContentId!=ContentId)return false;
-  if(!settings.ReduxDevelopmentEnabled)throw new InvalidDataException("Select the Redux development profile from Game Mode before playing. It uses separate saves and has not passed a full playthrough.");
+  if(!settings.ReduxDevelopmentEnabled)throw new InvalidDataException("Select MaternalBound Redux from Game Mode before playing. It uses separate saves.");
   return true;
  }
  internal static async Task BuildAsync(string rom,IProgress<SetupProgress>? progress=null,CancellationToken cancel=default){
@@ -30,14 +30,14 @@ static class ReduxProfileService {
   byte[]? previousPack=null,previousMetadata=null;string? previousHash=null;
   if(upgrade){
    previousPack=File.ReadAllBytes(Pack);previousHash=StoryShuffle.Hash(previousPack);
-   if(ReduxStoryUpgrade.IsCurrent(previousHash)){progress?.Report(new("Redux","The current Redux development profile is already built."));return;}
+   if(ReduxStoryUpgrade.IsCurrent(previousHash)){progress?.Report(new("Redux","The current MaternalBound Redux profile is already built."));return;}
    if(!ReduxStoryUpgrade.CanUpgrade(previousHash))throw new InvalidDataException("This Redux pack is outside the reviewed update path. Preserve it and use a fresh installation.");
    previousMetadata=File.ReadAllBytes(Path.Combine(DirectoryPath,"profile.json"));
   } else if(Directory.Exists(DirectoryPath))throw new IOException("An incomplete Redux profile exists. Preserve its diagnostics and choose a fresh profile directory before rebuilding.");
   string outputDirectory=upgrade?Path.Combine(Path.GetDirectoryName(DirectoryPath)!,".redux-upgrade-"+Guid.NewGuid().ToString("N")):DirectoryPath;
   ReduxStoryUpgrade.Physical(DirectoryPath);ReduxStoryUpgrade.Physical(outputDirectory);
   string helper=HostRuntime.Executable("redux-setup");
-  if(!File.Exists(helper))throw new IOException("The Redux setup helper is missing. Use the complete Redux development package.");
+  if(!File.Exists(helper))throw new IOException("The Redux setup helper is missing. Use the complete EarthBound Companion package.");
   var start=new ProcessStartInfo(helper){WorkingDirectory=Settings.Root,UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
   foreach(var argument in new[]{"--rom",Path.GetFullPath(rom),"--base-assets",Path.Combine(Settings.BaseGame,"assets.pak"),"--output-directory",outputDirectory})start.ArgumentList.Add(argument);
   using var process=Process.Start(start)??throw new IOException("Redux setup did not start.");
@@ -67,7 +67,7 @@ static class ReduxProfileService {
    Directory.Move(DirectoryPath,backup);
    try{Directory.Move(outputDirectory,DirectoryPath);}catch{Directory.Move(backup,DirectoryPath);throw;}
    progress?.Report(new("Redux",$"Redux graphics updated; {imported} story save files copied unchanged. The old profile and seeds remain available with their original data."));
-  } else progress?.Report(new("Redux","Redux development profile built. Full playthrough is still unverified."));
+  } else progress?.Report(new("Redux","MaternalBound Redux profile ready."));
  }
  internal static void Test(string pack,string scratch){
   string root=Path.GetFullPath(scratch);if(Directory.Exists(root))throw new IOException("Use a fresh test directory.");

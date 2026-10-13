@@ -1,4 +1,12 @@
-# Feature freeze and maintenance
+# Completed feature set and maintenance
+
+October 13, 2026: **Windows 1.0.0 is the official feature-complete Companion
+release**, using the tested dev.38 native runtime and pinned Redux input
+`897d00833f4a08a0a92f106abf631629a6a6a041`. The launcher and release wording
+reflect completion; game data, saves, seed identities and earned achievements
+retain their existing formats. Future work is focused fixes for reported bugs.
+Linux, macOS and Android remain community preview.9. Newer upstream Redux
+changes and Deluxe are separate work. [Release record](docs/RELEASE-1.0.0.md).
 
 October 13, 2026: dev.38 corrects the Redux battle portrait padding/priority reported by **raid_rgb on Discord**. [Focused checks](docs/RELEASE-dev38.md). Shadow's widescreen CCS was reviewed and a native source map prepared; no widescreen redesign or full campaign audit was started.
 
@@ -16,7 +24,9 @@ achievements; [set and coverage](docs/ACHIEVEMENTS.md), [release checks](docs/RE
 The rest of the maintenance scope remains unchanged. This does not reopen a
 broad gameplay/patch audit or require another owner full playthrough.
 
-Effective October 8, 2026, active feature development is wrapped at **v0.5.0-redux-dev.32**. The project is in community testing and focused bug-fix maintenance. The existing experimental designation remains; closeout does not certify complete compatibility.
+Active feature development was first wrapped at **v0.5.0-redux-dev.32** on
+October 8, 2026. The requested follow-ups through dev.38 are included in the
+official 1.0.0 feature set. Completion does not certify exhaustive compatibility.
 
 [Latest Windows release](https://github.com/rages4calm/earthbound-companion/releases/latest) · [Other platforms](docs/PORTABILITY.md) · [Frozen baseline](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-redux-dev.32) · [Community testing](docs/COMMUNITY-TESTING.md) · [Developer tools](docs/TESTING.md)
 

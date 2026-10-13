@@ -1,4 +1,4 @@
-"""Publish verified uploads with the correct GitHub Latest/preview designation."""
+"""Publish verified official/Windows development uploads or platform previews."""
 
 import argparse
 import json
@@ -6,7 +6,7 @@ import re
 import subprocess
 
 REPO = "rages4calm/earthbound-companion"
-TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)-(redux-dev|ports-preview)\.(\d+)")
+TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)(?:-(redux-dev|ports-preview)\.(\d+))?")
 
 
 def gh(*args):
@@ -21,7 +21,9 @@ def identity(tag):
     if match is None:
         raise ValueError(f"Unsupported release tag: {tag}")
     major, minor, patch, kind, revision = match.groups()
-    return kind, tuple(map(int, (major, minor, patch, revision)))
+    # A final release sorts after development revisions of the same version.
+    channel = "ports-preview" if kind == "ports-preview" else "windows"
+    return channel, (*map(int, (major, minor, patch)), int(kind is None), int(revision or 0))
 
 
 def publish(tag, check_only=False):
@@ -44,15 +46,15 @@ def publish(tag, check_only=False):
     if any(k == kind and v > version for k, v, _ in published):
         raise ValueError("Refusing to publish/check an older release as current")
 
-    windows = [(v, t) for k, v, t in published if k == "redux-dev"]
-    if kind == "redux-dev":
+    windows = [(v, t) for k, v, t in published if k == "windows"]
+    if kind == "windows":
         windows.append((version, tag))
     expected_latest = max(windows)[1]
     if not check_only:
         gh(
             "release", "edit", tag, "--repo", REPO, "--draft=false",
             f"--prerelease={'true' if kind == 'ports-preview' else 'false'}",
-            f"--latest={'true' if kind == 'redux-dev' else 'false'}",
+            f"--latest={'true' if kind == 'windows' else 'false'}",
         )
 
     actual = json.loads(gh("api", f"repos/{REPO}/releases/tags/{tag}"))

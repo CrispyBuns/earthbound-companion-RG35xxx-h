@@ -12,7 +12,7 @@ index fee7cbdb..83ac66e8 100644
              SDL_Log("Companion ROM-free native selftest: %s",ok?"PASS":"FAIL");
  #endif
 diff --git a/port/unix/platform/sdl2_audio.c b/port/unix/platform/sdl2_audio.c
-index 409d215f..e7f7e577 100644
+index 409d215f..a221662c 100644
 --- a/port/unix/platform/sdl2_audio.c
 +++ b/port/unix/platform/sdl2_audio.c
 @@ -8,6 +8,7 @@
@@ -71,7 +71,19 @@ index 409d215f..e7f7e577 100644
  
  /* Optional MSU1 PCM player (msu_audio.c) -- mixed on top of the SPC700/DSP
   * output below. A no-op when no pack was loaded via --msu-dir/--msu-name. */
-@@ -78,6 +120,7 @@ static void audio_callback(void *userdata, Uint8 *stream, int len) {
+@@ -29,7 +71,10 @@ void platform_audio_msu_mix(int16_t *out, int frames, int out_rate);
+ 
+ static void audio_callback(void *userdata, Uint8 *stream, int len) {
+     (void)userdata;
+-    if (game_is_fast_forward() || pc_paused) {
++    /* Audio has its own device clock. Keep advancing SPC/MSU playback at the
++     * requested sample rate while gameplay fast-forwards, rather than freezing
++     * the music engine and accumulating sound commands until the button lifts. */
++    if (pc_paused) {
+         memset(stream, 0, len);
+         return;
+     }
+@@ -78,6 +123,7 @@ static void audio_callback(void *userdata, Uint8 *stream, int len) {
       * music track -- see the platform_audio_msu_play() call in
       * game/audio.c's change_music()). */
      platform_audio_msu_mix(out, total_samples, AUDIO_SAMPLE_RATE);
@@ -79,7 +91,7 @@ index 409d215f..e7f7e577 100644
      for(int i=0;i<total_samples*2;i++)out[i]=(int16_t)((int32_t)out[i]*pc_options.volume/100);
  }
  
-@@ -130,6 +173,8 @@ void platform_audio_unlock(void) {
+@@ -130,6 +176,8 @@ void platform_audio_unlock(void) {
  }
  
  #else /* !EB_ENABLE_AUDIO */
@@ -169,7 +181,7 @@ index 57032632..dc57b057 100644
      fprintf(stderr, "PC input remap / overlapping sources / deadzone / hotkey / focus-loss: %s\n",
              ok ? "PASS" : "FAIL");
 diff --git a/port/unix/platform/sdl2_video.c b/port/unix/platform/sdl2_video.c
-index 10539625..2a0467d6 100644
+index 10539625..ceafcaa4 100644
 --- a/port/unix/platform/sdl2_video.c
 +++ b/port/unix/platform/sdl2_video.c
 @@ -5,6 +5,7 @@
@@ -180,7 +192,48 @@ index 10539625..2a0467d6 100644
  #include "game/window.h"
  #include "entity/entity.h"
  #include "snes/ppu.h"
-@@ -94,7 +95,8 @@ static bool motion_overworld_mode(void) {
+@@ -64,6 +65,7 @@
+  * just a smaller source rect scaled up further than default. */
+ #define EB_ZOOM_IN_WIDTH  319
+ #define EB_ZOOM_IN_HEIGHT 179
++#define AA_SCALE 2
+ 
+ static SDL_Window *window;
+ static SDL_Renderer *renderer;
+@@ -74,12 +76,31 @@ static SDL_Texture *texture;
+  * instead of `texture` only on frames where it ran. */
+ static SDL_Texture *aa_texture;
+ static SDL_Texture *motion_party_texture;
++static SDL_Texture *motion_actor_texture, *motion_bg_texture;
+ static bool static_screen = false;
+-static bool motion_active;
++static bool motion_active, motion_script_pan;
+ static float motion_offset_x, motion_offset_y;
+ static pixel_t motion_background[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT];
+ static pixel_t motion_background_aa[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT * 4];
+ static uint32_t motion_party_rgba[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT * 4];
++static uint32_t motion_actor_rgba[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT * 4];
++static pixel_t motion_actor[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT];
++static pixel_t motion_actor_aa[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT * 4];
++static pixel_t motion_bg_only[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT];
++static pixel_t motion_bg_only_aa[EB_VIEWPORT_WIDTH * EB_VIEWPORT_HEIGHT * 4];
++static uint8_t motion_world_bg[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++static uint8_t motion_world_obj[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++static uint8_t motion_world_threshold[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++static uint8_t motion_actor_index[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++static uint8_t motion_actor_threshold[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++
++/* Match SDL's BGR565 expansion when crossing into an alpha texture. The
++ * palette's black pixels are opaque; coverage comes from PPU depth only. */
++static uint32_t motion_rgba(pixel_t color) {
++    return 0xFF000000u | ((color & 31u) * 255u / 31u << 16) |
++        (((color >> 5) & 63u) * 255u / 63u << 8) |
++        ((color >> 11) & 31u) * 255u / 31u;
++}
+ 
+ /* Presentation only: original positions, scripts, collision and save ABI stay
+  * unchanged. Fractional camera phase moves scenery at output-pixel precision;
+@@ -94,7 +115,8 @@ static bool motion_overworld_mode(void) {
      if (g_mode_stack.depth == 0 || g_mode_stack.mode[0] != GAME_MODE_OVERWORLD)
          return false;
      /* Ordinary window/interaction cascades retain the world's camera phase.
@@ -190,7 +243,7 @@ index 10539625..2a0467d6 100644
      for (unsigned at = 1; at < g_mode_stack.depth; at++) {
          switch (g_mode_stack.mode[at]) {
          case GAME_MODE_PROCESS_INTERACTION: case GAME_MODE_TEXT_WAIT_FADE:
-@@ -111,6 +113,22 @@ static bool motion_overworld_mode(void) {
+@@ -111,6 +133,25 @@ static bool motion_overworld_mode(void) {
          case GAME_MODE_TELEPHONE_MENU: case GAME_MODE_WINDOW_BORDER_ANIM:
          case GAME_MODE_SETTINGS_MENU: case GAME_MODE_KEY_ITEMS_MENU:
          case GAME_MODE_BICYCLE_DISMOUNT: case GAME_MODE_HP_ALERT:
@@ -205,6 +258,9 @@ index 10539625..2a0467d6 100644
 +                return false;
 +            break;
 +        case GAME_MODE_FLYOVER:
++            if (g_mode_stack.state[at].flyover.kind == FO_SCRIPT &&
++                game_state.camera_mode == 2)
++                break;
 +            /* Coffee/tea first fades the unchanged world out. Its later
 +             * animated text screen has independent framing. */
 +            if (g_mode_stack.state[at].flyover.kind != FO_COFFEETEA ||
@@ -213,27 +269,34 @@ index 10539625..2a0467d6 100644
              break;
          default:
              return false;
-@@ -123,25 +141,31 @@ static void motion_prepare(void) {
+@@ -121,29 +162,43 @@ static bool motion_overworld_mode(void) {
+ 
+ static void motion_prepare(void) {
      motion_active = false;
++    motion_script_pan = game_state.camera_mode == 2 &&
++        ow.camera_focus_entity >= 0 && ow.camera_focus_entity < MAX_ENTITIES;
      ppu_track_party_pixels = ppu_track_window_pixels = false;
      memset(ppu_party_oam, 0, sizeof(ppu_party_oam));
+-    if (!motion_party_texture || static_screen ||
+-        !motion_overworld_mode() || game_state.camera_mode ||
+-        (ppu.inidisp & 0x8F) != 15 || (ppu.bgmode & 7) != 1 ||
+-        presentation_oam_frame != core.frame_counter ||
 +    bool retained_fade = fade_active();
 +    for (unsigned at = 1; at < g_mode_stack.depth; at++)
 +        retained_fade |= g_mode_stack.mode[at] == GAME_MODE_MOSAIC_FADE ||
 +            (g_mode_stack.mode[at] == GAME_MODE_FLYOVER &&
 +             g_mode_stack.state[at].flyover.kind == FO_COFFEETEA &&
 +             g_mode_stack.state[at].flyover.phase == FOP_CT_FADEOUT1);
-     if (!motion_party_texture || static_screen ||
-         !motion_overworld_mode() || game_state.camera_mode ||
--        (ppu.inidisp & 0x8F) != 15 || (ppu.bgmode & 7) != 1 ||
--        presentation_oam_frame != core.frame_counter ||
++    if (!motion_party_texture || !motion_actor_texture || !motion_bg_texture || static_screen ||
++        !motion_overworld_mode() || (game_state.camera_mode && !motion_script_pan) ||
 +        (ppu.inidisp & 0x80) || (ppu.bgmode & 7) != 1 ||
-+        (presentation_oam_frame != core.frame_counter && !retained_fade) ||
++        (presentation_oam_frame != core.frame_counter && !retained_fade && !motion_script_pan) ||
          ppu.bg_hofs[0] != (uint16_t)(game_state.leader_x_coord - EB_VIEWPORT_CENTER_X) ||
          ppu.bg_vofs[0] != (uint16_t)(game_state.leader_y_coord - EB_VIEWPORT_CENTER_Y))
          return;
 -    bool have_party = false;
      for (unsigned at = 0; at < 128; at++) {
++        if (motion_script_pan) break;
          int ent = presentation_oam_entity[at];
          if (ent < 0) continue;
          for (unsigned member = 0; member < game_state.party_count && member < TOTAL_PARTY_COUNT; member++) {
@@ -246,20 +309,261 @@ index 10539625..2a0467d6 100644
 -    if (!have_party) return;
 +    /* Event fades can retain the displayed OAM or intentionally omit sprites.
 +     * Neither changes the scenery's camera phase. Mode and scroll guards above
-+     * still keep dedicated screens and scripted camera moves separate. */
++     * still exclude dedicated screens. A scripted entity-following camera
++     * moves the entire scene, including the party, at its fractional phase. */
      motion_active = ppu_track_party_pixels = true;
      ppu_track_window_pixels = any_window_open();
++    for (unsigned at = 1; motion_script_pan && at < g_mode_stack.depth; at++)
++        if (g_mode_stack.mode[at] == GAME_MODE_FLYOVER &&
++            g_mode_stack.state[at].flyover.kind == FO_SCRIPT)
++            ppu_track_window_pixels = true;
      motion_offset_x = game_state.leader_x_frac / 65536.0f;
-@@ -1060,6 +1084,9 @@ void platform_video_end_frame(void) {
+     motion_offset_y = game_state.leader_y_frac / 65536.0f;
+ }
+@@ -152,18 +207,24 @@ static void motion_background_scanline(int y, const pixel_t *pixels) {
+     memcpy(motion_background + y * EB_VIEWPORT_WIDTH, pixels,
+            EB_VIEWPORT_WIDTH * sizeof(pixel_t));
+ }
++static void motion_actor_scanline(int y, const pixel_t *pixels) {
++    memcpy(motion_actor + y * EB_VIEWPORT_WIDTH, pixels, EB_VIEWPORT_WIDTH * sizeof(pixel_t));
++}
++static void motion_bg_only_scanline(int y, const pixel_t *pixels) {
++    memcpy(motion_bg_only + y * EB_VIEWPORT_WIDTH, pixels, EB_VIEWPORT_WIDTH * sizeof(pixel_t));
++}
+ 
+ static void motion_render_background(void) {
+     int16_t saved_y[128];
+     uint8_t saved_tm = ppu.tm, saved_ts = ppu.ts;
+     uint8_t saved_tm_lines[EB_VIEWPORT_HEIGHT], saved_ts_lines[EB_VIEWPORT_HEIGHT];
+     bool hide_windows = ppu_track_window_pixels;
++    memcpy(saved_tm_lines, ppu.tm_per_scanline, sizeof(saved_tm_lines));
++    memcpy(saved_ts_lines, ppu.ts_per_scanline, sizeof(saved_ts_lines));
+     if (hide_windows) {
+         /* Render scenery behind the fixed BG3 text pixels, including opaque
+          * black window fill that can equal the background color. Restore all
+          * derived layer masks before leaving this presentation-only pass. */
+-        memcpy(saved_tm_lines, ppu.tm_per_scanline, sizeof(saved_tm_lines));
+-        memcpy(saved_ts_lines, ppu.ts_per_scanline, sizeof(saved_ts_lines));
+         ppu.tm &= (uint8_t)~0x04; ppu.ts &= (uint8_t)~0x04;
+         for (unsigned y = 0; y < EB_VIEWPORT_HEIGHT; y++) {
+             ppu.tm_per_scanline[y] &= (uint8_t)~0x04;
+@@ -174,7 +235,40 @@ static void motion_render_background(void) {
+     for (unsigned at = 0; at < 128; at++)
+         if (ppu_party_oam[at]) ppu.oam_full_y[at] = EB_VIEWPORT_HEIGHT;
+     ppu_track_party_pixels = false; /* retain mask from the complete first pass */
++    ppu_track_motion_depth = true;
+     ppu_render_frame(motion_background_scanline);
++    memcpy(motion_world_bg, ppu_motion_bg_priority, sizeof(motion_world_bg));
++    memcpy(motion_world_obj, ppu_motion_obj_index, sizeof(motion_world_obj));
++    memcpy(motion_world_threshold, ppu_motion_obj_threshold, sizeof(motion_world_threshold));
++    if (motion_script_pan) {
++        /* No actor is anchored to the screen during the Onett camera tour.
++         * BG3 captions remain fixed; all world sprites use the world pass. */
++        memset(motion_actor_index, 255, sizeof(motion_actor_index));
++        ppu_track_motion_depth = false;
++        goto restore_motion_layers;
++    }
++    /* Capture unoccluded party artwork. Its final coverage is decided in the
++     * output coordinate system, rather than pinning pieces of scenery to it. */
++    for (unsigned at = 0; at < 128; at++)
++        ppu.oam_full_y[at] = ppu_party_oam[at] ? saved_y[at] : EB_VIEWPORT_HEIGHT;
++    /* Keep layer-enable geometry unchanged: disabling all BGs also selects
++     * the PPU's centered native-canvas path and moves the isolated actors. */
++    ppu_motion_party_only = true;
++    ppu_render_frame(motion_actor_scanline);
++    ppu_motion_party_only = false;
++    memcpy(motion_actor_index, ppu_motion_obj_index, sizeof(motion_actor_index));
++    memcpy(motion_actor_threshold, ppu_motion_obj_threshold, sizeof(motion_actor_threshold));
++    ppu_track_motion_depth = false;
++    /* A higher-priority BG can cover a party sprite which wins OAM over an
++     * NPC. Retain BG-only colors for that case, not the NPC's world-pass RGB. */
++    ppu.tm = saved_tm & (uint8_t)~(0x10 | (hide_windows ? 0x04 : 0));
++    for (unsigned y = 0; y < EB_VIEWPORT_HEIGHT; y++)
++        ppu.tm_per_scanline[y] = saved_tm_lines[y] & (uint8_t)~(0x10 | (hide_windows ? 0x04 : 0));
++    for (unsigned at = 0; at < 128; at++) ppu.oam_full_y[at] = EB_VIEWPORT_HEIGHT;
++    ppu_render_frame(motion_bg_only_scanline);
++restore_motion_layers:
++    ppu.tm = saved_tm;
++    memcpy(ppu.tm_per_scanline, saved_tm_lines, sizeof(saved_tm_lines));
+     if (hide_windows) {
+         ppu.tm = saved_tm; ppu.ts = saved_ts;
+         memcpy(ppu.tm_per_scanline, saved_tm_lines, sizeof(saved_tm_lines));
+@@ -183,6 +277,73 @@ static void motion_render_background(void) {
+     memcpy(ppu.oam_full_y, saved_y, sizeof(saved_y));
+ }
+ 
++/* Clip party quads against world pixels in output coordinates. The world and
++ * the party have different subpixel origins; copying foreground RGB into the
++ * fixed party mask splits NPCs and loses same-colored BG outlines. Geometry
++ * preserves each origin and the original BG priority / lowest-OAM rule. */
++#define MOTION_QUADS 1024
++static SDL_Vertex motion_vertices[MOTION_QUADS * 4];
++static int motion_indices[MOTION_QUADS * 6];
++static unsigned motion_quads;
++static void motion_flush(SDL_Texture *image) {
++    if (motion_quads) SDL_RenderGeometry(renderer, image, motion_vertices,
++        (int)motion_quads * 4, motion_indices, (int)motion_quads * 6);
++    motion_quads = 0;
++}
++static void motion_quad(SDL_Texture *image, float l, float t, float r, float b,
++                        float u0, float v0, float u1, float v1) {
++    if (motion_quads == MOTION_QUADS) motion_flush(image);
++    unsigned at = motion_quads * 4, it = motion_quads * 6;
++    const SDL_Color white = {255,255,255,255};
++    motion_vertices[at] = (SDL_Vertex){{l,t},white,{u0,v0}};
++    motion_vertices[at+1] = (SDL_Vertex){{r,t},white,{u1,v0}};
++    motion_vertices[at+2] = (SDL_Vertex){{r,b},white,{u1,v1}};
++    motion_vertices[at+3] = (SDL_Vertex){{l,b},white,{u0,v1}};
++    const int order[6] = {0,1,2,0,2,3};
++    for (unsigned i=0;i<6;i++) motion_indices[it+i] = (int)at + order[i];
++    motion_quads++;
++}
++static void motion_render_actor(const SDL_Rect *crop, const SDL_Rect *dst,
++                                const SDL_Rect *source, const SDL_FRect *world,
++                                int factor, bool repair_bg) {
++    SDL_Texture *image = repair_bg ? motion_bg_texture : motion_actor_texture;
++    float pxs=(float)dst->w/(crop->w/factor), pys=(float)dst->h/(crop->h/factor);
++    float wxs=world->w/(source->w/factor), wys=world->h/(source->h/factor);
++    float wx0=world->x-(source->x/factor)*wxs, wy0=world->y-(source->y/factor)*wys;
++    float uvx=(float)factor/(EB_VIEWPORT_WIDTH*AA_SCALE);
++    float uvy=(float)factor/(EB_VIEWPORT_HEIGHT*AA_SCALE);
++    motion_quads=0;
++    for (int y=0;y<EB_VIEWPORT_HEIGHT;y++) for (int x=0;x<EB_VIEWPORT_WIDTH;x++) {
++        uint8_t index=motion_actor_index[y][x];
++        if (index==255) continue;
++        float pl=dst->x+(x-crop->x/factor)*pxs, pt=dst->y+(y-crop->y/factor)*pys;
++        float pr=pl+pxs, pb=pt+pys;
++        if (pr<=dst->x || pb<=dst->y || pl>=dst->x+dst->w || pt>=dst->y+dst->h) continue;
++        int sx0=(int)floorf((pl-wx0)/wxs), sx1=(int)floorf((pr-wx0)/wxs-0.00001f);
++        int sy0=(int)floorf((pt-wy0)/wys), sy1=(int)floorf((pb-wy0)/wys-0.00001f);
++        for (int sy=sy0;sy<=sy1;sy++) for (int sx=sx0;sx<=sx1;sx++) {
++            if (sx<0 || sy<0 || sx>=EB_VIEWPORT_WIDTH || sy>=EB_VIEWPORT_HEIGHT) continue;
++            float l=fmaxf(pl,wx0+sx*wxs), r=fminf(pr,wx0+(sx+1)*wxs);
++            float t=fmaxf(pt,wy0+sy*wys), b=fminf(pb,wy0+(sy+1)*wys);
++            if (l>=r || t>=b) continue;
++            bool npc=motion_world_obj[sy][sx]<index;
++            bool bg=motion_world_bg[sy][sx]>=motion_actor_threshold[y][x];
++            if (repair_bg) {
++                /* The party replaced a lower-OAM-priority NPC, but a BG still
++                 * covers it. Use BG colors, not that discarded NPC's RGB. */
++                if (!npc && bg && motion_world_obj[sy][sx]!=255 &&
++                    motion_world_bg[sy][sx]<motion_world_threshold[sy][sx])
++                    motion_quad(image,l,t,r,b,(l-wx0)/wxs*uvx,(t-wy0)/wys*uvy,
++                        (r-wx0)/wxs*uvx,(b-wy0)/wys*uvy);
++            } else if (!npc && !bg) {
++                motion_quad(image,l,t,r,b,(x+(l-pl)/pxs)*uvx,(y+(t-pt)/pys)*uvy,
++                    (x+(r-pl)/pxs)*uvx,(y+(b-pt)/pys)*uvy);
++            }
++        }
++    }
++    motion_flush(image);
++}
++
+ /* Overworld FOV/zoom cycle (R3) -- see platform_video_set_zoom() below and
+  * AUX_ZOOM_TOGGLE in game_main.c. EB_ZOOM_OFF = default, matches every
+  * scene's pre-existing EB_VIEWPORT_WIDTH x SNES_HEIGHT footprint. */
+@@ -729,7 +890,6 @@ static void apply_scanlines(pixel_t *pixels, int pitch) {
+  * wobbling by one full quantization step between two synthetic "frames"
+  * produced zero text-edge-shape disagreements with tolerance, versus
+  * real disagreements without it. */
+-#define AA_SCALE 2
+ #define AA_COLOR_TOLERANCE 10  /* max per-8-bit-channel delta to treat two
+                                  * colors as the same for this decision */
+ 
+@@ -882,12 +1042,20 @@ bool platform_video_init(void) {
+         SDL_TEXTUREACCESS_STREAMING, EB_VIEWPORT_WIDTH * AA_SCALE,
+         EB_VIEWPORT_HEIGHT * AA_SCALE);
+     if (motion_party_texture) SDL_SetTextureBlendMode(motion_party_texture, SDL_BLENDMODE_BLEND);
++    motion_actor_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
++        SDL_TEXTUREACCESS_STREAMING, EB_VIEWPORT_WIDTH * AA_SCALE, EB_VIEWPORT_HEIGHT * AA_SCALE);
++    if (motion_actor_texture) SDL_SetTextureBlendMode(motion_actor_texture, SDL_BLENDMODE_BLEND);
++    motion_bg_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGR565,
++        SDL_TEXTUREACCESS_STREAMING, EB_VIEWPORT_WIDTH * AA_SCALE, EB_VIEWPORT_HEIGHT * AA_SCALE);
+     return true;
+ }
+ 
+ void platform_video_shutdown(void) {
+     pc_shader_shutdown();
+     if (motion_party_texture) SDL_DestroyTexture(motion_party_texture);
++    if (motion_actor_texture) SDL_DestroyTexture(motion_actor_texture);
++    if (motion_bg_texture) SDL_DestroyTexture(motion_bg_texture);
++    motion_actor_texture = motion_bg_texture = NULL;
+     motion_party_texture = NULL;
+     motion_active = ppu_track_party_pixels = ppu_track_window_pixels = false;
+     if (texture)    SDL_DestroyTexture(texture);
+@@ -1047,34 +1215,43 @@ void platform_video_end_frame(void) {
+         if (motion_active) {
+             int pitch = EB_VIEWPORT_WIDTH * sizeof(pixel_t);
+             if (dof_intensity > 0) apply_dof(motion_background, pitch, dof_intensity);
++            if (dof_intensity > 0) apply_dof(motion_actor, pitch, dof_intensity);
++            if (dof_intensity > 0) apply_dof(motion_bg_only, pitch, dof_intensity);
+             if (want_scanlines) apply_scanlines(motion_background, pitch);
++            if (want_scanlines) { apply_scanlines(motion_actor, pitch); apply_scanlines(motion_bg_only, pitch); }
+             if (want_grading) apply_color_grade(motion_background, pitch);
++            if (want_grading) { apply_color_grade(motion_actor, pitch); apply_color_grade(motion_bg_only, pitch); }
+             if (aa_ran) apply_aa_upscale(motion_background, pitch,
+                 motion_background_aa, EB_VIEWPORT_WIDTH * AA_SCALE);
++            if (aa_ran) {
++                apply_aa_upscale(motion_actor, pitch, motion_actor_aa, EB_VIEWPORT_WIDTH * AA_SCALE);
++                apply_aa_upscale(motion_bg_only, pitch, motion_bg_only_aa, EB_VIEWPORT_WIDTH * AA_SCALE);
++            }
+             int factor = aa_ran ? AA_SCALE : 1;
+             int w = EB_VIEWPORT_WIDTH * factor, h = EB_VIEWPORT_HEIGHT * factor;
+             for (int y = 0; y < h; y++) {
+                 const pixel_t *full = aa_ran ? aa_upscaled + y * w :
+                     (const pixel_t *)((const uint8_t *)locked_pixels + y * locked_pitch);
+-                const pixel_t *background = (aa_ran ? motion_background_aa : motion_background) + y * w;
                  uint32_t *out = motion_party_rgba + y * w;
++                uint32_t *actor_out = motion_actor_rgba + y * w;
++                const pixel_t *actor = (aa_ran ? motion_actor_aa : motion_actor) + y * w;
                  for (int x = 0; x < w; x++) {
                      out[x] = 0;
-+                    /* Type 3 is the winning non-party sprite over a party pixel.
-+                     * Preserve its opaque coverage even when both passes have
-+                     * identical RGB (especially shared black outlines). */
-                     if (ppu_party_pixels[y / factor][x / factor] || full[x] != background[x]) {
-                         uint8_t r, g, b; fx_unpack(full[x], &r, &g, &b);
-                         if (ppu_party_pixels[y / factor][x / factor] == 2) {
+-                    if (ppu_party_pixels[y / factor][x / factor] || full[x] != background[x]) {
+-                        uint8_t r, g, b; fx_unpack(full[x], &r, &g, &b);
+-                        if (ppu_party_pixels[y / factor][x / factor] == 2) {
+-                            /* Match SDL's BGR565 expansion for fixed text, rather
+-                             * than the intentionally different FX bit replication. */
+-                            r = (uint8_t)((full[x] & 31u) * 255u / 31u);
+-                            g = (uint8_t)(((full[x] >> 5) & 63u) * 255u / 63u);
+-                            b = (uint8_t)(((full[x] >> 11) & 31u) * 255u / 31u);
+-                        }
+-                        out[x] = 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
++                    actor_out[x] = 0;
++                    if (motion_actor_index[y / factor][x / factor] != 255) {
++                        actor_out[x] = motion_rgba(actor[x]);
++                    }
++                    /* Only text is fixed here. Foreground NPC/BG pixels stay
++                     * in world coordinates, including shared black outlines. */
++                    if (ppu_party_pixels[y / factor][x / factor] == 2) {
++                        out[x] = motion_rgba(full[x]);
+                     }
+                 }
+             }
+             SDL_Rect area = {0, 0, w, h};
+             SDL_UpdateTexture(motion_party_texture, &area, motion_party_rgba, w * sizeof(uint32_t));
++            SDL_UpdateTexture(motion_actor_texture, &area, motion_actor_rgba, w * sizeof(uint32_t));
++            SDL_UpdateTexture(motion_bg_texture, &area, aa_ran ? motion_bg_only_aa : motion_bg_only, w * sizeof(pixel_t));
+         }
+         SDL_UnlockTexture(texture);
+         locked_pixels = NULL;
+@@ -1352,6 +1529,10 @@ void platform_video_end_frame(void) {
+         SDL_bool clipped = SDL_RenderIsClipEnabled(renderer);
+         SDL_RenderSetClipRect(renderer, &dst);
+         SDL_RenderCopyF(renderer, aa_ran ? aa_texture : texture, &source, &world);
++        if (!motion_script_pan) {
++            motion_render_actor(&crop,&dst,&source,&world,factor,true);
++            motion_render_actor(&crop,&dst,&source,&world,factor,false);
++        }
+         SDL_RenderCopy(renderer, motion_party_texture, &crop, &dst);
+         SDL_RenderSetClipRect(renderer, clipped ? &old_clip : NULL);
+     } else {
+@@ -1411,4 +1592,6 @@ void pc_video_apply(void) {
+     if (texture) SDL_SetTextureScaleMode(texture, mode);
+     if (aa_texture) SDL_SetTextureScaleMode(aa_texture, mode);
+     if (motion_party_texture) SDL_SetTextureScaleMode(motion_party_texture, mode);
++    if (motion_actor_texture) SDL_SetTextureScaleMode(motion_actor_texture, mode);
++    if (motion_bg_texture) SDL_SetTextureScaleMode(motion_bg_texture, mode);
+ }
 diff --git a/src/entity/entity.h b/src/entity/entity.h
 index 101ea3cf..5fee11a3 100644
 --- a/src/entity/entity.h
@@ -650,10 +954,10 @@ index dc1a16ad..47b9b676 100644
  void platform_audio_lock(void);                       /* acquire audio mutex (pairs with unlock) */
  void platform_audio_unlock(void);
 diff --git a/src/snes/ppu.h b/src/snes/ppu.h
-index 2f385863..a4308830 100644
+index 2f385863..9e543ec7 100644
 --- a/src/snes/ppu.h
 +++ b/src/snes/ppu.h
-@@ -237,7 +237,8 @@ typedef struct {
+@@ -237,10 +237,18 @@ typedef struct {
  extern PPUProfile ppu_profile;
  #endif
  
@@ -663,13 +967,30 @@ index 2f385863..a4308830 100644
  extern bool ppu_track_party_pixels;
  extern bool ppu_track_window_pixels;
  extern bool ppu_party_oam[128];
+ extern uint8_t ppu_party_pixels[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++/* Presentation depth, outside the serialized PPU state. Capture both BG and
++ * OBJ candidates even when one hides the other; RGB black is never alpha. */
++extern bool ppu_track_motion_depth;
++extern bool ppu_motion_party_only;
++extern uint8_t ppu_motion_bg_priority[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++extern uint8_t ppu_motion_obj_index[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++extern uint8_t ppu_motion_obj_threshold[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
+ 
+ #endif /* SNES_PPU_H */
 diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
-index 2c06c014..3bcad8b9 100644
+index 2c06c014..d6f253a3 100644
 --- a/src/snes/ppu_render.c
 +++ b/src/snes/ppu_render.c
-@@ -12,6 +12,10 @@ bool ppu_track_window_pixels;
+@@ -11,7 +11,17 @@ bool ppu_track_party_pixels;
+ bool ppu_track_window_pixels;
  bool ppu_party_oam[128];
  uint8_t ppu_party_pixels[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++bool ppu_track_motion_depth;
++bool ppu_motion_party_only;
++uint8_t ppu_motion_bg_priority[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++uint8_t ppu_motion_obj_index[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++uint8_t ppu_motion_obj_threshold[EB_VIEWPORT_HEIGHT][EB_VIEWPORT_WIDTH];
++static uint8_t motion_obj_index_line[EB_VIEWPORT_WIDTH];
  static uint8_t party_obj_line[EB_VIEWPORT_WIDTH];
 +/* The winner alone loses same-colored foreground OBJ pixels in the two-pass
 + * presentation mask. Keep opaque party coverage beneath that winner too;
@@ -678,7 +999,7 @@ index 2c06c014..3bcad8b9 100644
  
  /* Embedded ports can define these at build time to optimize rendering:
   *
-@@ -800,6 +804,7 @@ typedef struct {
+@@ -800,6 +810,7 @@ typedef struct {
      int16_t  y;          /* spr_y (scanline space, incl. sprite_y_offset) */
      uint8_t  w, h;
      uint8_t  attr;       /* raw OAM attr (vflip/hflip/prio/pal/tile-hi) */
@@ -686,7 +1007,7 @@ index 2c06c014..3bcad8b9 100644
      uint16_t tile_num;   /* spr->tile | ((attr & 1) << 8) */
  } ObjActive;
  static ObjActive obj_active[128];
-@@ -841,6 +846,7 @@ static void PPU_HOT_FUNC(build_obj_buckets)(void) {
+@@ -841,6 +852,7 @@ static void PPU_HOT_FUNC(build_obj_buckets)(void) {
          obj_active[slot].w        = (uint8_t)w;
          obj_active[slot].h        = (uint8_t)h;
          obj_active[slot].attr     = spr->attr;
@@ -694,7 +1015,7 @@ index 2c06c014..3bcad8b9 100644
          obj_active[slot].tile_num = spr->tile | ((uint16_t)(spr->attr & 1) << 8);
  
          int bstart = y0 < 0 ? 0 : (y0 >> OBJ_BAND_SHIFT);
-@@ -869,6 +875,8 @@ static int obj_prio_dirty_hi = LINE_BUF_WIDTH;
+@@ -869,6 +881,8 @@ static int obj_prio_dirty_hi = LINE_BUF_WIDTH;
  #endif
  
  static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color, uint8_t *obj_prio, TileRowCacheEntry *tile_cache) {
@@ -703,7 +1024,7 @@ index 2c06c014..3bcad8b9 100644
      /* When vertical centering is active, sprites only render within the
       * SNES-visible scanline range. The border scanlines (above/below the
       * centered area) show only BG content, no sprites. This prevents
-@@ -893,7 +901,7 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
+@@ -893,7 +907,7 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
      /* Iterate only sprites that overlap this band (priority order preserved). */
      for (int k = 0; k < bcnt; k++) {
          const ObjActive *a = &obj_active[blist[k]];
@@ -712,11 +1033,13 @@ index 2c06c014..3bcad8b9 100644
  
          int spr_x = a->x;
          int spr_y = a->y;
-@@ -1018,7 +1026,10 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
+@@ -1018,7 +1032,12 @@ static bool PPU_HOT_FUNC(render_obj_scanline)(int scanline, uint16_t *obj_color,
                   * 127â†’0, later (lower-index) sprites unconditionally overwrite. */
                  obj_color[screen_x] = rgb;
                  obj_prio[screen_x] = spr_prio + 1;
 -                if (ppu_track_party_pixels) party_obj_line[screen_x] = ppu_party_oam[presentation_index];
++                if (ppu_track_motion_depth)
++                    motion_obj_index_line[screen_x] = (uint8_t)presentation_index;
 +                if (ppu_track_party_pixels) {
 +                    party_obj_line[screen_x] = ppu_party_oam[presentation_index];
 +                    party_coverage_line[screen_x] |= ppu_party_oam[presentation_index];
@@ -724,7 +1047,35 @@ index 2c06c014..3bcad8b9 100644
              }
          }
      }
-@@ -2117,7 +2128,7 @@ merge_done:
+@@ -1425,6 +1444,11 @@ void PPU_HOT_FUNC(ppu_render_frame_ex)(int ctx_id, int y_start, int y_end,
+ #endif
+     pixel_t  *line_out        = line_out_ctx[ctx_id];
+     if (ppu_track_party_pixels) memset(ppu_party_pixels, 0, sizeof(ppu_party_pixels));
++    if (ppu_track_motion_depth) {
++        memset(ppu_motion_bg_priority, 0, sizeof(ppu_motion_bg_priority));
++        memset(ppu_motion_obj_index, 255, sizeof(ppu_motion_obj_index));
++        memset(ppu_motion_obj_threshold, 0, sizeof(ppu_motion_obj_threshold));
++    }
+     uint32_t *best_bg         = best_bg_ctx[ctx_id];
+     uint16_t *sub_bg_color    = sub_bg_color_ctx[ctx_id];
+     uint8_t  *sub_bg_gp       = sub_bg_gp_ctx[ctx_id];
+@@ -2104,6 +2128,7 @@ merge_done:
+                     for (int x = x_start; x < x_end; x++) {
+                         uint32_t bg_w = best_bg[x];
+                         best_bg[x] = 0;
++                        if (ppu_motion_party_only) bg_w = 0;
+                         uint8_t bg_gp_val = GP_LM_GP(bg_w);
+                         uint8_t obj_pk = obj_prio[x];
+                         uint16_t color;
+@@ -2114,10 +2139,15 @@ merge_done:
+                         else
+                             color = backdrop;
+                         line_out[x + fb_x_offset] = color;
++                        if (ppu_track_motion_depth) {
++                            ppu_motion_bg_priority[out_y][x + fb_x_offset] = bg_gp_val;
++                            ppu_motion_obj_index[out_y][x + fb_x_offset] = obj_pk ? motion_obj_index_line[x] : 255;
++                            ppu_motion_obj_threshold[out_y][x + fb_x_offset] = obj_thresh[obj_pk];
++                        }
                          if (ppu_track_party_pixels)
                              ppu_party_pixels[out_y][x + fb_x_offset] =
                                  (obj_pk > 0 && bg_gp_val < obj_thresh[obj_pk])
@@ -733,7 +1084,36 @@ index 2c06c014..3bcad8b9 100644
                                      : ((ppu_track_window_pixels && bg_gp_val > 0 &&
                                          GP_LM_LM(bg_w) == LAYER_BG3) ? 2 : 0);
                      }
-@@ -2167,7 +2178,8 @@ merge_done:
+@@ -2125,9 +2155,12 @@ merge_done:
+                     for (int x = x_start; x < x_end; x++) {
+                         uint32_t bg_w = best_bg[x];
+                         best_bg[x] = 0;
++                        if (ppu_motion_party_only) bg_w = 0;
+                         line_out[x + fb_x_offset] =
+                             GP_LM_GP(bg_w) > 0 ? MAIN_COLOR(bg_w)
+                                                : backdrop;
++                        if (ppu_track_motion_depth)
++                            ppu_motion_bg_priority[out_y][x + fb_x_offset] = GP_LM_GP(bg_w);
+                         if (ppu_track_party_pixels && ppu_track_window_pixels &&
+                             GP_LM_GP(bg_w) > 0 && GP_LM_LM(bg_w) == LAYER_BG3)
+                             ppu_party_pixels[out_y][x + fb_x_offset] = 2;
+@@ -2152,8 +2185,15 @@ merge_done:
+                 /* Store-back clear: leave the entry zero for the next scanline
+                  * (replaces the per-scanline memset, see the clear phase). */
+                 best_bg[x] = 0;
++                if (ppu_motion_party_only) bg_w = 0;
+                 uint8_t bg_gp_val = GP_LM_GP(bg_w);
+ 
++                if (ppu_track_motion_depth) {
++                    ppu_motion_bg_priority[out_y][x + fb_x_offset] = bg_gp_val;
++                    ppu_motion_obj_index[out_y][x + fb_x_offset] = obj_pk ? motion_obj_index_line[x] : 255;
++                    ppu_motion_obj_threshold[out_y][x + fb_x_offset] = obj_thresh[obj_pk];
++                }
++
+                 if (obj_pk > 0 && bg_gp_val < obj_thresh[obj_pk]) {
+                     color = obj_color[x];
+                     main_layer = LAYER_OBJ;
+@@ -2167,7 +2207,8 @@ merge_done:
  
                  if (ppu_track_party_pixels)
                      ppu_party_pixels[out_y][x + fb_x_offset] =

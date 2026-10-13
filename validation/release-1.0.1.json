@@ -1,0 +1,580 @@
+{
+  "release": "v1.0.1",
+  "platformRelease": "v0.5.0-ports-preview.11",
+  "native": {
+    "nativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+    "patchesApplied": 5,
+    "sourceFilesCompared": [
+      "port/unix/main.c",
+      "port/unix/platform/sdl2_audio.c",
+      "port/unix/platform/sdl2_input.c",
+      "port/unix/platform/sdl2_video.c",
+      "src/entity/entity.h",
+      "src/game/companion_achievements.c",
+      "src/game/eb_achievements.h",
+      "src/game/text.c",
+      "src/game_main.c",
+      "src/game_main.h",
+      "src/platform/pc_options.c",
+      "src/platform/pc_options.h",
+      "src/platform/platform.h",
+      "src/snes/ppu.h",
+      "src/snes/ppu_render.c",
+      "src/game/maternalbound_battle_sprites.c"
+    ],
+    "tests": [
+      {
+        "edition": "original",
+        "test": "savestate",
+        "passed": true
+      },
+      {
+        "edition": "original",
+        "test": "screen-transitions",
+        "passed": true
+      },
+      {
+        "edition": "original",
+        "test": "achievements",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "savestate",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "screen-transitions",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "achievements",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "redux-battle-sprites",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "redux-motion",
+        "passed": true
+      }
+    ]
+  },
+  "intro": {
+    "unsmoothed": {
+      "samples": 371,
+      "maxMotionError": 0.7071075439453125,
+      "presentedSteps": [
+        0.0,
+        1.0
+      ],
+      "stepStdDev": 0.45427186755325516
+    },
+    "candidate": {
+      "samples": 371,
+      "maxMotionError": 5.439453126809823e-07,
+      "presentedSteps": [
+        0.707107,
+        0.707108
+      ],
+      "stepStdDev": 4.980181003948796e-07,
+      "productionNativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "totalRenderedProbeFrames": 1294,
+      "phaseResetGuardsAllForcedBlank": true
+    }
+  },
+  "audio": {
+    "productionNativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+    "clockInvariant": true,
+    "results": [
+      {
+        "hq": 0,
+        "pattern": 0,
+        "sha256": "7ac406348feb58e66950fbb8278fe2a850aefef83a27aec1796fca4c9ceb0197",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 8574,
+          "mixSum": 1147700030,
+          "pcmHash": "3bff66ea24dc80e9",
+          "nonzeroSamples": 4025801,
+          "zeroSamples": 6199,
+          "music": 5,
+          "msuActive": false,
+          "msuReadPos": 0.0,
+          "pending": false,
+          "effects": []
+        }
+      },
+      {
+        "hq": 0,
+        "pattern": 1,
+        "sha256": "7ac406348feb58e66950fbb8278fe2a850aefef83a27aec1796fca4c9ceb0197",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 8574,
+          "mixSum": 1147700030,
+          "pcmHash": "3bff66ea24dc80e9",
+          "nonzeroSamples": 4025801,
+          "zeroSamples": 6199,
+          "music": 5,
+          "msuActive": false,
+          "msuReadPos": 0.0,
+          "pending": false,
+          "effects": []
+        }
+      },
+      {
+        "hq": 0,
+        "pattern": 2,
+        "sha256": "7ac406348feb58e66950fbb8278fe2a850aefef83a27aec1796fca4c9ceb0197",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 8574,
+          "mixSum": 1147700030,
+          "pcmHash": "3bff66ea24dc80e9",
+          "nonzeroSamples": 4025801,
+          "zeroSamples": 6199,
+          "music": 5,
+          "msuActive": false,
+          "msuReadPos": 0.0,
+          "pending": false,
+          "effects": []
+        }
+      },
+      {
+        "hq": 1,
+        "pattern": 0,
+        "sha256": "1ed6d1b0595fa7f13abeb4d6692560de1f643365920f9d03abcdfc4972d64645",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 4498,
+          "mixSum": 11543471998,
+          "pcmHash": "021a91132c4c6f99",
+          "nonzeroSamples": 4021920,
+          "zeroSamples": 10080,
+          "music": 5,
+          "msuActive": true,
+          "msuReadPos": 88200.0,
+          "pending": false,
+          "effects": []
+        }
+      },
+      {
+        "hq": 1,
+        "pattern": 1,
+        "sha256": "1ed6d1b0595fa7f13abeb4d6692560de1f643365920f9d03abcdfc4972d64645",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 4498,
+          "mixSum": 11543471998,
+          "pcmHash": "021a91132c4c6f99",
+          "nonzeroSamples": 4021920,
+          "zeroSamples": 10080,
+          "music": 5,
+          "msuActive": true,
+          "msuReadPos": 88200.0,
+          "pending": false,
+          "effects": []
+        }
+      },
+      {
+        "hq": 1,
+        "pattern": 2,
+        "sha256": "1ed6d1b0595fa7f13abeb4d6692560de1f643365920f9d03abcdfc4972d64645",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 4498,
+          "mixSum": 11543471998,
+          "pcmHash": "021a91132c4c6f99",
+          "nonzeroSamples": 4021920,
+          "zeroSamples": 10080,
+          "music": 5,
+          "msuActive": true,
+          "msuReadPos": 88200.0,
+          "pending": false,
+          "effects": []
+        }
+      },
+      {
+        "hq": 0,
+        "pattern": 3,
+        "sha256": "d7b5b83f44224a7c01d85e185449af8aacc66688b1cff2d8404d1e8e60b0ee70",
+        "summary": {
+          "ticks": 3780,
+          "callbacks": 1969,
+          "mixPeak": 12546,
+          "mixSum": 3013528688,
+          "pcmHash": "85663acf22758411",
+          "nonzeroSamples": 4025621,
+          "zeroSamples": 6379,
+          "music": 5,
+          "msuActive": false,
+          "msuReadPos": 0.0,
+          "pending": false,
+          "effects": [
+            {
+              "id": 7,
+              "requests": 57600,
+              "acks": 3596,
+              "starts": 759,
+              "nonzeroVoice7Samples": 528663,
+              "voice7Peak": 5137,
+              "voice7AbsSum": 1205511158
+            }
+          ]
+        }
+      }
+    ],
+    "limits": [
+      "Production SDL callback with a paused dummy audio device and deterministic sample scheduling; not physical speaker listening. MSU fixture is a generated sine wave."
+    ]
+  },
+  "finalRenderMatrix": [
+    {
+      "executableSha256": "351bf2e636ba60439e71b2fe56cc4b349db88fc2ff384d3f046ae69a12994093",
+      "productionExecutableSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 24,
+      "cameraSteps": [
+        1.0
+      ],
+      "cameraStepStdDev": 0.0,
+      "presentedStepStdDev": 5.000000000236297e-07,
+      "timingMs": {
+        "median": 16.6667,
+        "min": 16.4889,
+        "max": 18.84,
+        "p95": 16.6717
+      },
+      "preparedStage": {
+        "x": 2024,
+        "y": 1488
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 3,
+      "maxMotionError": 5.214843751266685e-07,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "final-party-crisp",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 0,
+      "blackPixels": 0,
+      "maxPixelMismatch": 0
+    },
+    {
+      "executableSha256": "351bf2e636ba60439e71b2fe56cc4b349db88fc2ff384d3f046ae69a12994093",
+      "productionExecutableSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 24,
+      "cameraSteps": [
+        1.0
+      ],
+      "cameraStepStdDev": 0.0,
+      "presentedStepStdDev": 5.000000000236297e-07,
+      "timingMs": {
+        "median": 16.6666,
+        "min": 16.3952,
+        "max": 32.2024,
+        "p95": 16.6724
+      },
+      "preparedStage": {
+        "x": 2024,
+        "y": 1488
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 3,
+      "maxMotionError": 5.214843751266685e-07,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "final-owner-fx",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 0,
+      "blackPixels": 0,
+      "maxPixelMismatch": 0
+    },
+    {
+      "executableSha256": "351bf2e636ba60439e71b2fe56cc4b349db88fc2ff384d3f046ae69a12994093",
+      "productionExecutableSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 24,
+      "cameraSteps": [
+        1.0
+      ],
+      "cameraStepStdDev": 0.0,
+      "presentedStepStdDev": 5.000000000236297e-07,
+      "timingMs": {
+        "median": 16.6665,
+        "min": 16.4354,
+        "max": 24.2151,
+        "p95": 16.6748
+      },
+      "preparedStage": {
+        "x": 2024,
+        "y": 1488
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 3,
+      "maxMotionError": 5.214843751266685e-07,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "final-black",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 0,
+      "blackPixels": 336,
+      "maxPixelMismatch": 0
+    }
+  ],
+  "dialogue": [
+    {
+      "cameraPhaseUnchanged": true,
+      "fixture": "queued-text",
+      "filter": 0,
+      "aspect": 0,
+      "preparedScene": true,
+      "copiedColdRestore": true,
+      "sourceCheckpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "productionNativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "observerSha256": "18009097600df050fa7d0a85f69c3decc06de05cec47b815a8a9a240c717ad42",
+      "limits": [
+        "Prepared Onett window/text fixture; not every NPC/map or physical monitor scanout."
+      ]
+    },
+    {
+      "cameraPhaseUnchanged": true,
+      "fixture": "pause-menu",
+      "filter": 1,
+      "aspect": 0,
+      "preparedScene": true,
+      "copiedColdRestore": true,
+      "sourceCheckpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "productionNativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "observerSha256": "6fe8b6a90a531eb2cbb9d7c5c81e56a7f0b9aa9d98b18b1975f451daf40dc4ad",
+      "limits": [
+        "Prepared Onett window/text fixture; not every NPC/map or physical monitor scanout."
+      ]
+    }
+  ],
+  "limits": [
+    "Prepared routes and copied saves; no new full campaign.",
+    "Pixel priorities compare against original PPU composition before presentation effects.",
+    "Audio uses the production callback with deterministic samples; no physical speaker listening is claimed.",
+    "Linux/macOS/Android require community gameplay and physical-device testing."
+  ],
+  "preFinalRenderMatrix": [
+    {
+      "executableSha256": "8fa482d349e13992241939ed4690be2d3a8872ce67f127aa68f09b902c479c5a",
+      "productionExecutableSha256": "f2b31f4c669b861a643897c21b24104bc597c324ecf3486c9c873f5ac4e4b5d5",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 0,
+      "cameraSteps": [],
+      "cameraStepStdDev": null,
+      "presentedStepStdDev": null,
+      "timingMs": {
+        "median": 16.6666,
+        "min": 16.5863,
+        "max": 16.747,
+        "p95": 16.6687
+      },
+      "preparedStage": {
+        "x": 1814,
+        "y": 1946
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 1,
+      "maxMotionError": 0.0,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "party-crisp",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 171,
+      "maxPixelMismatch": 0
+    },
+    {
+      "executableSha256": "8fa482d349e13992241939ed4690be2d3a8872ce67f127aa68f09b902c479c5a",
+      "productionExecutableSha256": "f2b31f4c669b861a643897c21b24104bc597c324ecf3486c9c873f5ac4e4b5d5",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 0,
+      "cameraSteps": [],
+      "cameraStepStdDev": null,
+      "presentedStepStdDev": null,
+      "timingMs": {
+        "median": 16.6666,
+        "min": 16.4363,
+        "max": 16.8964,
+        "p95": 16.669
+      },
+      "preparedStage": {
+        "x": 1814,
+        "y": 1946
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 1,
+      "maxMotionError": 0.0,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "party-aa",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 171,
+      "maxPixelMismatch": 0
+    },
+    {
+      "executableSha256": "8fa482d349e13992241939ed4690be2d3a8872ce67f127aa68f09b902c479c5a",
+      "productionExecutableSha256": "f2b31f4c669b861a643897c21b24104bc597c324ecf3486c9c873f5ac4e4b5d5",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 0,
+      "cameraSteps": [],
+      "cameraStepStdDev": null,
+      "presentedStepStdDev": null,
+      "timingMs": {
+        "median": 16.6666,
+        "min": 16.5883,
+        "max": 16.7455,
+        "p95": 16.6719
+      },
+      "preparedStage": {
+        "x": 1814,
+        "y": 1946
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 1,
+      "maxMotionError": 0.0,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "party-linear",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 171,
+      "maxPixelMismatch": 0
+    },
+    {
+      "executableSha256": "8fa482d349e13992241939ed4690be2d3a8872ce67f127aa68f09b902c479c5a",
+      "productionExecutableSha256": "f2b31f4c669b861a643897c21b24104bc597c324ecf3486c9c873f5ac4e4b5d5",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 0,
+      "cameraSteps": [],
+      "cameraStepStdDev": null,
+      "presentedStepStdDev": null,
+      "timingMs": {
+        "median": 16.6667,
+        "min": 16.3323,
+        "max": 17.0019,
+        "p95": 16.6991
+      },
+      "preparedStage": {
+        "x": 1814,
+        "y": 1946
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 1,
+      "maxMotionError": 0.0,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "npc-aa",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 294,
+      "maxOcclusion": 156,
+      "maxPixelMismatch": 0
+    },
+    {
+      "executableSha256": "8fa482d349e13992241939ed4690be2d3a8872ce67f127aa68f09b902c479c5a",
+      "productionExecutableSha256": "f2b31f4c669b861a643897c21b24104bc597c324ecf3486c9c873f5ac4e4b5d5",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 0,
+      "cameraSteps": [],
+      "cameraStepStdDev": null,
+      "presentedStepStdDev": null,
+      "timingMs": {
+        "median": 16.6666,
+        "min": 16.6126,
+        "max": 16.7201,
+        "p95": 16.6686
+      },
+      "preparedStage": {
+        "x": 1814,
+        "y": 1946
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 1,
+      "maxMotionError": 0.0,
+      "sandwichStatuses": [
+        0
+      ],
+      "name": "party-software",
+      "zeroPhaseChecks": 297,
+      "maximumActors": 336,
+      "maxOcclusion": 171,
+      "maxPixelMismatch": 0
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.1 / v0.5.0-ports-preview.11
+
+Fix community reports of warped NPC/map-object pixels and disappearing foreground outlines during party overlap. Smooth the scripted Onett building pan after New Game. Keep native and HQ music playing at normal speed during held or toggled fast-forward. Retain existing assets, saves, settings and achievement progress; Android retains direct ROM setup.
+
 ## v1.0.0 — official Windows release
 
 - Complete the supported Companion feature set and move to focused bug-fix maintenance.

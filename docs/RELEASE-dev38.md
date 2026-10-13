@@ -42,3 +42,11 @@ uses the native C engine rather than an ASM ROM patch. The [source map and
 porting notes](WIDESCREEN-PORTING-NOTES.md) identify the relevant map/camera,
 actor bounds, spawning, renderer, battle/UI and presentation code. The reference
 bundle contains source only; no ROM, extracted game data or save is included.
+
+The Windows ZIP passes all 50 manifest hashes, launcher/profile checks and
+achievement consumers in both editions. Both local installations are updated;
+all 103 protected files remain unchanged and a copied existing checkpoint loads.
+All five [platform CI jobs](https://github.com/rages4calm/earthbound-companion/actions/runs/38431906662)
+pass at source commit `c249b469b62d0af19a603bfe8f5cf0de3dd04135`. Package content/architecture checks
+and all six uploaded release digests pass. The separate 27-file source bundle
+matches the public reconstruction and contains no game data or executable.

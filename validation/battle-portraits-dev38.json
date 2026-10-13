@@ -1,0 +1,282 @@
+{
+  "release": "v0.5.0-redux-dev.38",
+  "platformRelease": "v0.5.0-ports-preview.9",
+  "reportedBy": "raid_rgb (Discord)",
+  "native": {
+    "nativeSha256": "a6de0138a33e3754915a5985ad7395ac83e3c85dad11794ddbcc4d48c20a5cad",
+    "patchReconstructionFiles": [
+      "port/unix/main.c",
+      "port/unix/platform/sdl2_audio.c",
+      "port/unix/platform/sdl2_input.c",
+      "port/unix/platform/sdl2_video.c",
+      "src/entity/entity.h",
+      "src/game/companion_achievements.c",
+      "src/game/eb_achievements.h",
+      "src/game/text.c",
+      "src/game_main.c",
+      "src/game_main.h",
+      "src/platform/pc_options.c",
+      "src/platform/pc_options.h",
+      "src/platform/platform.h",
+      "src/snes/ppu.h",
+      "src/snes/ppu_render.c",
+      "src/game/maternalbound_battle_sprites.c"
+    ],
+    "patchesApplied": 5,
+    "tests": [
+      {
+        "edition": "original",
+        "test": "savestate",
+        "passed": true,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nsavestate round-trip self-test: PASS\r\nsavestate perturb (cold-load) self-test: PASS\r\nsavestate crash-safe self-test: PASS\r\nsavestate asset-pointer self-test: PASS\r\n"
+      },
+      {
+        "edition": "original",
+        "test": "screen-transitions",
+        "passed": true,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nNative screen transitions: 21 exit/palette/brightness cases, timer step 1, PASS\r\n"
+      },
+      {
+        "edition": "redux",
+        "test": "redux-battle-sprites",
+        "passed": true,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nRedux native battle party sprites: 12 variants, selection, victory, cleanup, 862 pixels, PASS\r\n"
+      },
+      {
+        "edition": "redux",
+        "test": "savestate",
+        "passed": true,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nsavestate round-trip self-test: PASS\r\nsavestate perturb (cold-load) self-test: PASS\r\nsavestate crash-safe self-test: PASS\r\nsavestate asset-pointer self-test: PASS\r\n"
+      },
+      {
+        "edition": "redux",
+        "test": "screen-transitions",
+        "passed": true,
+        "logTail": "PC options: experience=1x money=1x fast-forward=3x target\r\nNative screen transitions: 21 exit/palette/brightness cases, timer step 2, PASS\r\n"
+      }
+    ],
+    "existingChecksSameBinary": true
+  },
+  "portraitPixels": {
+    "cases": 240,
+    "pixelChecks": 215040,
+    "pixelErrors": 0,
+    "passed": true,
+    "expectedMismatch": false,
+    "negativeControlDetected": false,
+    "examples": [],
+    "privateBuild": {
+      "driverSourceSha256": "917cb6e0d249f48cccab301d19e7d336559cecd8bcd57c8ea4dc2b14c7c963e7",
+      "executableSha256": "9f76a38a59dfba33ae766ee6b0a0bbe7a31d33a9db11d72694e2c22a35f04b18",
+      "productionExecutableSha256": "a6de0138a33e3754915a5985ad7395ac83e3c85dad11794ddbcc4d48c20a5cad",
+      "productionLibrarySha256": "5e33182950727f345fe2d734243f6bb85a85a712f1d56537796a6d8abf0ed386",
+      "platformMainObjectSha256": "81b7f2bd1f569f5b5bfe0ff55610277a158354aebcc520fb60a04e2b141af875",
+      "sharedBuildModified": false,
+      "sharedSourceModified": false,
+      "method": "Copied platform main renamed with objcopy; private driver linked to unchanged production native library."
+    },
+    "sourceRomSha256": "49425083080555a0ff70ef6ebd74aea29d4c6288ff8fc11be66a259c287ade9d",
+    "limits": [
+      "Source-derived pixel/priority and raising-layout comparison; not a SNES emulator campaign.",
+      "Final HP/PP-box occlusion is checked separately with the production renderer."
+    ]
+  },
+  "dev37Baseline": {
+    "cases": 240,
+    "pixelChecks": 215040,
+    "pixelErrors": 102032,
+    "passed": false,
+    "expectedMismatch": true,
+    "negativeControlDetected": true,
+    "examples": [
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 1,
+        "errors": 426
+      },
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 2,
+        "errors": 426
+      },
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 3,
+        "errors": 426
+      },
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 4,
+        "errors": 426
+      }
+    ],
+    "privateBuild": {
+      "driverSourceSha256": "917cb6e0d249f48cccab301d19e7d336559cecd8bcd57c8ea4dc2b14c7c963e7",
+      "executableSha256": "5f609482eae8cdc1aeeb0177b5671fadcdabe547a5ed55431c366fdf57a032d1",
+      "productionExecutableSha256": "b494935c0aa77485c8ec085fd32e1884a5cbdba05f1b5ff074b4bb92bbb8700f",
+      "productionLibrarySha256": "013745bdd3775a5b0a417c4c5589588e7ccc34a25e69155ec3dbcbacb72ca464",
+      "platformMainObjectSha256": "81b7f2bd1f569f5b5bfe0ff55610277a158354aebcc520fb60a04e2b141af875",
+      "sharedBuildModified": false,
+      "sharedSourceModified": false,
+      "method": "Copied platform main renamed with objcopy; private driver linked to unchanged production native library."
+    },
+    "sourceRomSha256": "49425083080555a0ff70ef6ebd74aea29d4c6288ff8fc11be66a259c287ade9d",
+    "limits": [
+      "Source-derived pixel/priority and raising-layout comparison; not a SNES emulator campaign.",
+      "Final HP/PP-box occlusion is checked separately with the production renderer."
+    ]
+  },
+  "oldSourceControl": {
+    "cases": 240,
+    "pixelChecks": 215040,
+    "pixelErrors": 102032,
+    "passed": false,
+    "expectedMismatch": true,
+    "negativeControlDetected": true,
+    "examples": [
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 1,
+        "errors": 426
+      },
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 2,
+        "errors": 426
+      },
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 3,
+        "errors": 426
+      },
+      {
+        "count": 1,
+        "mode": 0,
+        "slot": 0,
+        "phase": 4,
+        "errors": 426
+      }
+    ],
+    "privateBuild": {
+      "driverSourceSha256": "40d55e64c557df21305d8ca7509f15ba17a1210caa4b0e2ab5304e201f93a6a8",
+      "executableSha256": "029a771309714314271a5f9750a6a3102ed0fe50226ddad9ffc0fb6abb24056b",
+      "productionExecutableSha256": "a6de0138a33e3754915a5985ad7395ac83e3c85dad11794ddbcc4d48c20a5cad",
+      "productionLibrarySha256": "5e33182950727f345fe2d734243f6bb85a85a712f1d56537796a6d8abf0ed386",
+      "platformMainObjectSha256": "81b7f2bd1f569f5b5bfe0ff55610277a158354aebcc520fb60a04e2b141af875",
+      "sharedBuildModified": false,
+      "sharedSourceModified": false,
+      "method": "Copied platform main renamed with objcopy; private driver linked to unchanged production native library.",
+      "referencePortraitSourceSha256": "438a96da2c54bb564242bb52f1bbb5d8505367b89a3e974300edc5cd502d5afa",
+      "referenceOverridesPortraitObject": true
+    },
+    "sourceRomSha256": "49425083080555a0ff70ef6ebd74aea29d4c6288ff8fc11be66a259c287ade9d",
+    "limits": [
+      "Source-derived pixel/priority and raising-layout comparison; not a SNES emulator campaign.",
+      "Final HP/PP-box occlusion is checked separately with the production renderer."
+    ]
+  },
+  "latestUpstreamData": {
+    "upstreamRevision": "0659fdfc54ec962859af27deb5b04c49c6024a55",
+    "upstreamPatchSha256": "80843e3a35844d2f082379b94627aea6e8eb7f72a6488dfbb99a7bf6b9bfa572",
+    "patchedRomSha256": "49425083080555a0ff70ef6ebd74aea29d4c6288ff8fc11be66a259c287ade9d",
+    "patchedRomBytes": 6291456,
+    "patchAndSourceAndTargetCRCsVerified": true,
+    "nativePsiBytes": 92784,
+    "latestConvertedPsiBytes": 92784,
+    "latestPsiDataMatchesNativePack": true,
+    "differentPsiBytes": 0,
+    "psiFrames": 1686,
+    "groups": [
+      {
+        "group": 1,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 2,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 3,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 4,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 5,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 6,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 343,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 355,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      },
+      {
+        "group": 457,
+        "height": 24,
+        "width": 16,
+        "spritemapType": 5,
+        "sourceAndNativeDimensionsMatch": true
+      }
+    ]
+  },
+  "productionMenuCapture": {
+    "partyMembers": 4,
+    "frame": 360,
+    "visuallyReviewed": true,
+    "nativeSha256": "a6de0138a33e3754915a5985ad7395ac83e3c85dad11794ddbcc4d48c20a5cad",
+    "method": "Production executable; SDL software rendering in isolated prepared battle",
+    "preparedScene": true
+  },
+  "limits": [
+    "Focused pixels/priority and prepared menu, not every natural battle or a full campaign.",
+    "Latest upstream PSI data equality does not establish final rendered PSI parity.",
+    "Platform gameplay remains community-tested."
+  ]
+}

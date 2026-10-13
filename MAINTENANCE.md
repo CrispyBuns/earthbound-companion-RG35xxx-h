@@ -1,5 +1,7 @@
 # Feature freeze and maintenance
 
+October 13, 2026: dev.38 corrects the Redux battle portrait padding/priority reported by **raid_rgb on Discord**. [Focused checks](docs/RELEASE-dev38.md). Shadow's widescreen CCS was reviewed and a native source map prepared; no widescreen redesign or full campaign audit was started.
+
 October 12, 2026: dev.37 addresses two remaining community reports: shared black outlines during sprite overlap and scenery phase during scripted event fades. Additional testers report completing both editions. [Focused checks](docs/RELEASE-dev37.md); no new feature expansion or broad audit.
 
 October 11, 2026: dev.36 addresses community sprite-overlap and doorway/fade camera reports, and adds the requested controller hold-fast-forward and in-game achievement browser with optional sound. The 46-entry set is unchanged. [Focused checks](docs/RELEASE-dev36.md).

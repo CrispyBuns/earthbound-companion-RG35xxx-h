@@ -743,3 +743,29 @@ index 2c06c014..3bcad8b9 100644
                          ((ppu_track_window_pixels && main_layer == LAYER_BG3) ? 2 : 0);
  
                  /* Color math eligibility */
+diff --git a/src/game/maternalbound_battle_sprites.c b/src/game/maternalbound_battle_sprites.c
+--- a/src/game/maternalbound_battle_sprites.c
++++ b/src/game/maternalbound_battle_sprites.c
+@@ -100,7 +100,12 @@
+         unsigned wt,ht,pal; bool flip;
+         const uint8_t *frame=group_frame(group,&wt,&ht,&pal,&flip);
+         if(!frame) FATAL("Redux battle party sprite %u is unavailable\n",group);
+-        int row=y-EB_VIEWPORT_PAD_TOP-(maternalbound_battle_sprites.anchor_y[i]-(int)ht*8);
++        /* Bowspr allocates an even number of 8px rows and blanks the first
++         * row for odd-height sprites. Type 5's two 16px objects start at -24:
++         * a 24px party image therefore begins at anchor-16, with its feet
++         * behind the HP/PP box. Preserve that padding in the direct renderer. */
++        int blank_rows=ht&1;
++        int row=y-EB_VIEWPORT_PAD_TOP-(maternalbound_battle_sprites.anchor_y[i]-(int)ht*8+blank_rows*8);
+         if(row<0 || row>=(int)ht*8) continue;
+         const uint8_t *palette=ASSET_DATA(ASSET_OVERWORLD_SPRITES_PALETTES(pal));
+         if(!palette || ASSET_SIZE(ASSET_OVERWORLD_SPRITES_PALETTES(pal))<32) FATAL("Redux battle sprite palette is unavailable\n");
+@@ -116,7 +121,7 @@
+             int x=left+(int)column;
+             if(pixel && x>=0 && x<width) {
+                 colour[x]=bgr555_to_pixel(read_u16_le(palette+pixel*2));
+-                priority[x]=4; wrote=true; /* BG3 text still has higher priority. */
++                priority[x]=3; wrote=true; /* Bowspr OBJ priority 2; UI/PSI remain above it. */
+             }
+         }
+     }

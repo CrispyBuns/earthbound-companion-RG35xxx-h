@@ -1,6 +1,6 @@
 # Linux, macOS and Android previews
 
-[Dev.37](https://github.com/rages4calm/earthbound-companion/releases/latest) is the current Windows release; preview.8 supplies Linux, macOS and Android
+[Dev.38](https://github.com/rages4calm/earthbound-companion/releases/latest) is the current Windows release; preview.9 supplies Linux, macOS and Android
 builds with the same 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).
@@ -31,7 +31,7 @@ Desktop preview data is stored in `EarthBoundCompanionPreview` beneath the opera
 
 Install the ARM64 APK on a compatible Android 8.0+ device. The x64 APK is supplied for emulator testing. The preview application ID is `org.earthbound.companion.preview`. APK updates use a persistent project signing key.
 
-Use [preview.8](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.8) for the current Android and desktop downloads. Android retains preview.2's orientation fix and the persistent application ID/signing key, so it can update an earlier preview without replacing its app data.
+Use [preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) for the current Android and desktop downloads. Android retains preview.2's orientation fix and the persistent application ID/signing key, so it can update an earlier preview without replacing its app data.
 
 1. Transfer your privately prepared Original or supported Redux pack to your device.
 2. In **Game & setup**, import the matching `assets.pak`, select the edition and press **Play**.

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.0-redux-dev.38 / v0.5.0-ports-preview.9
+
+- Restore upstream padding and sprite priority for Redux battle portraits; the HP/PP box covers the lower body. Thanks to **raid_rgb (Discord)** for reporting it.
+- Preserve saves, data, controls and achievement progress.
+- Add a native widescreen source map and review of Shadow's supplied CCS reference.
+
 ## v0.5.0-redux-dev.37 / v0.5.0-ports-preview.8
 
 - Preserve shared black outlines on foreground sprites overlapping Ness or the party.

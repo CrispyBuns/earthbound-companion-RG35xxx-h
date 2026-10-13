@@ -35,6 +35,7 @@ All contributors to those repositories retain credit for their work. Companion�
 - **CoilSnake contributors** — the binary formats and relocation code for sprites, maps, events, encounters and fonts inform the native pack converters. Corresponding converter/adaptation source is published with GPLv3 notices.
 - [stochaztic/eb-randomizer](https://github.com/stochaztic/eb-randomizer) and [earthbound.app](https://earthbound.app/) — randomizer behavior and softlock-risk research. Companion’s Story Shuffle is an independent native implementation and does not reproduce their seed format.
 - [Raid-rgb/Earthbound-Widescreen-patch-for-BSNES-HD](https://github.com/Raid-rgb/Earthbound-Widescreen-patch-for-BSNES-HD) — compared during widescreen research; not bundled or applied.
+- **raid_rgb (Discord)** — reported the Redux battle portrait positioning defect corrected in dev.38.
 - [ShrineFox/EarthBound-Mod-Menu](https://github.com/ShrineFox/EarthBound-Mod-Menu) — ROM-side QoL reference; not bundled or applied.
 - [TheRunaway5/Phase-Distorter](https://github.com/TheRunaway5/Phase-Distorter) and [nickclyde/EarthBoundRecomp](https://github.com/nickclyde/EarthBoundRecomp) — alternative native/recompilation architectures evaluated during source selection.
 

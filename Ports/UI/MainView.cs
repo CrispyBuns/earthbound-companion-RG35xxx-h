@@ -13,6 +13,7 @@ public sealed partial class MainView : UserControl {
  readonly WrapPanel actions=new(){Orientation=Orientation.Horizontal};
  readonly Func<Settings,bool,SeedRecord?,Task>? mobileLaunch;
  readonly Action? mobileReturn;
+ readonly Func<string,bool,IProgress<string>,Task>? mobileSetup;
  readonly DispatcherTimer settingsMonitor=new(){Interval=TimeSpan.FromMilliseconds(350)};
  bool gameRunning,requestSeen;
  public bool IsBusy=>busy;
@@ -20,10 +21,12 @@ public sealed partial class MainView : UserControl {
  readonly List<Action> capture=[];
  readonly List<Action> refresh=[];
  readonly List<Control> busyControls=[];
+ readonly HashSet<string> ownedImports=[];
  bool busy;
- public MainView(Func<Settings,bool,SeedRecord?,Task>? mobileLaunch=null,Action? mobileReturn=null) {
+ public MainView(Func<Settings,bool,SeedRecord?,Task>? mobileLaunch=null,Action? mobileReturn=null,Func<string,bool,IProgress<string>,Task>? mobileSetup=null) {
   this.mobileLaunch=mobileLaunch;
   this.mobileReturn=mobileReturn;
+  this.mobileSetup=mobileSetup;
   var content=new StackPanel{Margin=new Thickness(24),Spacing=14};
   content.Children.Add(new TextBlock{Text="EarthBound Companion",FontSize=mobileLaunch==null?28:22,FontWeight=Avalonia.Media.FontWeight.Bold,TextWrapping=Avalonia.Media.TextWrapping.Wrap});
   content.Children.Add(new TextBlock{Text="Platform preview · Uses separate data and saves. Community gameplay testing is pending.",TextWrapping=Avalonia.Media.TextWrapping.Wrap});
@@ -55,19 +58,34 @@ public sealed partial class MainView : UserControl {
  CheckBox Check(StackPanel panel,string label,Func<bool> get,Action<bool> set){var c=new CheckBox{Content=Text(label),IsChecked=get()};panel.Children.Add(c);capture.Add(()=>set(c.IsChecked==true));refresh.Add(()=>c.IsChecked=get());return c;}
  ComboBox Choice(StackPanel panel,string label,string[] values,Func<int> get,Action<int> set){panel.Children.Add(Text(label));var c=new ComboBox{ItemsSource=values,SelectedIndex=get(),MinWidth=240};panel.Children.Add(c);capture.Add(()=>set(c.SelectedIndex));refresh.Add(()=>c.SelectedIndex=get());return c;}
  NumericUpDown Number(StackPanel panel,string label,int min,int max,Func<int> get,Action<int> set){panel.Children.Add(Text(label));var c=new NumericUpDown{Minimum=min,Maximum=max,Value=get(),Width=170,HorizontalAlignment=HorizontalAlignment.Left};panel.Children.Add(c);capture.Add(()=>set((int)(c.Value??min)));refresh.Add(()=>c.Value=get());return c;}
- async Task<string?> Pick(string title,params string[] patterns){var files=await TopLevel.GetTopLevel(this)!.StorageProvider.OpenFilePickerAsync(new(){Title=title,AllowMultiple=false,FileTypeFilter=[new FilePickerFileType(title){Patterns=patterns}]});var file=files.FirstOrDefault();if(file==null)return null;var local=file.TryGetLocalPath();if(local!=null)return local;var temp=Path.Combine(Settings.User,"Imports",Guid.NewGuid().ToString("N")+"-"+Path.GetFileName(file.Name));Directory.CreateDirectory(Path.GetDirectoryName(temp)!);await using var input=await file.OpenReadAsync();await using var output=File.Create(temp);byte[] buffer=new byte[65536];long count=0;int n;while((n=await input.ReadAsync(buffer))>0){count+=n;if(count>128L*1024*1024)throw new IOException("Import exceeds the supported size limit.");await output.WriteAsync(buffer.AsMemory(0,n));}return temp;}
+ async Task<string?> Pick(string title,params string[] patterns){var files=await TopLevel.GetTopLevel(this)!.StorageProvider.OpenFilePickerAsync(new(){Title=title,AllowMultiple=false,FileTypeFilter=[new FilePickerFileType(title){Patterns=patterns}]});var file=files.FirstOrDefault();if(file==null)return null;var local=file.TryGetLocalPath();if(local!=null)return local;var temp=Path.Combine(Settings.User,"Imports",Guid.NewGuid().ToString("N")+"-"+Path.GetFileName(file.Name));Directory.CreateDirectory(Path.GetDirectoryName(temp)!);await using var input=await file.OpenReadAsync();await using var output=File.Create(temp);byte[] buffer=new byte[65536];long count=0;int n;while((n=await input.ReadAsync(buffer))>0){count+=n;if(count>128L*1024*1024)throw new IOException("Import exceeds the supported size limit.");await output.WriteAsync(buffer.AsMemory(0,n));}ownedImports.Add(temp);return temp;}
  async Task ExportFile(string title,string name,byte[] data){var file=await TopLevel.GetTopLevel(this)!.StorageProvider.SaveFilePickerAsync(new(){Title=title,SuggestedFileName=name});if(file==null)return;await using var stream=await file.OpenWriteAsync();await stream.WriteAsync(data);status.Text="Exported "+file.Name;}
  StackPanel Setup(){var p=Page();
-  p.Children.Add(Text("Import your privately generated game data, or use a platform setup helper when supplied. The preview never bundles game assets."));
+  p.Children.Add(Text(mobileSetup!=null?"Set up Original or Redux directly from your clean EarthBound (USA) ROM. Redux downloads its supported source files; keep Companion open while setup runs. You can also import an existing asset pack.":"Import your privately generated game data, or use a platform setup helper when supplied. The preview never bundles game assets."));
   p.Children.Add(Action("Import Original assets.pak",async()=>{var path=await Pick("Original asset pack","*.pak");if(path==null)return;var data=await File.ReadAllBytesAsync(path);var policy=ProgressionGuard.CheckBase(data);if(policy.ContentId!="earthbound-usa")throw new InvalidDataException("Choose an Original EarthBound pack.");Directory.CreateDirectory(Settings.BaseGame);var target=Path.Combine(Settings.BaseGame,"assets.pak");if(File.Exists(target)&&StoryShuffle.HashFile(target)!=StoryShuffle.Hash(data))throw new IOException("An Original pack already exists. It was preserved; use a separate preview data folder for another version.");File.WriteAllBytes(target+".import",data);File.Move(target+".import",target,true);status.Text="Original data imported. Choose Original to play.";}));
   p.Children.Add(Action("Import Redux assets.pak",async()=>{var path=await Pick("Redux asset pack","*.pak");if(path==null)return;var data=await File.ReadAllBytesAsync(path);var policy=ProgressionGuard.CheckBase(data);string hash=StoryShuffle.Hash(data);if(policy.ContentId!=ReduxProfileService.ContentId||!ReduxStoryUpgrade.IsCurrent(hash))throw new InvalidDataException("Choose a current, supported Redux pack.");var folder=ReduxProfileService.DirectoryPath;if(Directory.Exists(folder))throw new IOException("A Redux profile already exists and was preserved.");var staging=folder+".import-"+Guid.NewGuid().ToString("N");Directory.CreateDirectory(staging);await File.WriteAllBytesAsync(Path.Combine(staging,"assets.pak"),data);await File.WriteAllTextAsync(Path.Combine(staging,"profile.json"),System.Text.Json.JsonSerializer.Serialize(new {contentId=policy.ContentId,assetPackSha256=hash}));Directory.Move(staging,folder);status.Text="Redux data imported with its own save profile.";}));
-  if(mobileLaunch==null){
-   p.Children.Add(Action("Set up Original from ROM",async()=>{var path=await Pick("Clean EarthBound USA ROM","*.sfc","*.smc");if(path==null)return;await SetupService.InstallAsync(path,false,new Progress<SetupProgress>(v=>status.Text=v.Detail));status.Text="Original setup complete.";}));
-   p.Children.Add(Action("Build Redux from ROM",async()=>{var path=await Pick("Clean EarthBound USA ROM","*.sfc","*.smc");if(path==null)return;await ReduxProfileService.BuildAsync(path,new Progress<SetupProgress>(v=>status.Text=v.Detail));status.Text="Redux setup complete.";}));
-  }else p.Children.Add(Text("Prepare the asset packs with Companion on a computer, then transfer them privately to your phone. ROM conversion on the phone is not available yet."));
+  if(mobileLaunch==null||mobileSetup!=null){
+   p.Children.Add(Action("Set up Original from ROM",()=>SetUpRom(false)));
+   p.Children.Add(Action("Set up Redux from ROM",()=>SetUpRom(true)));
+  }else p.Children.Add(Text("Prepare the asset packs with Companion on a computer, then transfer them privately to your Android device."));
   p.Children.Add(Action("Select Original",()=>{settings.AssetPack="";settings.ReduxDevelopmentEnabled=false;settings.Save();seeds.SelectedItem=null;status.Text="Original selected.";return Task.CompletedTask;}));
   p.Children.Add(Action("Select Redux",()=>{ReduxProfileService.Select(settings);seeds.SelectedItem=null;status.Text="Redux selected.";return Task.CompletedTask;}));
+  if(mobileSetup!=null)p.Children.Add(Action("Export ROM setup log",async()=>{var path=Path.Combine(Settings.User,"rom-setup.log");if(!File.Exists(path))throw new IOException("Run ROM setup first to create a log.");await ExportFile("Export ROM setup log","rom-setup.log",await File.ReadAllBytesAsync(path));}));
   return p;
+ }
+ async Task SetUpRom(bool redux){
+  var path=await Pick("Clean EarthBound USA ROM","*.sfc","*.smc");if(path==null)return;
+  try {
+   var progress=new Progress<SetupProgress>(v=>status.Text=v.Detail);
+   if(mobileSetup!=null)await mobileSetup(path,redux,new Progress<string>(v=>status.Text=v));
+   else if(redux)await ReduxProfileService.BuildAsync(path,progress);
+   else await SetupService.InstallAsync(path,false,progress);
+   if(redux)ReduxProfileService.Select(settings);else{settings.AssetPack="";settings.ReduxDevelopmentEnabled=false;settings.Save();}
+   seeds.SelectedItem=null;status.Text=(redux?"Redux":"Original")+" setup complete and selected. Press Play.";
+  } finally {
+   // Only remove a copy made by our content-URI picker, never a player's ROM.
+   if(ownedImports.Remove(path))File.Delete(path);
+  }
  }
  StackPanel Display(){var p=Page();
   Choice(p,"Preset",["Enhanced","Classic","CRT","Easygoing","Custom"],()=>settings.PresetIndex(),_=>{}).SelectionChanged+=(_,e)=>{if(e.AddedItems.Count>0&&e.AddedItems[0] is string name&&name!="Custom"){settings.Preset(name);Refresh();}};

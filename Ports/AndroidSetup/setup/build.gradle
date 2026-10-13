@@ -1,0 +1,29 @@
+plugins { id 'com.android.library'; id 'com.chaquo.python' }
+android {
+    namespace 'org.earthbound.companion.romsetup'
+    compileSdk 36
+    defaultConfig { minSdk 26; ndk { abiFilters 'arm64-v8a', 'x86_64' } }
+    sourceSets { main { python.srcDirs = ['../python', '../../../build/android-setup/python'] } }
+}
+chaquopy {
+    defaultConfig {
+        version = '3.13'
+        buildPython(System.getenv('EB_BUILD_PYTHON') ?: 'python3.13')
+        extractPackages('*')
+        pip {
+            install 'Pillow==11.0.0'
+            install 'PyYAML==6.0.3'
+            install 'cyclopts==3.24.0'
+            install 'typing-extensions==4.15.0'
+            install 'certifi==2026.7.22'
+            options '--find-links', '../../../build/android-setup/wheels'
+            install 'ccscript==1.500'
+            install 'eb_native_comp==1.0.0'
+        }
+    }
+}
+tasks.register('exportRuntime', Copy) {
+    dependsOn 'assembleRelease'
+    from layout.buildDirectory.file('outputs/aar/setup-release.aar')
+    into '../../../build/android-setup/aar'
+}

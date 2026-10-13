@@ -56,6 +56,9 @@ Ports/AndroidManaged/native-libs/
 Ports/AndroidManaged/Java/*.java
 !Ports/AndroidManaged/Java/GameActivity.java
 Ports/Android/.gradle/
+Ports/AndroidSetup/.gradle/
+Ports/AndroidSetup/**/build/
+Ports/AndroidSetup/local.properties
 
 # Private historical development and recovery material
 _Archive/

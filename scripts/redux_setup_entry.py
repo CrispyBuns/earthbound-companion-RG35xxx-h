@@ -62,7 +62,9 @@ def run_worker(name, arguments):
         raise ValueError("Unknown setup worker")
 
 
-def main():
+def main(argv=None, worker_runner=None):
+    if argv is not None:
+        sys.argv = [__file__, *argv]
     if sys.argv[1:]==["--selftest-compiler-order"]:
         from redux_compile_order import compiler_order_selftest
         print(json.dumps(compiler_order_selftest()),flush=True)
@@ -136,8 +138,9 @@ def main():
         print(json.dumps({"stage":"download-source","status":"passed"}),flush=True)
         os.environ["PYTHONUTF8"]="1"
         build_profile(["--rom",str(rom),"--base-assets",str(args.base_assets.resolve()),
-            "--redux-source",str(source),"--coilsnake-python",sys.executable,"--native-python",sys.executable,
-            "--native-source",str(native),"--bridge",str(bridge),"--output-directory",str(target),"--bundled-worker"])
+            "--redux-source",str(source),"--coilsnake-python",sys.executable or __file__,"--native-python",sys.executable or __file__,
+            "--native-source",str(native),"--bridge",str(bridge),"--output-directory",str(target),"--bundled-worker"],
+            worker_runner=worker_runner)
 
 
 if __name__=="__main__":

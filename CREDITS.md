@@ -56,6 +56,7 @@ All contributors to those repositories retain credit for their work. Companion�
 - [PyInstaller](https://github.com/pyinstaller/pyinstaller) — standalone first-run ROM extraction helper.
 - [pk-hack/CoilSnake](https://github.com/pk-hack/CoilSnake) — builds the upstream MaternalBound development source for the local native-conversion work.
 - [charasyn/ccscript_legacy](https://github.com/charasyn/ccscript_legacy) — legacy CCScript compiler dependency, locally updated to build under C++17.
+- [Chaquopy](https://github.com/chaquo/chaquopy) and [Python](https://github.com/python/cpython) contributors — embedded Android runtime for on-device ROM setup. MIT/PSF notices accompany the APK. [Pydantic](https://github.com/pydantic/pydantic)'s pure Python v1 models support the Android converter adapter; Pillow, PyYAML and Cyclopts retain their upstream credit and package notices.
 
 The reproducible Redux helper pins [CoilSnake `346cfc7`](https://github.com/pk-hack/CoilSnake/tree/346cfc753644bc3703b6fc4eaa0a5d6bdcb9bb4a) and [CCScript 1.500 `cecd6a4`](https://github.com/charasyn/ccscript_legacy/tree/cecd6a44baf88f3e6de86938b4052502b4c53366). The C++17 and Windows `std::filesystem` repair is published in [patches/ccscript-cxx17.patch](patches/ccscript-cxx17.patch). The standalone setup entry point, converters and packaging specification are corresponding source; upstream compiler authors retain their credit.
 

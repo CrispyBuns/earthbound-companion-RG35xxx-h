@@ -14,10 +14,21 @@ public sealed class MainActivity : AvaloniaMainActivity<MobileApp> {
  internal static MainActivity? Current;
  TaskCompletionSource? gameClosed;
  bool smokeStarted;
+ bool romSetupTestStarted;
+ protected override void OnPostResume(){base.OnPostResume();if(!romSetupTestStarted&&Intent?.GetStringExtra("romSetupTest") is string mode){romSetupTestStarted=true;_ = RunRomSetupTest(mode);}}
+ async Task RunRomSetupTest(string mode){
+  try{
+   bool redux=mode=="redux";if(mode!="original"&&!redux)throw new InvalidDataException("Unknown setup test mode");
+   await AndroidRomSetup.Install(Path.Combine(FilesDir!.AbsolutePath,"rom-setup-test.sfc"),redux,new Progress<string>(v=>global::Android.Util.Log.Info("CompanionSmoke",v)));
+   var settings=Settings.Load();if(redux)ReduxProfileService.Select(settings);else{settings.AssetPack="";settings.ReduxDevelopmentEnabled=false;settings.Save();}
+   global::Android.Util.Log.Info("CompanionSmoke","On-device "+mode+" ROM setup: PASS");
+   await Launch(settings,false,null);
+  }catch(Exception e){global::Android.Util.Log.Error("CompanionSmoke","On-device ROM setup: FAIL "+e);}
+ }
  protected override void OnCreate(global::Android.OS.Bundle? state){Current=this;Settings.OverrideRoot=Path.Combine(FilesDir!.AbsolutePath,"CompanionPreview");HostRuntime.NativeLibraryDirectory=ApplicationInfo!.NativeLibraryDir;base.OnCreate(state);if(Intent?.GetBooleanExtra("portableSmokeTest",false)==true)global::Android.Util.Log.Info("CompanionSmoke","Managed smoke activity created");}
  public override void OnConfigurationChanged(global::Android.Content.Res.Configuration newConfig){base.OnConfigurationChanged(newConfig);if(smokeStarted)global::Android.Util.Log.Info("CompanionSmoke","Managed launcher configuration changed without activity recreation");}
  protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)=>base.CustomizeAppBuilder(builder).WithInterFont();
- protected override void OnResume(){base.OnResume();if(!smokeStarted&&Intent?.GetBooleanExtra("portableSmokeTest",false)==true){smokeStarted=true;new global::Android.OS.Handler(global::Android.OS.Looper.MainLooper!).PostDelayed(()=>{var fixture=new Settings{Width=1280,Sprint=2};fixture.Save();var restored=Settings.Load();if(restored.Width!=1280||restored.Sprint!=2)throw new InvalidDataException("Android settings round-trip failed");var recipe=System.Text.Json.JsonSerializer.Deserialize<ShuffleOptions>(System.Text.Json.JsonSerializer.Serialize(new ShuffleOptions{Mode="Surprise"}));if(recipe?.Mode!="Surprise")throw new InvalidDataException("Android recipe serialization failed");global::Android.Util.Log.Info("CompanionSmoke","Managed settings and recipe JSON round-trip: PASS");var intent=new Intent();intent.SetClassName(this,"org.earthbound.companion.GameActivity");intent.PutExtra("arguments",new[]{"--selftest-pc"});StartActivity(intent);},3000);}if(gameClosed!=null&&File.Exists(Settings.PathTo("settings.request")))return;gameClosed?.TrySetResult();gameClosed=null;}
+ protected override void OnResume(){base.OnResume();if(!smokeStarted&&Intent?.GetBooleanExtra("portableSmokeTest",false)==true){smokeStarted=true;new global::Android.OS.Handler(global::Android.OS.Looper.MainLooper!).PostDelayed(async()=>{string setupError=await Task.Run(()=>AndroidRomSetup.Invoke("","",false,""));if(setupError.Length!=0)throw new InvalidDataException(setupError);global::Android.Util.Log.Info("CompanionSmoke","Embedded ROM converters and compiler ordering: PASS");var fixture=new Settings{Width=1280,Sprint=2};fixture.Save();var restored=Settings.Load();if(restored.Width!=1280||restored.Sprint!=2)throw new InvalidDataException("Android settings round-trip failed");var recipe=System.Text.Json.JsonSerializer.Deserialize<ShuffleOptions>(System.Text.Json.JsonSerializer.Serialize(new ShuffleOptions{Mode="Surprise"}));if(recipe?.Mode!="Surprise")throw new InvalidDataException("Android recipe serialization failed");global::Android.Util.Log.Info("CompanionSmoke","Managed settings and recipe JSON round-trip: PASS");var intent=new Intent();intent.SetClassName(this,"org.earthbound.companion.GameActivity");intent.PutExtra("arguments",new[]{"--selftest-pc"});StartActivity(intent);},3000);}if(gameClosed!=null&&File.Exists(Settings.PathTo("settings.request")))return;gameClosed?.TrySetResult();gameClosed=null;}
  internal void ReturnToGame(){if(gameClosed==null)return;var intent=new Intent();intent.SetClassName(this,"org.earthbound.companion.GameActivity");intent.AddFlags(ActivityFlags.ReorderToFront);StartActivity(intent);}
  public override void OnBackPressed(){if(gameClosed==null){base.OnBackPressed();return;}File.WriteAllText(Settings.PathTo("settings.applied"),"");File.Delete(Settings.PathTo("settings.request"));ReturnToGame();}
  internal Task Launch(Settings settings,bool resume,SeedRecord? seed){
@@ -37,5 +48,5 @@ public sealed class MainActivity : AvaloniaMainActivity<MobileApp> {
 }
 public sealed class MobileApp : Avalonia.Application {
  public override void Initialize(){RequestedThemeVariant=Avalonia.Styling.ThemeVariant.Dark;Styles.Add(new FluentTheme());}
- public override void OnFrameworkInitializationCompleted(){if(ApplicationLifetime is ISingleViewApplicationLifetime single)single.MainView=new MainView((settings,resume,seed)=>MainActivity.Current!.Launch(settings,resume,seed),()=>MainActivity.Current!.ReturnToGame());base.OnFrameworkInitializationCompleted();}
+ public override void OnFrameworkInitializationCompleted(){if(ApplicationLifetime is ISingleViewApplicationLifetime single)single.MainView=new MainView((settings,resume,seed)=>MainActivity.Current!.Launch(settings,resume,seed),()=>MainActivity.Current!.ReturnToGame(),AndroidRomSetup.Install);base.OnFrameworkInitializationCompleted();}
 }

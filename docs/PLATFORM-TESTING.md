@@ -2,7 +2,7 @@
 
 No second campaign is required. Use a new adventure or copies of your own saves. Report the platform, OS version, CPU architecture, build, game edition, display resolution and controller model. Include `game.log` from the selected adventure when relevant; do not upload ROMs or generated asset packs.
 
-- **Setup and launch:** build Original from your own clean ROM on desktop, or import its privately generated pack on Android. Start the game and confirm text, sound and controls. Repeat with Redux if available.
+- **Setup and launch:** set up Original from your own clean USA ROM on desktop or Android. Repeat with Redux; on Android its source download needs internet. Keep the app open while building. Start the game and confirm text, sound and controls. Existing pack import remains available.
 - **Movement:** walk, hold Y to sprint, and try sprint plus a Skip Sandwich. Visit a town and a crowded outdoor map, using 4:3 and widescreen. Watch scrolling, enemies at the sides and sprite clipping.
 - **Battle and transitions:** enter a normal battle, cast a single-target PSI ability, exit, and use a door or teleport. Existing copied Giygas/credits saves can target those graphics without a full campaign.
 - **Settings:** open settings from the game, change one setting, save and return. Confirm the game resumes and the option applies.

@@ -12,19 +12,19 @@
 | Linux x64 / SteamOS | [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `linux-x64` archive |
 | macOS Apple Silicon (ARM64) | [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `osx-arm64` archive |
 | macOS Intel (x64) | [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `osx-x64` archive |
-| Android ARM64 phones/tablets | [Android preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `android-arm64` APK |
-| Android x64 | [Android preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) | `android-x64` APK — emulator testing |
+| Android ARM64 handhelds/phones/tablets | [Android preview.10](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.10) | `android-arm64` APK — ROM setup on the device |
+| Android x64 | [Android preview.10](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.10) | `android-x64` APK — emulator testing |
 
 Linux, macOS and Android builds are **community previews**; full playthroughs and broader device testing are still pending. Linux requires glibc 2.38+, macOS requires 12+, and Android requires 8.0+. macOS previews are not notarized. [Platform setup, features and testing limits](docs/PORTABILITY.md).
 
-Desktop builds set up Original and Redux from your own clean USA ROM. Android imports privately generated asset packs. No release includes a ROM or game assets. External Slang shader presets are currently Windows-only.
+Desktop and Android builds set up Original and Redux from your own clean USA ROM. **Android no longer needs a computer first:** choose **Set up Original from ROM** or **Set up Redux from ROM** on the device. Importing existing asset packs remains available. No release includes a ROM or game assets. External Slang shader presets are currently Windows-only.
 
 [▶ Watch the EarthBound Companion + MaternalBound Redux trailer](https://youtu.be/RZ5UdAxyqdY)
 
 **Discord contact:** `chrono.trigger`
 
 > [!NOTE]
-> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Preview.9 downloads](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) · [setup and coverage](docs/PORTABILITY.md). New-platform gameplay still needs community testing.
+> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) · [Android preview.10](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.10) · [setup and coverage](docs/PORTABILITY.md). New-platform gameplay still needs community testing.
 
 > [!NOTE]
 > **1.0.0 official release — the supported feature set is complete.** Future updates focus on reported bugs. [Release notes](docs/RELEASE-1.0.0.md) · [Scope and coverage](MAINTENANCE.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml).

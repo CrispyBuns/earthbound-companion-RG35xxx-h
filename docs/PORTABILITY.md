@@ -1,6 +1,6 @@
 # Linux, macOS and Android previews
 
-[Windows 1.0.0](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.9 supplies Linux, macOS and Android
+[Windows 1.0.0](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.9 supplies Linux and macOS, and preview.10 supplies Android
 builds with the same tested dev.38 game core and 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).
@@ -9,7 +9,7 @@ and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).
 
 Linux x64, Apple Silicon macOS and Intel macOS use the existing C/SDL2 game core with a portable Avalonia launcher. Android ARM64 phones and x64 emulators use that same game core with SDL's Android activity and touch controls. The portable launchers share the existing settings, Story Shuffle v4, progression checks, content profiles and save recovery code with Windows.
 
-The launchers include Original/Redux selection, display presets, widescreen, built-in display effects, HQ/MSU music settings, gameplay options, controller/keyboard mapping, seed generation and recipe import, verified backup recovery, phone-save transfer and settings export. Desktop packages include Original and Redux ROM conversion helpers. Android imports privately generated asset packs; converting a ROM on the phone is not available yet.
+The launchers include Original/Redux selection, display presets, widescreen, built-in display effects, HQ/MSU music settings, gameplay options, controller/keyboard mapping, seed generation and recipe import, verified backup recovery, phone-save transfer and settings export. Desktop and Android can set up both editions from a clean USA ROM. Importing privately generated asset packs remains supported.
 
 External Slang shader presets are currently Windows-only. Built-in scanlines, color grading, filtering and depth effects are available in these previews. macOS packages have an ad-hoc signature, but no Apple Developer ID signing or notarization. iOS is outside this preview.
 
@@ -37,16 +37,18 @@ Desktop preview data is stored in `EarthBoundCompanionPreview` beneath the opera
 
 Install the ARM64 APK on a compatible Android 8.0+ device. The x64 APK is supplied for emulator testing. The preview application ID is `org.earthbound.companion.preview`. APK updates use a persistent project signing key.
 
-Use [preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) for the current Android and desktop downloads. Android retains preview.2's orientation fix and the persistent application ID/signing key, so it can update an earlier preview without replacing its app data.
+Use [Android preview.10](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.10) for Android and [desktop preview.9](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.9) for Linux/macOS. Android retains the persistent application ID/signing key, so an APK update preserves existing app data.
 
-1. Transfer your privately prepared Original or supported Redux pack to your device.
-2. In **Game & setup**, import the matching `assets.pak`, select the edition and press **Play**.
+1. Put your clean EarthBound (USA) `.sfc` or `.smc` ROM on the device. Headered clean dumps are supported. Extract a ZIP first; do not apply a hack patch to the ROM.
+2. In **Game & setup**, choose **Set up Original from ROM** or **Set up Redux from ROM**, then select the ROM in Android's file picker. Original setup works offline. Redux downloads the pinned supported source files over verified HTTPS and builds them locally; it also prepares Original data if needed. Keep Companion open while setup runs. Once setup completes, the edition is selected automatically—press **Play**. A computer is not required. Existing packs can still be imported with the matching **Import … assets.pak** button.
 3. Touch controls include diagonals, sprint (Y), A/B/X, L/R, Start/Select, quick Save/Load, Fast and Settings. A Bluetooth or USB controller can also be used. Save/Load uses the selected quick-save slot.
 4. The touch Settings button opens the launcher. **Save settings / return to game** resumes the existing game.
 
 A background event requests a quick save on the game thread and pauses game logic. Back requests a checkpoint and clean game exit. If SDL reports a lost render device, the game requests a checkpoint and returns to the launcher rather than continuing with invalid textures. Sudden termination cannot guarantee a new quick save. Phone lifecycle, touch layout, controllers and actual gameplay still require device testing.
 
 Android data stays in app-private storage. **Saves & mods** exports/imports through the system file picker. Export saves before uninstalling; removing the app removes its private data.
+
+Setup validates the ROM, pinned Redux source, compiled ROM and generated packs before installation. Existing profiles and saves are preserved. Generated ROMs and temporary source copies are removed when setup finishes. If setup fails, use **Export ROM setup log** in **Game & setup** to save the diagnostic text for a report; do not send your ROM or generated pack.
 
 ## Save transfer
 
@@ -56,7 +58,7 @@ Verified Companion backup ZIPs check the adventure and asset identity before res
 
 ## What has and has not been tested
 
-Builds, ROM-free input/MSU checks, settings ABI/round trips, path isolation, synthetic phone-save backup/recovery and launcher startup are covered by automation. Android emulator checks launch the managed UI and SDL native ROM-free selftest. Those checks do not verify the game campaign, audio playback quality, real controllers, physical phones or long sessions. Community reports remain necessary; see [PLATFORM-TESTING.md](PLATFORM-TESTING.md) for short focused tests.
+Builds, ROM-free input/MSU checks, settings ABI/round trips, path isolation, synthetic phone-save backup/recovery and launcher startup are covered by automation. Android checks include embedded converter imports, synthetic native compiler ordering and invalid-ROM rejection. Private emulator tests additionally build Original and Redux from the owner's clean ROM and require their exact supported pack checksums; the ROM is never sent to public CI. These checks do not verify the game campaign, audio playback quality, physical controllers/handhelds or long sessions. Community reports remain necessary; see [PLATFORM-TESTING.md](PLATFORM-TESTING.md) for short focused tests.
 
 The Windows launcher is compiled as a guard. Local tests additionally use copies and temporary sessions to check Original/Redux native launches and deterministic seed recipes. No new-platform full playthrough is claimed. Published build results identify the checks that actually passed.
 

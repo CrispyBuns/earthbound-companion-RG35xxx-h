@@ -1,0 +1,56 @@
+{
+  "packages": {
+    "android-x64": {
+      "sha256": "e9ea24ca6178c39d21577b02e3993c547899d6a4fd90923d795e890e67a11aba",
+      "bytes": 67624204,
+      "nativeCoreUnchangedFromPreview9": {
+        "libearthbound.so": "5ba9583555495d525b4ae40dec981a2bbed2c8890fe2b35cbb68116e94ec3183",
+        "libSDL2.so": "f7ef6cebc4cdf25742a17441a07488567fc2d865334d6907312a012de7ef72c6"
+      },
+      "privatePayloads": 0
+    },
+    "android-arm64": {
+      "sha256": "386553b49f18a32d3edfe4c9145379b13df81107c5adbb9fecb37dcd3e667a44",
+      "bytes": 66575741,
+      "nativeCoreUnchangedFromPreview9": {
+        "libearthbound.so": "aaaeb24d526f2783f2819524d9388cbfdc8796567b791cb2228e7094ef52e2de",
+        "libSDL2.so": "d4e82c014adbbcf5e48ca9ae2a19596227670832fe6905191c774bb80ec73907"
+      },
+      "privatePayloads": 0
+    }
+  },
+  "release": "v0.5.0-ports-preview.10",
+  "date": "2026-10-13",
+  "scope": "Android ROM setup and launcher; game/SDL unchanged from preview.9",
+  "reduxSource": "897d00833f4a08a0a92f106abf631629a6a6a041",
+  "conversion": {
+    "originalPackSha256": "792370574832629c0dc436bbc5b3a3993a8670e7e5fc3e3a5b467791ce514462",
+    "cleanRomSha256": "a8fe2226728002786d68c27ddddf0b90a894db52e4dfe268fdf72a68cae5f02e",
+    "compiledReduxSha256": "c2a2fc98c7e6518b797959ffadf24ca4db8b4d7745ed3a9eb92eee106db1d0ab",
+    "reduxPackSha256": "4b5f1c5ac76e4bdcce2dc66a2e8ef95b659e561d3cadebefa66efb85c0be5236"
+  },
+  "checks": {
+    "finalApkSettingsRecipeAndNativeSDL": "passed",
+    "headeredCleanRom": "passed",
+    "windowsBuildWarnings": 0,
+    "existingPacksProfileAndSentinelUnchanged": "passed",
+    "zipAlignment": "passed",
+    "hostInvalidRomCases": 3,
+    "setupStagingEmpty": "passed",
+    "android15GameLaunchAndRender": "passed",
+    "portableSaveRecovery": "passed",
+    "tlsRegressionCases": 6,
+    "invalidRomRejected": "passed",
+    "publicationIdentityCases": 4,
+    "signatureMatchesPreview9": true,
+    "finalApkEmbeddedImportsAndCompilerOrdering": "passed",
+    "android15FilePickerOriginalAndRedux": "passed",
+    "android17ExactConversion": "passed",
+    "androidFilePickerLogExport": "passed"
+  },
+  "limitations": [
+    "Physical ARM64 device gameplay and controllers pending",
+    "Audio quality, long sessions and full Android campaign pending",
+    "Existing graphics dependencies use compatibility mode on 16KB page-size systems"
+  ]
+}

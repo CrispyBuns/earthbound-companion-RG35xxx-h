@@ -35,7 +35,7 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
 
-def main(argv=None) -> None:
+def main(argv=None, worker_runner=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for option in ("rom", "redux-source", "coilsnake-python", "native-python",
                    "native-source", "base-assets", "bridge", "output-directory"):
@@ -70,7 +70,7 @@ def main(argv=None) -> None:
             raise RuntimeError("Redux source differs from the audited compiler input: " + entry["path"])
     if sha(paths["base_assets"]) not in AUDITED_ORIGINAL_PACKS:
         raise RuntimeError("Original asset pack does not match the audited native base.")
-    for key in ("coilsnake_python", "native_python"):
+    for key in (() if worker_runner else ("coilsnake_python", "native_python")):
         if not paths[key].is_file():
             raise RuntimeError("Python environment is missing: " + str(paths[key]))
 
@@ -85,9 +85,24 @@ def main(argv=None) -> None:
 
     def run(name: str, command: list[str]) -> None:
         print(json.dumps({"stage": name, "status": "running"}), flush=True)
-        with (stage / (name + ".log")).open("wb") as log:
-            result = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT)
-        if result.returncode:
+        if worker_runner:
+            # Android embeds Python: do not spawn an executable from writable
+            # app storage. The same workers run in-process with their own log.
+            import contextlib
+            with (stage / (name + ".log")).open("w", encoding="utf-8") as log:
+                position = command.index("--worker")
+                with contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
+                    try:
+                        worker_runner(command[position + 1], command[position + 2:])
+                    except SystemExit as exit_status:
+                        if exit_status.code not in (None, 0):
+                            raise RuntimeError(f"{name} exited with code {exit_status.code}") from exit_status
+            returncode = 0
+        else:
+            with (stage / (name + ".log")).open("wb") as log:
+                result = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT)
+            returncode = result.returncode
+        if returncode:
             raise RuntimeError(f"{name} failed. Inspect {stage / (name + '.log')}. No profile was installed.")
         print(json.dumps({"stage": name, "status": "passed"}), flush=True)
 

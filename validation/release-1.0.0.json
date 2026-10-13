@@ -1,6 +1,6 @@
 {
   "release": "v1.0.0",
-  "status": "verified-ready-for-publication",
+  "status": "published-verified",
   "nativeBaseline": "v0.5.0-redux-dev.38",
   "reduxRevision": "897d00833f4a08a0a92f106abf631629a6a6a041",
   "gameplayAndSetupBinariesUnchanged": true,
@@ -53,5 +53,19 @@
     "Current release checks cover the updated package/launcher and isolated runtime consumers. Prior dev.38 renderer evidence retains its original identity.",
     "Owner and community campaign reports remain separate from automated exhaustive coverage.",
     "No newer upstream Redux conversion, Deluxe integration or new full randomized campaign is claimed."
-  ]
+  ],
+  "publication": {
+    "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.0",
+    "tag": "v1.0.0",
+    "releaseSourceCommit": "05f9cceeaf1406f96b9185d434103508daa25eb3",
+    "publishedAt": "2026-10-13T19:28:35Z",
+    "latestVerified": true,
+    "uploadedAssetDigests": [
+      {
+        "name": "EarthBound-Companion-Windows-v1.0.0.zip",
+        "digest": "sha256:46c9ed4f79cc2c65d900b9f9ffe6cc8d3e61ab29e18e1e0759952be58d77d747",
+        "size": 129169972
+      }
+    ]
+  }
 }

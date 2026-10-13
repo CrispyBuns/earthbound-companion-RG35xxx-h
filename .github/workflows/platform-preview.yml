@@ -142,10 +142,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - run: dotnet workload install android --skip-manifest-update
-      - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
+      # Set up Gradle before staging SDL's example Android wrapper. We use the
+      # installed Gradle directly; SDL's legacy wrapper is never executed.
+      - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
       - name: Build embedded on-device ROM converters (code only)
         env:
           EB_BUILD_PYTHON: python3.13

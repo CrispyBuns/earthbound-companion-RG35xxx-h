@@ -24,7 +24,7 @@ Desktop and Android builds set up Original and Redux from your own clean USA ROM
 **Discord contact:** `chrono.trigger`
 
 > [!NOTE]
-> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Platform preview.15](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.15) · [Platform preview.15](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.15) · [setup and coverage](docs/PORTABILITY.md). Android handheld users can hide the touch overlay in **Controls → Show touch controls**. New-platform gameplay still needs community testing.
+> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Linux/macOS preview.15](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.15) · [Android preview.16](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.16) · [setup and coverage](docs/PORTABILITY.md). Android handheld users can hide the touch overlay in **Controls → Show touch controls**. New-platform gameplay still needs community testing.
 
 > [!NOTE]
 > **1.0.5 maintenance release — the supported feature set is complete.** Future updates focus on reported bugs. [Release notes](docs/RELEASE-1.0.5.md) · [Scope and coverage](MAINTENANCE.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml).

@@ -2,10 +2,10 @@
 
 ## Separate game executable icon
 
-`earthbound-game.png` is community-contributed pixel artwork supplied through
+`earthbound-game.png` is pixel artwork contributed by **princeofdalaam (Discord)** and supplied through
 chrono.trigger on October 14, 2026. `earthbound-game.ico` contains the Windows
-sizes listed below, exported with nearest-neighbor sizing. It is used only by
-the native game executable; the launcher retains its red-cap planet icon.
+sizes listed below, exported with nearest-neighbor sizing. It is used by
+the native game executable and Android app; the Windows launcher retains its red-cap planet icon.
 Rebuild with `python scripts/build_app_icon.py --source Companion/Assets/earthbound-game.png --destination Companion/Assets/earthbound-game.ico --pixel-art`.
 
 ## Launcher artwork

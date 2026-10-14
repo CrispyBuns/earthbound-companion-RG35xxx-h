@@ -1,5 +1,7 @@
 # Credits and provenance
 
+Game executable and Android app icon: **princeofdalaam (Discord)**.
+
 **Companion Achievements:** original reusable C engine by Carl Prewitt Jr., MIT
 licensed. Local game definitions, adapters and launcher integration are maintained
 here. No RetroAchievements implementation or badge artwork is included.

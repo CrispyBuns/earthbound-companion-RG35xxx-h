@@ -1,0 +1,43 @@
+name: Publish built platform packages
+on:
+  workflow_dispatch:
+    inputs:
+      build_run:
+        description: Successful platform-preview build run ID
+        required: true
+        type: string
+      release_tag:
+        description: Existing draft platform release
+        required: true
+        type: string
+permissions:
+  actions: read
+  contents: write
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN: ${{ inputs.build_run }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
+    steps:
+      - name: Wait for completed builds and upload their packages
+        shell: bash
+        run: |
+          [[ "$BUILD_RUN" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-ports-preview\.[0-9]+$ ]]
+          for attempt in $(seq 1 60); do
+            status=$(gh run view "$BUILD_RUN" --json status --jq .status)
+            if [ "$status" = completed ]; then
+              [ "$(gh run view "$BUILD_RUN" --json conclusion --jq .conclusion)" = success ]
+              break
+            fi
+            [ "$attempt" -lt 60 ]
+            sleep 30
+          done
+          gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft | grep -qx true
+          gh run download "$BUILD_RUN" -D packages -p 'EarthBound-Companion-*-preview'
+          mapfile -d '' files < <(find packages -type f \( -name '*.tar.gz' -o -name '*.apk' \) -print0)
+          [ "${#files[@]}" -eq 5 ]
+          gh release upload "$RELEASE_TAG" "${files[@]}"

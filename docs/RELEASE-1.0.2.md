@@ -2,11 +2,11 @@
 
 Android's touch **Settings** button was sending the native Zoom action. This
 could select close-up zoom, which temporarily pulls back to fit dialogue and
-menus. The button now pauses and opens Settings. The portable Controls page
+menus. The button now pauses and opens Settings. Android also resumes correctly when Save/Return is processed before the game Activity returns to the foreground. Ordinary backgrounding still preserves an intentional Pause. The portable Controls page
 also labels actions in their actual native order; Windows bindings are unchanged.
 
 For the zoomed-out widescreen view, keep **Wide FOV On**. If the old button
-already zoomed in, switch Wide FOV Off, then On once. This restores the wide
+already zoomed in, open the game's own **Set Up → Wide FOV** and switch Off, then On once. The launcher checkbox alone does not reset an existing close-up camera. This restores the wide
 view without changing the touch-overlay preference. Dialogue and menus retain
 the wide framing and show their complete windows.
 

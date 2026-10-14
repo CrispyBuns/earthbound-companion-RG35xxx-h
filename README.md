@@ -32,7 +32,7 @@ Desktop and Android builds set up Original and Redux from your own clean USA ROM
 > [!NOTE]
 > **Windows 1.0.2 extends Redux battle Lifeup across widescreen. Platform preview.13 also corrects Android Settings and portable control labels.** It supports Original EarthBound and Companion's pinned native MaternalBound Redux adaptation. The owner completed Redux through the credits, with equipment/stat boosts for final testing; community testers also report completing both editions. The Redux input remains `897d0083`, rather than automatically following newer upstream changes. Exhaustive campaign parity, full randomized progression and every combat/music combination remain unverified. [Redux version and coverage](MATERNALBOUND-NATIVE.md).
 
-For a stable wide view through conversations and menus, keep **Wide FOV On**. Android preview.13 fixes the touch Settings button accidentally selecting close-up zoom. If the old button already zoomed you in, switch Wide FOV Off, then On once to restore the wide view. [Details and focused checks](docs/RELEASE-1.0.2.md).
+For a stable wide view through conversations and menus, keep **Wide FOV On**. Android preview.13 fixes the touch Settings button accidentally selecting close-up zoom. If the old button already zoomed you in, open the game's own **Set Up → Wide FOV** and switch Off, then On once to restore the wide view. [Details and focused checks](docs/RELEASE-1.0.2.md).
 
 1.0.1 keeps NPCs and foreground scenery in their own camera coordinates, preserving opaque outlines when Ness passes behind them. The opening Onett pan now uses fractional scrolling, and fast-forward leaves music playing at normal speed. [Fixes and focused checks](docs/RELEASE-1.0.1.md).
 

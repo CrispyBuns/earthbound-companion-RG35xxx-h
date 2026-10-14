@@ -2,7 +2,7 @@
 
 ## v1.0.2 / v0.5.0-ports-preview.13
 
-Correct Android's touch Settings button, which previously triggered close-up zoom. Keep Wide FOV On for the zoomed-out wide view through dialogue and menus; if the old button already zoomed in, switch Wide FOV Off then On once. Correct the portable Controls labels without changing Windows bindings. Extend Redux battle Lifeup across widescreen; other PSI retains its existing target bounds. Saves, game packs, achievements and the pinned Redux input are unchanged.
+Correct Android's touch Settings button, which previously triggered close-up zoom. Keep Wide FOV On for the zoomed-out wide view through dialogue and menus; if the old button already zoomed in, use the game's own Set Up → Wide FOV and switch Off then On once. Fix the Android Settings return race that could leave the game paused after resuming. Correct the portable Controls labels without changing Windows bindings. Extend Redux battle Lifeup across widescreen; other PSI retains its existing target bounds. Saves, game packs, achievements and the pinned Redux input are unchanged.
 
 ## v0.5.0-ports-preview.12 — Android touch controls
 

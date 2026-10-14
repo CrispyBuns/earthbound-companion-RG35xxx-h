@@ -101,7 +101,7 @@ index 409d215f..a221662c 100644
  bool platform_audio_init(void) { return true; }
  void platform_audio_shutdown(void) {}
 diff --git a/port/unix/platform/sdl2_input.c b/port/unix/platform/sdl2_input.c
-index 57032632..dc57b057 100644
+index 57032632..24261eb6 100644
 --- a/port/unix/platform/sdl2_input.c
 +++ b/port/unix/platform/sdl2_input.c
 @@ -1,5 +1,6 @@
@@ -111,7 +111,24 @@ index 57032632..dc57b057 100644
  #include "include/pad.h"
  #include "platform/pc_options.h"
  #include "platform/platform.h"
-@@ -93,7 +94,9 @@ static void assemble(void) {
+@@ -85,6 +86,16 @@ void pc_reload_if_requested(void) {
+             change_music(track);
+     }
+     pc_video_apply();
++#ifdef __ANDROID__
++    /* Settings may be applied while the game Activity is still backgrounded.
++     * Record the explicit return-to-game intent for the foreground event,
++     * rather than restoring the pause taken when Settings first opened.
++     * Keep background gameplay paused until that lifecycle event arrives. */
++    if (mobile_background) {
++        mobile_previous_pause = false;
++        pc_paused = true;
++    } else
++#endif
+     pc_paused = false;
+ }
+ static void assemble(void) {
+@@ -93,7 +104,9 @@ static void assemble(void) {
          int k = pc_options.keys[i], b = pc_options.buttons[i];
          if (engine_alt_controls == ALT_CONTROLS_ON && b >= 0 && b < 4)
              b ^= 1;
@@ -122,7 +139,7 @@ index 57032632..dc57b057 100644
  #ifdef __ANDROID__
          held = held || pc_mobile_held(i);
  #endif
-@@ -101,8 +104,13 @@ static void assemble(void) {
+@@ -101,8 +114,13 @@ static void assemble(void) {
          last[i] = held;
          if (i < 12 && held)
              pad |= bits[i];
@@ -138,7 +155,7 @@ index 57032632..dc57b057 100644
          if (i == PC_SAVE && held)
              aux |= AUX_SAVESTATE;
          if (i == PC_LOAD && held)
-@@ -284,6 +292,32 @@ bool pc_input_selftest(void) {
+@@ -284,6 +302,32 @@ bool pc_input_selftest(void) {
      keys[pc_options.keys[PC_SAVE]] = true;
      assemble();
      ok = ok && (aux & AUX_SAVESTATE);
@@ -171,7 +188,7 @@ index 57032632..dc57b057 100644
      SDL_Event e;
      memset(&e, 0, sizeof(e));
      e.type = SDL_WINDOWEVENT;
-@@ -291,6 +325,8 @@ bool pc_input_selftest(void) {
+@@ -291,6 +335,8 @@ bool pc_input_selftest(void) {
      SDL_PushEvent(&e);
      platform_input_poll();
      ok = ok && pad == 0 && aux == 0;

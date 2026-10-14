@@ -173,5 +173,142 @@
     "RootIsolated": true,
     "Checked": "paths, settings round-trip, INI validation, phone-save recovery, recipe validation",
     "GameplayTested": false
+  },
+  "windowsPackage": {
+    "zip": "EarthBound-Companion-Windows-v1.0.2.zip",
+    "sha256": "b60b5133472b45f73e213d996e7b230e4ed5c04b868a32f7775c327c680b0f1b",
+    "manifestFiles": 50,
+    "privateContentAbsentFromZip": true,
+    "nativeSha256": "186dff417f4dd4442cc9369607bb8e3b09a48ccb86db1df51cd58a519d621172",
+    "tests": [
+      {
+        "test": "launcher-selftest",
+        "passed": true
+      },
+      {
+        "test": "launcher-profiles",
+        "passed": true
+      },
+      {
+        "test": "achievement-consumers",
+        "edition": "original",
+        "passed": true
+      },
+      {
+        "test": "achievement-consumers",
+        "edition": "redux",
+        "passed": true
+      }
+    ],
+    "limits": [
+      "Private assets were supplied after archive validation. No campaign or setup rebuild is claimed."
+    ]
+  },
+  "ownerInstallation": {
+    "installedCopies": 2,
+    "protectedFilesUnchanged": 115,
+    "nativeSha256": "186dff417f4dd4442cc9369607bb8e3b09a48ccb86db1df51cd58a519d621172",
+    "copiedCheckpointLoadConfirmed": true,
+    "earnedProgressPreserved": true
+  },
+  "overworldLifeupBranches": {
+    "passed": true,
+    "cases": 8,
+    "outsideBattle": {
+      "levels": 4,
+      "visibleAnimations": 0,
+      "branch": "pause"
+    },
+    "battle": {
+      "levels": 4,
+      "animationSlot": 42
+    },
+    "limits": [
+      "Actual compiled pinned Redux bytecode and dispatcher with prepared contexts, not a full natural menu/campaign flow."
+    ]
+  },
+  "androidPauseRace": {
+    "sourceSha256": "fe2c01f49de029f29c3d2932472a32ccc830f0d9959751ae37ef8807710670f0",
+    "cases": {
+      "reference": {
+        "exitCode": 1,
+        "sourceSha256": "b95d62647d4ff939b5ff95d3e53f159d6b6c6769b2678f72f7853c60c5ebe587",
+        "executableSha256": "e4610127efa15a6b4a76532d2919c90b3ec340abc29e03b3da1d042dc007e38d",
+        "results": [
+          "CASE settings_requests_pause_and_launcher PASS paused=1 checkpoints=0 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE settings_background_checkpoint PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE apply_while_background_stays_paused FAIL paused=0 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE apply_before_foreground_resumes FAIL paused=1 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE foreground_before_apply_waits_for_settings PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE apply_after_foreground_resumes PASS paused=0 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE apply_without_lifecycle_resumes PASS paused=0 checkpoints=0 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE ordinary_background_pauses PASS paused=1 checkpoints=1 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE ordinary_foreground_restores_running PASS paused=0 checkpoints=1 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE explicit_user_pause PASS paused=1 checkpoints=0 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE unrelated_lifecycle_preserves_user_pause PASS paused=1 checkpoints=1 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE explicit_return_from_settings_resumes_user_pause FAIL paused=1 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE settings_without_apply_stays_background_paused PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE settings_without_apply_stays_foreground_paused PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE resumed_marker_not_reapplied PASS paused=0 checkpoints=1 launcher=0 loads=1/1/1 request=0 applied=0",
+          "CASE marker_consumed_exactly_once PASS paused=0 checkpoints=1 launcher=0 loads=1/1/1 request=0 applied=0",
+          "RESULT cases=16 failures=3"
+        ]
+      },
+      "candidate": {
+        "exitCode": 0,
+        "sourceSha256": "05062e31cda6d996a7b2404482e55c9a97a588094fa2b0c6f0ac1a9e4bea208d",
+        "executableSha256": "7e969ad745e12fa712959fd2c2405afb1143682fb483c5a8bc4409fb0206b80c",
+        "results": [
+          "CASE settings_requests_pause_and_launcher PASS paused=1 checkpoints=0 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE settings_background_checkpoint PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE apply_while_background_stays_paused PASS paused=1 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE apply_before_foreground_resumes PASS paused=0 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE foreground_before_apply_waits_for_settings PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE apply_after_foreground_resumes PASS paused=0 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE apply_without_lifecycle_resumes PASS paused=0 checkpoints=0 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE ordinary_background_pauses PASS paused=1 checkpoints=1 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE ordinary_foreground_restores_running PASS paused=0 checkpoints=1 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE explicit_user_pause PASS paused=1 checkpoints=0 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE unrelated_lifecycle_preserves_user_pause PASS paused=1 checkpoints=1 launcher=0 loads=0/0/0 request=0 applied=0",
+          "CASE explicit_return_from_settings_resumes_user_pause PASS paused=0 checkpoints=1 launcher=1 loads=1/1/1 request=1 applied=0",
+          "CASE settings_without_apply_stays_background_paused PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE settings_without_apply_stays_foreground_paused PASS paused=1 checkpoints=1 launcher=1 loads=0/0/0 request=1 applied=0",
+          "CASE resumed_marker_not_reapplied PASS paused=0 checkpoints=1 launcher=0 loads=1/1/1 request=0 applied=0",
+          "CASE marker_consumed_exactly_once PASS paused=0 checkpoints=1 launcher=0 loads=1/1/1 request=0 applied=0",
+          "RESULT cases=16 failures=0"
+        ]
+      }
+    },
+    "limits": [
+      "Real production input assembly/reload/lifecycle code compiled with __ANDROID__ and actual host SDL event queue. External callbacks are counters; no physical Android Activity/surface or game save certification."
+    ],
+    "passed": true
+  },
+  "androidSourceReconstruction": {
+    "passed": true,
+    "windowsInputObjectUnchanged": true,
+    "windowsInputObjectSha256": "557f302e9403130a9601879e641293fa611b01f3728f0f88359efa94b8c69c49",
+    "publishedWindowsNativeSha256": "186dff417f4dd4442cc9369607bb8e3b09a48ccb86db1df51cd58a519d621172",
+    "patchesApplied": 5,
+    "sourceFilesCompared": [
+      "port/unix/main.c",
+      "port/unix/platform/sdl2_audio.c",
+      "port/unix/platform/sdl2_input.c",
+      "port/unix/platform/sdl2_video.c",
+      "src/entity/entity.h",
+      "src/game/battle_psi.c",
+      "src/game/companion_achievements.c",
+      "src/game/eb_achievements.h",
+      "src/game/text.c",
+      "src/game_main.c",
+      "src/game_main.h",
+      "src/platform/pc_options.c",
+      "src/platform/pc_options.h",
+      "src/platform/platform.h",
+      "src/snes/ppu.h",
+      "src/snes/ppu_render.c",
+      "src/game/maternalbound_battle_sprites.c"
+    ],
+    "androidOnlyDelta": true
   }
 }

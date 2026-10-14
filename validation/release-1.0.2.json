@@ -310,5 +310,203 @@
       "src/game/maternalbound_battle_sprites.c"
     ],
     "androidOnlyDelta": true
+  },
+  "androidEmulator": {
+    "passed": true,
+    "sourceCommit": "657856a4f8d731feba201ad25e94543b630f5c14",
+    "ciRun": 38504173522,
+    "androidApi": 37,
+    "checks": {
+      "exactFinalApksVerified": true,
+      "bothPersistentSignaturesVerified": true,
+      "freshNativeLibrariesFromFixedCiSource": true,
+      "settingsAction19OpensManagedLauncher": true,
+      "realSettingsSaveReturnRendersAndContinues": true,
+      "sameNativeProcessAndActivityAcrossSettings": true,
+      "nativeMainStartedOnce": true,
+      "startupAndSyntheticOnettSettingsReplay": true,
+      "goodsAndDialogueRetainedThroughSettings": true,
+      "wideFovEnabled": true,
+      "backgroundFramingRoiPixelIdentical": true,
+      "goodsWindowRoiPixelIdentical": true,
+      "fourCharacterGoodsAndStatusPanelsReviewed": true,
+      "itemDialogueReviewed": true,
+      "savedHiddenButtons": 0,
+      "temporaryAndroidBackVisibleButtons": 20,
+      "savingRestoresHiddenPreference": true,
+      "coldRestartRetainsHiddenPreference": true,
+      "secondAndroidBackReturnsToLauncher": true,
+      "userPausePreservation": "Separate host-native SDL lifecycle fixture passed16 cases; manual emulator pause-key behavior is not claimed.",
+      "romFreeNativeSelftest": true,
+      "managedSettingsRecipeJsonRoundTrip": true,
+      "embeddedRomConvertersCompilerOrdering": true
+    },
+    "privateDataUnchangedAfterReinstall": 83,
+    "artifacts": {
+      "android-x64": {
+        "sha256": "8c6114ff777a68e252a550362c81c275c5fc16a2e103124dcdd544ddf7dc3dda",
+        "nativeGameSha256": "2c4201e7c98f8193f13fd22019fdc91da2a3e390a09b05139c73e09c40b944d7",
+        "elfMachine": 62
+      },
+      "android-arm64": {
+        "sha256": "f101c0724b4d0bb8d4bdc808433c599e162078093016d366bfd8c13654748aaa",
+        "nativeGameSha256": "8b2d63cbfa3fbad20c1c1c5c723055a2d152d97681fb0075bf6d168aa42f3706",
+        "elfMachine": 183
+      }
+    },
+    "framing": {
+      "beforeSize": [
+        1280,
+        800
+      ],
+      "afterSize": [
+        1280,
+        800
+      ],
+      "backgroundRoi": [
+        400,
+        120,
+        800,
+        280
+      ],
+      "unchanged": true,
+      "goodsWindowRoi": [
+        400,
+        120,
+        1000,
+        470
+      ],
+      "goodsWindowUnchangedAfterSettings": true,
+      "wideFovConfiguredDuringTest": true,
+      "wideDialogueReviewed": true
+    },
+    "limits": [
+      "Bounded synthetic Original Onett/menu fixture, not a campaign or physical handheld/controller test.",
+      "On-device ROM conversion was not rerun; existing embedded converter imports/order and native smoke were tested.",
+      "Manual Android pause-key and predictive-back gesture were not qualified; host-native pause preservation and Android Back key recovery were covered separately.",
+      "Cold app restart was used after closing gameplay; same-process native relaunch was not requalified.",
+      "Local API37 rotation was not rerun; the exact signed APK subsequently passed an independent corrected API35 CI startup/rotation replay, run38505153038.",
+      "Fresh synthetic fixture began with WideFOV enabled; deliberate legacy ZoomIn migration was tested separately by the zoom worker."
+    ],
+    "privateCapturesOnly": true,
+    "ownerSavesAccessed": false,
+    "ownerAssetsModified": false,
+    "emulatorStopped": true,
+    "displayOverrideRestored": true
+  },
+  "platformPackages": [
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "bytes": 66604413,
+      "sha256": "f101c0724b4d0bb8d4bdc808433c599e162078093016d366bfd8c13654748aaa",
+      "kind": "android",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "bytes": 67628300,
+      "sha256": "8c6114ff777a68e252a550362c81c275c5fc16a2e103124dcdd544ddf7dc3dda",
+      "kind": "android",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "bytes": 124656647,
+      "sha256": "bdb5a9e18b75ce09997739176756ca40aad73ec4116533f19840cd448b5d5df6",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "bytes": 90021079,
+      "sha256": "c0643c7c6276c06e69f894044e90bd9a3d542efd68ba5b9cdf04439b18729939",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "bytes": 94907359,
+      "sha256": "45614a01034ad71d8e0ea44fd6fed4159168ea43aa9fc66be5bbd1f2664b8eb5",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    }
+  ],
+  "ci": {
+    "desktopAndInitialBuild": {
+      "run": 38502758004,
+      "sourceCommit": "69166a35b5af6a717ab9811cbb24d4c5803ee18c",
+      "allFiveJobsPassed": true
+    },
+    "finalAndroidBuild": {
+      "run": 38504173522,
+      "sourceCommit": "657856a4f8d731feba201ad25e94543b630f5c14",
+      "compileSignAndPackagePassed": true,
+      "startupMarkersPassed": 3,
+      "wholeRunPassed": false,
+      "reason": "Absolute Activity-count assertion included an emulator cold-boot display recreation before the tested rotation."
+    },
+    "exactAndroidPackageReplay": {
+      "run": 38505153038,
+      "testSourceCommit": "6998712a3663b154d8d13554bbfc4858825e135f",
+      "artifactSourceRun": 38504173522,
+      "passed": true,
+      "startupMarkersPassed": 3,
+      "rotationDidNotRecreateActivity": true,
+      "apkSha256": "8c6114ff777a68e252a550362c81c275c5fc16a2e103124dcdd544ddf7dc3dda"
+    }
+  },
+  "published": {
+    "windowsLatest": "v1.0.2",
+    "platformPrerelease": "v0.5.0-ports-preview.13",
+    "uploadedPackages": [
+      {
+        "name": "EarthBound-Companion-Windows-v1.0.2.zip",
+        "bytes": 129209313,
+        "sha256": "b60b5133472b45f73e213d996e7b230e4ed5c04b868a32f7775c327c680b0f1b",
+        "buildSourceCommit": "69166a35b5af6a717ab9811cbb24d4c5803ee18c",
+        "uploadedDigestMatches": true
+      },
+      {
+        "name": "EarthBound-Companion-android-arm64-preview.apk",
+        "bytes": 66604413,
+        "sha256": "f101c0724b4d0bb8d4bdc808433c599e162078093016d366bfd8c13654748aaa",
+        "buildSourceCommit": "657856a4f8d731feba201ad25e94543b630f5c14",
+        "uploadedDigestMatches": true
+      },
+      {
+        "name": "EarthBound-Companion-android-x64-preview.apk",
+        "bytes": 67628300,
+        "sha256": "8c6114ff777a68e252a550362c81c275c5fc16a2e103124dcdd544ddf7dc3dda",
+        "buildSourceCommit": "657856a4f8d731feba201ad25e94543b630f5c14",
+        "uploadedDigestMatches": true
+      },
+      {
+        "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+        "bytes": 124656647,
+        "sha256": "bdb5a9e18b75ce09997739176756ca40aad73ec4116533f19840cd448b5d5df6",
+        "buildSourceCommit": "69166a35b5af6a717ab9811cbb24d4c5803ee18c",
+        "uploadedDigestMatches": true
+      },
+      {
+        "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+        "bytes": 90021079,
+        "sha256": "c0643c7c6276c06e69f894044e90bd9a3d542efd68ba5b9cdf04439b18729939",
+        "buildSourceCommit": "69166a35b5af6a717ab9811cbb24d4c5803ee18c",
+        "uploadedDigestMatches": true
+      },
+      {
+        "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+        "bytes": 94907359,
+        "sha256": "45614a01034ad71d8e0ea44fd6fed4159168ea43aa9fc66be5bbd1f2664b8eb5",
+        "buildSourceCommit": "69166a35b5af6a717ab9811cbb24d4c5803ee18c",
+        "uploadedDigestMatches": true
+      }
+    ],
+    "allSixUploadedDigestsMatch": true
   }
 }

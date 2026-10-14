@@ -114,3 +114,19 @@ The reused clean-package verifier retains dev18-30 hash defaults. For dev.31 pas
 Use `motion_qa_dev33.py --help` with the matching frozen CMake build, native source, local checkpoint, pack and a fresh output directory. Pass `--enhanced` for the dev.33 renderer; `--sprint 1`/`2` controls Y running and `--sandwich 120` schedules the real effect expiry. `--direction 0`–`7` covers all directions. `--captures` saves private screenshots. The tool cold-restores a copied save and changes only private RAM into its documented fixture; `--no-stage` retains the actual checkpoint. It never edits the input save or installation. The source/build paths must correspond, and the build must remain frozen while a cached host is reused. Headless runs cannot measure rendered motion.
 
 [Dev.33 reports](../validation/display-dev33/) bind the executed player, instrumented host, packs and limits. [Release notes](RELEASE-dev33.md) distinguish final checks from earlier renderer regression coverage. `Build-ShaderRuntime.ps1` builds the pinned optional D3D11 runtime without installing a toolchain. Legacy GLSL preset loading and unlocked-FPS gameplay are not included.
+
+
+## Replay an existing Android package
+
+For a focused startup/rotation check without rebuilding unchanged APKs:
+
+```powershell
+gh workflow run android-package-qa.yml --ref main -f source_run=38504173522
+```
+
+Use the platform-preview run containing the signed Android artifact to test.
+The read-only workflow checks both ABI payloads and replays the exact x64 APK's
+ROM-free native, managed-JSON and converter smoke checks. Rotation compares
+Activity creation against its pre-test baseline and requires a new configuration
+callback. This does not replace private gameplay, physical-device or ROM setup
+testing. Historical release checks should retain their original artifact hashes.

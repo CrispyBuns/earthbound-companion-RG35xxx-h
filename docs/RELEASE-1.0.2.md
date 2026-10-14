@@ -37,3 +37,29 @@ earned achievements retain their formats. Redux remains pinned to 897d0083.
 
 Package, Android emulator and publication receipts are recorded in
 [the validation record](../validation/release-1.0.2.json).
+
+## Android replay and publication
+
+On the Android API 37 x64 emulator, actual touch Settings/Save/Return flows pass
+in startup, a private synthetic Onett party, Goods and item dialogue. Rendering
+continues in the same native Activity/process. WideFOV remains enabled; tested
+background and Goods-window regions are pixel-identical across Settings.
+Hidden controls persist through return and cold restart; Back reveals all 20
+buttons temporarily, and saving restores the hidden choice. APK update retained
+all 83 checked private app files. Both APKs retain the project signing certificate.
+
+The exact signed x64 APK also passes an independent API 35 ROM-free startup and
+rotation replay. The rebuild's original rotation assertion counted a cold-boot
+display recreation before the rotation test; the corrected test compares against
+its own baseline and still rejects any new recreation during rotation.
+
+Windows 1.0.2 is installed and GitHub Latest; preview.13 is a community prerelease.
+All six uploaded package digests match the verified files. Windows/desktop packages
+were built from 69166a3; Android from 657856a4, adding only the Android pause-return
+fix. A private compile confirms that change leaves the Windows input object byte
+identical. Source reconstruction retains all five patches and the portrait fix.
+
+These checks do not qualify physical ARM handhelds/controllers, predictive Back,
+another complete campaign or a fresh ROM-conversion run. Same-process game relaunch
+after quitting was not requalified; cold app restart was used. User pause retention
+is covered by the 16-case host SDL event-order fixture, not an emulator claim.

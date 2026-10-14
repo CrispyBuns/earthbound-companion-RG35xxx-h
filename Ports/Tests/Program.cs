@@ -32,6 +32,9 @@ Require(ini.Contains("width=2560")&&ini.Contains("exp_multiplier=1")&&ini.Contai
 Require(ini.Contains("achievement_sound=0"),"Achievement sound preference missing from native configuration");
 settings.Save();Require(Settings.Load().Sprint==2&&Settings.Load().Width==2560,"Settings round trip failed");
 Require(!Settings.Load().AchievementSound&&new Settings().AchievementSound,"Achievement sound preference round trip/default failed");
+ Require(new Settings().ShowTouchControls&&JsonSerializer.Deserialize<Settings>("{}")!.ShowTouchControls,"Older settings should retain visible touch controls");
+ settings.ShowTouchControls=false;settings.Save();Require(!Settings.Load().ShowTouchControls,"Hidden touch-control preference did not persist");
+ settings.Preset("Classic");Require(!settings.ShowTouchControls,"Display presets should preserve handheld touch-control preference");
 Require(Settings.Root==root&&Settings.User.StartsWith(root),"Test root escaped");
 Require(!HostRuntime.Executable("earthbound").StartsWith(root),"Data folder used as executable search path");
 File.WriteAllBytes(Path.Combine(Settings.BaseGame,"assets.pak"),"Synthetic test fixture; no game content"u8.ToArray());

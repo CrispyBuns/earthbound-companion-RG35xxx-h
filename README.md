@@ -12,8 +12,8 @@
 | Linux x64 / SteamOS | [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) | `linux-x64` archive |
 | macOS Apple Silicon (ARM64) | [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) | `osx-arm64` archive |
 | macOS Intel (x64) | [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) | `osx-x64` archive |
-| Android ARM64 handhelds/phones/tablets | [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) | `android-arm64` APK — ROM setup on the device |
-| Android x64 | [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) | `android-x64` APK — emulator testing |
+| Android ARM64 handhelds/phones/tablets | [Android preview.12](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.12) | `android-arm64` APK — ROM setup on the device |
+| Android x64 | [Android preview.12](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.12) | `android-x64` APK — emulator testing |
 
 Linux, macOS and Android builds are **community previews**; full playthroughs and broader device testing are still pending. Linux requires glibc 2.38+, macOS requires 12+, and Android requires 8.0+. macOS previews are not notarized. [Platform setup, features and testing limits](docs/PORTABILITY.md).
 
@@ -24,7 +24,7 @@ Desktop and Android builds set up Original and Redux from your own clean USA ROM
 **Discord contact:** `chrono.trigger`
 
 > [!NOTE]
-> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) · [Platform preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) · [setup and coverage](docs/PORTABILITY.md). New-platform gameplay still needs community testing.
+> **Community platform previews:** Linux x64/SteamOS, macOS Apple Silicon/Intel and Android ARM64/x64 share the native game core, settings, Story Shuffle and achievements. [Desktop preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) · [Android preview.12](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.12) · [setup and coverage](docs/PORTABILITY.md). Android handheld users can hide the touch overlay in **Controls → Show touch controls**. New-platform gameplay still needs community testing.
 
 > [!NOTE]
 > **1.0.1 maintenance release — the supported feature set is complete.** Future updates focus on reported bugs. [Release notes](docs/RELEASE-1.0.1.md) · [Scope and coverage](MAINTENANCE.md) · [Report a bug](https://github.com/rages4calm/earthbound-companion/issues/new?template=bug-report.yml).

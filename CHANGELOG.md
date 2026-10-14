@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.0-ports-preview.12 — Android touch controls
+
+- Add a saved **Show touch controls** option under Controls for Android handhelds and controllers.
+- Hide the entire touch overlay when disabled. Android Back reveals the buttons temporarily so Settings remains reachable.
+- Apply the preference when returning from Settings and retain it after restarting the app. Existing installations keep touch controls enabled until changed.
+- Retain the preview.11 native game core, direct ROM setup, saves and achievements. Windows 1.0.1 and Linux/macOS preview.11 remain current.
+
 ## v1.0.1 / v0.5.0-ports-preview.11
 
 Fix community reports of warped NPC/map-object pixels and disappearing foreground outlines during party overlap. Smooth the scripted Onett building pan after New Game. Keep native and HQ music playing at normal speed during held or toggled fast-forward. Retain existing assets, saves, settings and achievement progress; Android retains direct ROM setup.

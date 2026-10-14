@@ -7,7 +7,7 @@ October 13, 2026: **Windows 1.0.1 is the current maintenance release** following
 `897d00833f4a08a0a92f106abf631629a6a6a041`. The launcher and release wording
 reflect completion; game data, saves, seed identities and earned achievements
 retain their existing formats. Future work is focused fixes for reported bugs.
-Linux, macOS and Android remain community preview.11. Newer upstream Redux
+Linux/macOS remain community preview.11; Android uses preview.12 with optional touch controls. Newer upstream Redux
 changes and Deluxe are separate work. [Release record](docs/RELEASE-1.0.0.md).
 
 October 13, 2026: dev.38 corrects the Redux battle portrait padding/priority reported by **raid_rgb on Discord**. [Focused checks](docs/RELEASE-dev38.md). Shadow's widescreen CCS was reviewed and a native source map prepared; no widescreen redesign or full campaign audit was started.

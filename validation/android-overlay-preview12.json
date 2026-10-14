@@ -1,0 +1,82 @@
+{
+  "release": "v0.5.0-ports-preview.12",
+  "platform": "Android only",
+  "packages": {
+    "android-x64": {
+      "bytes": 67588837,
+      "sha256": "df9f3b8b28a85491a1f95453d0b544461e9732abddfdc0fb7fc591e2d545b5cf",
+      "nativeUnchangedFromPreview11": {
+        "libearthbound.so": true,
+        "libSDL2.so": true
+      }
+    },
+    "android-arm64": {
+      "bytes": 66592125,
+      "sha256": "580c105512361cb07fb4c8dd6cbe7344a0ee69b6d5a0a293777de16b190e77ce",
+      "nativeUnchangedFromPreview11": {
+        "libearthbound.so": true,
+        "libSDL2.so": true
+      }
+    }
+  },
+  "settingsAbi": 5,
+  "applicationId": "org.earthbound.companion.preview",
+  "applicationVersion": 12,
+  "signingCertificateSha256": "0ff1807701821ca658c4dd2cbc5b0a5e7c3158a95b6085ba00a6fce0b4cc40ee",
+  "nativeRuntime": "Byte-identical engine/SDL libraries from published preview.11; no new native rebuild",
+  "sourceFileSha256": {
+    "Companion/Settings.cs": "02a2b57290e4e8b2f8fb67676fa6c69e941b28469fcae3c2b42e365a59df8309",
+    "Ports/UI/MainView.cs": "893f1b07b34bf58d5b5aac02f9c9a509be5a7263c3469a69e21cd66d2036f91f",
+    "Ports/AndroidManaged/MainActivity.cs": "e2ce0878813b5ddadfc4695686c3250db4089cb3043eb99f4c0c105d7ed65073",
+    "Ports/AndroidManaged/Java/GameActivity.java": "7479c5df1615f5316bf8fdfb8dcbffc23cd44da9025771bb5cea2cbad19d54c1",
+    "Ports/AndroidManaged/Companion.Android.csproj": "602e0381be89920b9716462c9fcb2306a672049128b91650e1400236086407db"
+  },
+  "localBuildChecks": [
+    "Windows launcher build",
+    "Portable UI build",
+    "Portable settings/persistence/save/achievement tests",
+    "Android ARM64 and x64 managed/Java publish",
+    "Both APK signatures, ABI/private-content/manifest checks"
+  ],
+  "emulator": {
+    "androidApi": 37,
+    "checks": {
+      "defaultVisibleCheckbox": true,
+      "defaultVisibleButtons": 20,
+      "launcherCheckboxSaveHiddenButtons": 0,
+      "falsePreferencePersistsColdRestart": true,
+      "firstAndroidBackRevealsButtons": 20,
+      "firstBackKeepsSameGameActivity": true,
+      "secondAndroidBackReturnsToLauncher": true,
+      "secondBackWritesCheckpoint": true,
+      "liveControlledIntentShowButtons": 20,
+      "liveControlledIntentHideButtons": 0,
+      "controlledIntentKeepsSameActivityAndNativeProcess": true,
+      "normalTouchSettingsPauseSaveReturn": "Not verified in the bounded title/attract replay; live preference application was verified through controlled return intents.",
+      "romFreeNativeSelftest": true,
+      "managedSettingsRecipeJsonRoundTrip": true,
+      "embeddedRomConvertersCompilerOrdering": true
+    },
+    "limits": [
+      "Normal touch Settings pause/save/return chain not verified: title/attract input did not consume action20 in bounded replay.",
+      "Physical handheld/controller and predictive-back gesture not tested; Android KEYCODE_BACK dispatch was tested on API37.",
+      "No campaign or on-device ROM conversion rerun.",
+      "Existing native session relaunch after quit failed with Android only supports one window; cold app restart used.",
+      "API37 presented existing16KB ELF compatibility warning; this QA app runs in compatibility mode.",
+      "Resolution change triggered existing renderer-reset save/quit guard; excluded from Back-quit proof.",
+      "Captures12/13/14 were early or failed relaunch states, excluded from passing overlay evidence."
+    ],
+    "privateDataUnchangedAfterReinstall": 78
+  },
+  "limits": [
+    "No physical handheld/controller test",
+    "No full campaign",
+    "No full ROM conversion rerun",
+    "No fresh native engine rebuild or new platform CI run",
+    "Normal touch Settings-button pause/return chain was not observed during title playback; controlled return intents were checked"
+  ],
+  "unchangedOtherDownloads": {
+    "Windows": "v1.0.1",
+    "Linux/macOS": "v0.5.0-ports-preview.11"
+  }
+}

@@ -5,7 +5,7 @@ publishing. Then use the shared publishing step:
 
 ```powershell
 python scripts/publish_tested_release.py v1.0.1
-python scripts/publish_tested_release.py v0.5.0-ports-preview.11
+python scripts/publish_tested_release.py v0.5.0-ports-preview.12
 ```
 
 Replace these example tags with the tested candidates. Windows releases are
@@ -27,5 +27,5 @@ Before reporting publication complete, verify both tags:
 
 ```powershell
 python scripts/publish_tested_release.py v1.0.1 --check
-python scripts/publish_tested_release.py v0.5.0-ports-preview.11 --check
+python scripts/publish_tested_release.py v0.5.0-ports-preview.12 --check
 ```

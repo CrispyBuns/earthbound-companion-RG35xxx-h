@@ -14,6 +14,7 @@ public sealed class Settings {
  public bool AchievementSound{get;set;}=true;
  public bool WideFov{get;set;}=true;public bool ColorGrading{get;set;}=true;
  public bool NintendoFaceLabels{get;set;}
+ public bool ShowTouchControls{get;set;}=true;
  public bool HqAudio{get;set;}=true;public int Volume{get;set;}=80;public int MusicVolume{get;set;}=75;
  public int Sprint{get;set;}=1;public bool InstantText{get;set;}=true;
  public bool NoHomesickness{get;set;}=true;public bool NoDadCalls{get;set;}

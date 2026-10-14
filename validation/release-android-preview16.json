@@ -1,0 +1,19 @@
+{
+  "tag": "v0.5.0-ports-preview.16",
+  "buildRun": 38649279676,
+  "sourceCommit": "4a4c5a0",
+  "artist": "princeofdalaam (Discord)",
+  "gameplayTestsRun": false,
+  "packages": [
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "bytes": 66608596,
+      "sha256": "e4ae9b419462e61069f8ff3532f73f02edb3e1cf41e72823533e9e0b2e22c760"
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "bytes": 67632483,
+      "sha256": "19e6e8568e31b92ea10947a0a1e3c6390bec79deb5c0d79818c0e07ca16123ce"
+    }
+  ]
+}

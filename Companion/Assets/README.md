@@ -1,5 +1,15 @@
 # Companion app icon
 
+## Separate game executable icon
+
+`earthbound-game.png` is community-contributed pixel artwork supplied through
+chrono.trigger on October 14, 2026. `earthbound-game.ico` contains the Windows
+sizes listed below, exported with nearest-neighbor sizing. It is used only by
+the native game executable; the launcher retains its red-cap planet icon.
+Rebuild with `python scripts/build_app_icon.py --source Companion/Assets/earthbound-game.png --destination Companion/Assets/earthbound-game.ico --pixel-art`.
+
+## Launcher artwork
+
 The red-cap planet and sparkle are original artwork created for EarthBound Companion with the built-in OpenAI image-generation tool on October 5, 2026. They express the fan launcher's identity. The artwork is not extracted from a ROM or copied from an official game logo.
 
 - `earthbound-companion.png`: original transparent artwork.

@@ -10,6 +10,11 @@ on:
         description: Existing draft platform release
         required: true
         type: string
+      target:
+        description: Package set to publish
+        type: choice
+        options: [all, android]
+        default: all
 permissions:
   actions: read
   contents: write
@@ -21,6 +26,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       BUILD_RUN: ${{ inputs.build_run }}
       RELEASE_TAG: ${{ inputs.release_tag }}
+      PACKAGE_TARGET: ${{ inputs.target }}
     steps:
       - name: Wait for completed builds and upload their packages
         shell: bash
@@ -39,5 +45,10 @@ jobs:
           gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft | grep -qx true
           gh run download "$BUILD_RUN" -D packages -p 'EarthBound-Companion-*-preview'
           mapfile -d '' files < <(find packages -type f \( -name '*.tar.gz' -o -name '*.apk' \) -print0)
-          [ "${#files[@]}" -eq 5 ]
+          if [ "$PACKAGE_TARGET" = android ]; then
+            [ "${#files[@]}" -eq 2 ]
+            for file in "${files[@]}"; do [[ "$file" = *.apk ]]; done
+          else
+            [ "${#files[@]}" -eq 5 ]
+          fi
           gh release upload "$RELEASE_TAG" "${files[@]}"

@@ -1,6 +1,6 @@
 # Completed feature set and maintenance
 
-## 1.0.3 / platform preview.14 — Tessie save recovery
+## 1.0.3 / platform preview.14 â€” Tessie save recovery
 
 Fix a save-loading repair that marked Jeff as having reunited with Ness during his solo Winters chapter. That made the tent cook skip enabling Tessie. Existing affected Redux phone saves and quick-saves recover on loading: visit the cook, accept the stew/sleep again, then walk onto the shore tip.
 

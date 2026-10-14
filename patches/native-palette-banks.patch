@@ -1,0 +1,36 @@
+--- a/src/snes/ppu_render.c
++++ b/src/snes/ppu_render.c
+@@ -661,6 +661,9 @@
+         uint16_t entry = read_u16_le(&ppu.vram[entry_addr]);
+         uint16_t tile_num = entry & 0x3FF;
+         uint8_t palette = (entry >> 10) & 0x07;
++        /* Mode 0 gives each BG its own 32-color bank (BG1..4). Keep the
++         * adjusted palette in the row plan so cached runs use the same bank. */
++        if ((ppu.bgmode & 7) == 0) palette += 8 * bg_index;
+         uint8_t prio_bit = (entry >> 13) & 1;
+         bool hflip = (entry >> 14) & 1;
+         bool vflip = (entry >> 15) & 1;
+--- a/src/intro/file_select.c
++++ b/src/intro/file_select.c
+@@ -1839,6 +1839,9 @@
+         reset_char_level_one(c + 1, level, 0);
+         if (exp > 0) gain_exp(0, c + 1, exp);
+ 
++        /* FILE_SELECT_MENU_LOOP initializes the normal HP/PP palette here. */
++        party_characters[c].hp_pp_window_options = 0x0400;
++
+         memset(party_characters[c].items, ITEM_NONE, sizeof(party_characters[c].items));
+         for (int j = 0; j < 10; j++) {
+             uint8_t item = entry[10 + j];
+--- a/src/game/window.c
++++ b/src/game/window.c
+@@ -2666,6 +2666,9 @@
+      * GET_EQUIP_WINDOW_TEXT_ALT returns a palette multiplier (× 0x0400).
+      * For greyed (0x0C00) characters, the functions are skipped entirely. */
+     uint16_t palette_bits = ch->hp_pp_window_options;  /* @LOCAL06 / @VIRTUAL04 */
++    /* Early saves from builds missing the new-game initializer contain zero.
++     * Render those with the normal bank without changing saved game data. */
++    if (palette_bits == 0) palette_bits = 0x0400;
+     uint16_t name_palette;    /* @LOCAL05 */
+     uint16_t header_palette;  /* @LOCAL08 */
+     uint16_t digit_offset;    /* @LOCAL04 */

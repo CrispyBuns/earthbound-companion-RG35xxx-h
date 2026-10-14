@@ -1,0 +1,78 @@
+{
+  "checks": [
+    {
+      "variant": "before",
+      "edition": "original",
+      "boss": "starman",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "before",
+      "edition": "original",
+      "boss": "frank",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "before",
+      "edition": "redux",
+      "boss": "starman",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "before",
+      "edition": "redux",
+      "boss": "frank",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "after",
+      "edition": "original",
+      "boss": "starman",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "after",
+      "edition": "original",
+      "boss": "frank",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "after",
+      "edition": "redux",
+      "boss": "starman",
+      "exit": 0,
+      "screenshot": true
+    },
+    {
+      "variant": "after",
+      "edition": "redux",
+      "boss": "frank",
+      "exit": 0,
+      "screenshot": true
+    }
+  ],
+  "limits": "Headless native fixtures on Windows, using Original and Redux private packs. No Android device execution.",
+  "sourceHashes": {
+    "src/snes/ppu_render.c": "a3f50d2b0a93594e2efa2141fca473bbde9a57cfa0ce328db7c1686b207322cc",
+    "src/game/window.c": "264c353356b62330a22e82268861b87869c8cbfbce9a41d889714bbd0eb40deb",
+    "src/intro/file_select.c": "eb7b2e875504027d4d69267aac06ff569d0254da7653621b9361b800d2f60d87"
+  },
+  "changes": [
+    "Mode 0 BG1/BG2/BG3/BG4 select separate 32-color CGRAM banks, including cached row runs.",
+    "New game assigns HP/PP options 0x0400, matching FILE_SELECT_MENU_LOOP assembly.",
+    "HP/PP draw treats legacy zero options as normal palette without modifying save data."
+  ],
+  "references": [
+    "src/vendor/lakesnes/snes/ppu.c: Mode 0 paletteNum += 8 * layer",
+    "asm/intro/file_select_menu_loop.asm: new-game hp_pp_window_options = $0400"
+  ],
+  "visualReview": "All eight battles exited normally. Before/after screenshots in both modes show brown/gray backgrounds changing to loaded battle colors and orange HP borders changing to normal borders. Original Starman Junior remains silver; Redux artwork remains distinct.",
+  "published": false,
+  "ownerInstallModified": false
+}

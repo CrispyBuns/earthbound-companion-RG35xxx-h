@@ -9,6 +9,10 @@ on:
         type: choice
         options: [all, android]
         default: all
+      build_only:
+        description: Build release packages without additional runtime tests
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   windows-guard:
-    if: github.event.inputs.target != 'android'
+    if: github.event.inputs.target != 'android' && github.event.inputs.build_only != 'true'
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +30,7 @@ jobs:
       - run: dotnet build Companion/Companion.csproj -c Release
       - run: python scripts/generate_achievement_catalog.py --check
       - run: dotnet run --project Ports/Tests/Companion.Portable.Tests.csproj -c Release
+        if: github.event.inputs.build_only != 'true'
       - run: dotnet run --project Ports/Desktop/Companion.Portable.csproj -c Release -- --smoke-test "${{ runner.temp }}/launcher-smoke.png"
   desktop:
     if: github.event.inputs.target != 'android'
@@ -55,7 +60,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev libxinerama-dev libgl1-mesa-dev libasound2-dev libpulse-dev libudev-dev xvfb
       - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
       - run: python scripts/check_portable_control_actions.py --native-source native-source
+        if: github.event.inputs.build_only != 'true'
       - name: Verify shared achievement catalog and core
+        if: github.event.inputs.build_only != 'true'
         shell: bash
         run: |
           python scripts/generate_achievement_catalog.py --check
@@ -70,8 +77,9 @@ jobs:
           cmake --install build/sdl
           cmake -S native-source/port/unix -B build/native -DCMAKE_C_COMPILER=clang -DEB_RUNTIME_ASSETS=ON -DEB_ENABLE_VERIFY=OFF -DEB_ENABLE_AUDIO=ON -DEB_SDL2_STATIC_CONFIG_DIR="$PWD/build/sdl-install/lib/cmake/SDL2" -DCMAKE_BUILD_TYPE=Release
           cmake --build build/native --target earthbound --parallel 3
-          SDL_AUDIODRIVER=dummy build/native/earthbound --selftest-pc
+          if [ "${{ github.event.inputs.build_only }}" != "true" ]; then SDL_AUDIODRIVER=dummy build/native/earthbound --selftest-pc; fi
       - run: dotnet run --project Ports/Tests/Companion.Portable.Tests.csproj -c Release
+        if: github.event.inputs.build_only != 'true'
       - name: Build private-ROM Original setup helper
         shell: bash
         run: |
@@ -80,6 +88,7 @@ jobs:
           pyinstaller ebtools_setup.spec --noconfirm
       - run: dotnet publish Ports/Desktop/Companion.Portable.csproj -c Release -r ${{ matrix.rid }} --self-contained true -o build/package
       - name: Render launcher with an empty isolated data folder
+        if: github.event.inputs.build_only != 'true'
         shell: bash
         run: |
           if [ "${{ runner.os }}" = "Linux" ]; then
@@ -90,6 +99,7 @@ jobs:
       - name: Build native Redux conversion helper
         run: python scripts/build_portable_helpers.py --work build/helper-tools --output build/package/Game
       - name: Verify packaged Redux compiler ordering and HTTPS trust
+        if: github.event.inputs.build_only != 'true'
         shell: bash
         run: |
           python -m pip install cryptography
@@ -150,12 +160,13 @@ jobs:
       # installed Gradle directly; SDL's legacy wrapper is never executed.
       - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
       - run: python scripts/check_portable_control_actions.py --native-source native-source
+        if: github.event.inputs.build_only != 'true'
       - name: Build embedded on-device ROM converters (code only)
         env:
           EB_BUILD_PYTHON: python3.13
         run: |
           python scripts/prepare_android_setup.py --native native-source
-          python -m unittest discover -s scripts -p test_android_rom_setup.py -v
+          if [ "${{ github.event.inputs.build_only }}" != "true" ]; then python -m unittest discover -s scripts -p test_android_rom_setup.py -v; fi
           python scripts/build_android_setup_extensions.py --ndk "$ANDROID_HOME/ndk/28.2.13676358"
           cd Ports/AndroidSetup
           gradle :setup:exportRuntime --console=plain
@@ -194,11 +205,13 @@ jobs:
           name: EarthBound-Companion-android-preview
           path: build/apk/*.apk
       - name: Enable Android emulator acceleration
+        if: github.event.inputs.build_only != 'true'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Run ROM-free launcher and native startup on Android emulator
+        if: github.event.inputs.build_only != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35

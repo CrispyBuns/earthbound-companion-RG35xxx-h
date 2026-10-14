@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.3 / platform preview.14 — Tessie save recovery
+
+Fix a save-loading repair that marked Jeff as having reunited with Ness during his solo Winters chapter. That made the tent cook skip enabling Tessie. Existing affected Redux phone saves and quick-saves recover on loading: visit the cook, accept the stew/sleep again, then walk onto the shore tip.
+
+The fix is shared across Windows, Linux/SteamOS, macOS Intel/Apple Silicon and Android ARM64/x64. Game data, saves, achievements and the pinned Redux source remain compatible. No ROM or game assets are included.
+
+The fix was reproduced and checked locally on Windows before publication. This release rebuild runs no additional gameplay or runtime tests, as requested; community testing is needed on the other platforms. Prior releases' test results are not presented as tests of these packages.
+
+
 ## v1.0.2 / v0.5.0-ports-preview.13
 
 Correct Android's touch Settings button, which previously triggered close-up zoom. Keep Wide FOV On for the zoomed-out wide view through dialogue and menus; if the old button already zoomed in, use the game's own Set Up â†’ Wide FOV and switch Off then On once. Fix the Android Settings return race that could leave the game paused after resuming. Correct the portable Controls labels without changing Windows bindings. Extend Redux battle Lifeup across widescreen; other PSI retains its existing target bounds. Saves, game packs, achievements and the pinned Redux input are unchanged.

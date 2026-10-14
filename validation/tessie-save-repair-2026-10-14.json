@@ -1,0 +1,29 @@
+{
+  "status": "tested-local-hotfix-not-published",
+  "cause": "Phone-load repair incorrectly treated ever-playable Jeff as having reunited with Ness; flag 14 bypassed the tent cook Tessie setup.",
+  "sourceRevision": "897d00833f4a08a0a92f106abf631629a6a6a041",
+  "nativeSha256": "fe92a3d5be967050151a41b20a694a6ebf7a41f7d17a12d840c36ac8746a3a95",
+  "assetPacksTested": [
+    "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+    "4b5f1c5ac76e4bdcce2dc66a2e8ef95b659e561d3cadebefa66efb85c0be5236"
+  ],
+  "evidence": {
+    "fanQuickSaveOrdinaryInputReproduction": true,
+    "sameTentInputsBeforeAndAfter": true,
+    "existingQuickSaveRecovered": true,
+    "tessieRideAndLandingCompleted": true,
+    "landingColdReload": true,
+    "originalAndReduxPhoneLoadRegressionCases": 12,
+    "savestateRegressionChecks": 4,
+    "publicPatchExactFileReconstruction": 3,
+    "suppliedInputsUnchanged": true,
+    "ownerInstallationChanged": false
+  },
+  "limits": [
+    "Targeted Winters sequence, not a new campaign.",
+    "Full ride executed with retained owner pack; current conversion additionally verified tent and landing reload.",
+    "No Linux, macOS or Android runtime tested for this change.",
+    "No official release or GitHub push performed."
+  ],
+  "screenshotNote": "SDL dummy/software capture stipples party artwork; equivalent normal Windows renderer capture is clean."
+}

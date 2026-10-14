@@ -1,0 +1,115 @@
+diff --git a/src/game/game_state.c b/src/game/game_state.c
+--- a/src/game/game_state.c
++++ b/src/game/game_state.c
+@@ -493,6 +493,28 @@
+     return write_sram_version_word();
+ }
+ 
++
++void repair_jeff_join_story_flag(void) {
++    bool ness = false, jeff = false, other_pc = false;
++    for (unsigned i = 0; i < TOTAL_PARTY_COUNT; i++) {
++        uint8_t member = game_state.party_members[i];
++        if (member == 1) ness = true;
++        if (member == 3) jeff = true;
++        if (member >= 1 && member <= 4 && member != 3) other_pc = true;
++    }
++    /* Redux explicitly marks this chapter with FLG_JEFF_SOLO (798).
++     * The old load repair mistook Jeff becoming playable for his later
++     * Threed reunion. FLG_JEFF (14) then made the tent cook skip both
++     * Tessie hotspots. Repair only the unequivocal solo Redux state. */
++    if (maternalbound_enabled() && event_flag_get(798) &&
++        event_flag_get(128) && game_state.party_members[0] == 3 &&
++        jeff && !other_pc) {
++        event_flag_clear(14);
++    } else if (ness && jeff && !event_flag_get(14)) {
++        /* Actual coexistence proves the reunion; ever-playable does not. */
++        event_flag_set(14);
++    }
++}
+ 
+ bool load_game(int slot) {
+     if (slot < 0 || slot >= SAVE_COUNT) return false;
+@@ -702,28 +724,8 @@
+         }
+     }
+ 
+-    /* FLG_JEFF (event flag 14, no named C constant -- flags are referenced
+-     * purely by number at this layer, matching the compiled dialogue
+-     * data) gates a real, live gameplay check: E05THRK.yml's Threed
+-     * gatekeeper NPCs re-arm the entire hotel-zombie sequence from its
+-     * very first stage on every conversation, specifically as long as
+-     * this flag reads unset, so a stuck-clear FLG_JEFF is directly
+-     * player-visible and disruptive, not just an inert data mismatch --
+-     * confirmed live as the sequence replaying indefinitely on a save
+-     * where Jeff had genuinely, fully joined (the entire canonical join
+-     * sequence completed) long before. That flag is dialogue-engine-set
+-     * (EEVENT2.yml/EEVENT1.yml's own add_party_member/set_event_flag
+-     * opcodes, a different, already-reliable code path from the
+-     * movement-script opcode bug fixed earlier in this file's history),
+-     * but has no self-healing mechanism of its own the way
+-     * party_ever_joined_mask now does above -- if Jeff's mask bit is
+-     * confirmed set (by the sync just above, from whatever source), that
+-     * unambiguously means he has really joined, so repair FLG_JEFF to
+-     * match rather than trust it blindly. Purely additive here too,
+-     * same reasoning as the mask sync. */
+-    if ((party_ever_joined_mask & 0x04) && !event_flag_get(14)) {
+-        event_flag_set(14);
+-    }
++    /* Keep the Threed recovery, but do not advance the solo Winters story. */
++    repair_jeff_join_story_flag();
+ 
+     eb_achievements_loaded();
+     return true;
+@@ -1322,6 +1324,27 @@
+         ok = false;
+     }
+ 
++    /* Actual checksum-protected save/load paths, including the solo chapter
++     * which the old ever-joined heuristic incorrectly advanced. */
++    for (unsigned test = 0; test < 6; test++) {
++        game_state_init();
++        party_ever_joined_mask = 7;
++        bool reunion = test == 4 || test == 5;
++        game_state.party_members[0] = reunion ? 1 : 3;
++        game_state.party_members[1] = reunion ? 3 : 9;
++        game_state.party_count = 2;
++        game_state.player_controlled_party_count = reunion ? 2 : 1;
++        event_flag_set(128);
++        if (!reunion && test != 3) event_flag_set(798);
++        if (test == 1 || test == 2 || test == 5) event_flag_set(14);
++        if (test == 2) event_flag_set(129); /* already crossed, still solo */
++        bool expected = reunion || (!maternalbound_enabled() && (test == 1 || test == 2));
++        if (!save_game(0) || !load_game(0) || event_flag_get(14) != expected) {
++            fprintf(stderr,"key_items_selftest: Jeff story save/load case %u failed\n",test);
++            return false;
++        }
++    }
++    fprintf(stderr,"Jeff story save/load: 6 cases PASS\n");
+     fprintf(stderr,"Key-item repair source policy: Tiny Ruby seeded=%u; legacy and existing-save checks complete\n",poo_ruby_seeded);
+     return ok;
+ }
+diff --git a/src/game/game_state.h b/src/game/game_state.h
+--- a/src/game/game_state.h
++++ b/src/game/game_state.h
+@@ -327,6 +327,9 @@
+ extern uint8_t current_save_slot; /* 1-indexed: 1, 2, or 3. Port of CURRENT_SAVE_SLOT BSS. */
+ bool save_game(int slot);
+ bool load_game(int slot);
++/* Restore the Jeff-joins story milestone without confusing his solo chapter
++ * with joining Ness. Also repairs the older premature Redux milestone. */
++void repair_jeff_join_story_flag(void);
+ /* Check phone-slot occupancy without applying/migrating live game state. */
+ bool save_game_slot_occupied(int slot);
+ bool erase_save(int slot);
+diff --git a/src/core/state_dump.c b/src/core/state_dump.c
+--- a/src/core/state_dump.c
++++ b/src/core/state_dump.c
+@@ -808,6 +808,7 @@
+      * (map "loops") because fill_tilemaps() has no arrangement data to stream. */
+     map_loader_savestate_rebind();
+     text_menus_savestate_recover();
++    repair_jeff_join_story_flag();
+     return true;
+ }
+ 

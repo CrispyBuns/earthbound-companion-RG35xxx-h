@@ -20,7 +20,7 @@ def prepare(repo, destination):
     run('git', 'clone', '--no-checkout', 'https://github.com/seanstaggsQU/earthboundRecompLinux2026.git', str(destination))
     run('git', '-C', str(destination), 'checkout', '--detach', NATIVE_REVISION)
     run('git', '-C', str(destination), 'submodule', 'update', '--init', 'src/vendor/tamp')
-    for name in ('native-companion.patch', 'native-portable.patch', 'native-achievements.patch', 'native-dialogue-camera.patch', 'native-render-input.patch'):
+    for name in ('native-companion.patch', 'native-portable.patch', 'native-achievements.patch', 'native-dialogue-camera.patch', 'native-render-input.patch', 'native-tessie-save.patch'):
         patch = str(repo / 'patches' / name)
         run('git', '-C', str(destination), 'apply', '--check', patch)
         run('git', '-C', str(destination), 'apply', patch)

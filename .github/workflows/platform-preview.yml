@@ -54,6 +54,7 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev libxinerama-dev libgl1-mesa-dev libasound2-dev libpulse-dev libudev-dev xvfb
       - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
+      - run: python scripts/check_portable_control_actions.py --native-source native-source
       - name: Verify shared achievement catalog and core
         shell: bash
         run: |
@@ -148,6 +149,7 @@ jobs:
       # Set up Gradle before staging SDL's example Android wrapper. We use the
       # installed Gradle directly; SDL's legacy wrapper is never executed.
       - run: python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
+      - run: python scripts/check_portable_control_actions.py --native-source native-source
       - name: Build embedded on-device ROM converters (code only)
         env:
           EB_BUILD_PYTHON: python3.13

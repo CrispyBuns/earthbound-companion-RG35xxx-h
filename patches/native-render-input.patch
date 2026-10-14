@@ -576,6 +576,55 @@ index 101ea3cf..5fee11a3 100644
  
  /* --- Entity fade state system (wipe/dissolve effects) ---
   *
+diff --git a/src/game/battle_psi.c b/src/game/battle_psi.c
+index b2b346cf..88129faf 100644
+--- a/src/game/battle_psi.c
++++ b/src/game/battle_psi.c
+@@ -59,6 +59,7 @@ static size_t battle_psi_table_size = 0;
+ 
+ #define PSI_ANIM_COUNT           34
+ #define REDUX_PSI_ANIM_COUNT     68
++#define REDUX_PSI_LIFEUP_ANIM    42
+ #define PSI_FRAME_SIZE           0x400  /* bytes per arrangement frame (32×32 tilemap) */
+ #define PSI_FRAMES_PER_BUNDLE    8     /* frames per compressed bundle in .arr.bundled */
+ 
+@@ -1005,14 +1006,30 @@ void psi_animation_savestate_rebind(void) {
+  *   Mode $03: fixed source word-pair clear (zeros) via registers $2118/$2119
+  * All three cover 0x400 VRAM words ($5800-$5BFF = 32×32 tilemap).
+  */
++static bool psi_animation_fills_viewport(void) {
++    /* Redux Lifeup is a full-field flash and repeated circle pattern.
++     * Keep this exception narrow: target metadata alone does not make the
++     * other 32x32 spell arrangements safe to repeat (notably Freeze). */
++    if (!maternalbound_enabled() ||
++        psi_animation_state.arr_current_anim_id != REDUX_PSI_LIFEUP_ANIM)
++        return false;
++    const PsiAnimConfig *cfg =
++        (const PsiAnimConfig *)ASSET_DATA(ASSET_DATA_PSI_ANIM_CFG_BIN);
++    size_t cfg_size = ASSET_SIZE(ASSET_DATA_PSI_ANIM_CFG_BIN);
++    return cfg && cfg_size >= (REDUX_PSI_LIFEUP_ANIM + 1) * sizeof(*cfg) &&
++        cfg[REDUX_PSI_LIFEUP_ANIM].target_type == PSI_TARGET_ALL_ENEMIES;
++}
++
+ void update_psi_animation(void) {
+-    /* PSI arrangements are one 32x32 screen, not a repeating battle
+-     * background. In particular, Giygas uses BG2 for PSI and its unused
+-     * layer inherits FILL from the background setup. Center every active
+-     * spell on the native battle slice instead of tiling it into the wide
+-     * gutters. Derive this each frame so cold animation saves recover too. */
++    /* Most PSI arrangements are one 32x32 screen, not a repeating battle
++     * background. Giygas uses BG2 for PSI, whose unused layer inherits FILL
++     * from background setup. Keep these effects on the native battle slice;
++     * only Redux Lifeup's full-field pattern extends into the wide gutters.
++     * Derive the mode from the saved animation ID every frame, including
++     * cold-restored active animations, without adding serialized state. */
+     unsigned psi_layer = loaded_bg_data_layer1.bitdepth == 2 ? 1 : 0;
+-    ppu.bg_viewport_fill[psi_layer] = psi_animation_state.time_until_next_frame
++    ppu.bg_viewport_fill[psi_layer] = psi_animation_state.time_until_next_frame &&
++        !psi_animation_fills_viewport()
+         ? BG_VIEWPORT_CENTER : BG_VIEWPORT_FILL;
+ 
+     /* --- Frame advancement (C2E6B3 lines 22-69) ---
 diff --git a/src/game/companion_achievements.c b/src/game/companion_achievements.c
 index 8959ce77..bdc68d39 100644
 --- a/src/game/companion_achievements.c

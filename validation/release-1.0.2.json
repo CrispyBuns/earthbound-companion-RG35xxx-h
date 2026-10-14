@@ -1,0 +1,177 @@
+{
+  "release": "v1.0.2",
+  "platformRelease": "v0.5.0-ports-preview.13",
+  "native": {
+    "nativeSha256": "186dff417f4dd4442cc9369607bb8e3b09a48ccb86db1df51cd58a519d621172",
+    "patchesApplied": 5,
+    "sourceFilesCompared": [
+      "port/unix/main.c",
+      "port/unix/platform/sdl2_audio.c",
+      "port/unix/platform/sdl2_input.c",
+      "port/unix/platform/sdl2_video.c",
+      "src/entity/entity.h",
+      "src/game/battle_psi.c",
+      "src/game/companion_achievements.c",
+      "src/game/eb_achievements.h",
+      "src/game/text.c",
+      "src/game_main.c",
+      "src/game_main.h",
+      "src/platform/pc_options.c",
+      "src/platform/pc_options.h",
+      "src/platform/platform.h",
+      "src/snes/ppu.h",
+      "src/snes/ppu_render.c",
+      "src/game/maternalbound_battle_sprites.c"
+    ],
+    "tests": [
+      {
+        "edition": "original",
+        "test": "savestate",
+        "passed": true
+      },
+      {
+        "edition": "original",
+        "test": "screen-transitions",
+        "passed": true
+      },
+      {
+        "edition": "original",
+        "test": "achievements",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "savestate",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "screen-transitions",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "achievements",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "redux-battle-sprites",
+        "passed": true
+      },
+      {
+        "edition": "redux",
+        "test": "redux-motion",
+        "passed": true
+      }
+    ]
+  },
+  "wideView": {
+    "status": "passed",
+    "cases": 14,
+    "renderedSamples": 6978,
+    "normalWideFlows": 8,
+    "allUiOpacityInsideTestedCrop": true,
+    "allMenusClosedNormally": true,
+    "action20ReproducedReportedPulse": true,
+    "action19RequestsSettingsAndPreservesWideView": true,
+    "coverageLimits": [
+      "Prepared four-party ordinary-world scene after real cold checkpoint restore; no campaign route.",
+      "Actual Original and Redux assets used only in private copied sessions; no game data published.",
+      "PC action routing verified through actual SDL key events; Android touch/JNI/device test belongs to parent task.",
+      "Alpha coverage and active menu geometry verify no tested window pixels clipped; no exhaustive all-window/all-font audit.",
+      "Unshipped split-UI zoom-in prototype tests are excluded; final source keeps verified 1.0.1 SDL renderer and game_main behavior.",
+      "Original checkpoint was generated privately from the actual Original pack; Redux checkpoint copied and hashed from the owner installation."
+    ]
+  },
+  "lifeupPixelParity": {
+    "passed": true,
+    "sampledArrangementEvents": 3750,
+    "totalNativePpuRenders": 15000,
+    "nativeSlice": "256x224 original coordinates",
+    "nativeSliceChangedFrames": 0,
+    "unrelatedFullFrameChangedFrames": 0,
+    "unrelatedAnimations": 67,
+    "lifeupGutterPeakBefore": 0,
+    "lifeupGutterPeakAfter": 65536,
+    "freezeEdgeCases": 4,
+    "freezeEdgeGutterPeak": 0,
+    "coldRebindPreparedCases": 4,
+    "coldReboundLifeupModeFill": true,
+    "limits": [
+      "Real asset frames and production PPU/PSI streaming, diagnostic white palette. Private old-center-policy object differs only in whitelist predicate. No full battle-turn/campaign or physical Android device claim. Cold pointer rebind/stale-mode reconstruction rather than serialized checkpoint load."
+    ]
+  },
+  "finalPsi": {
+    "original": {
+      "passed": true,
+      "animations": 34,
+      "cases": 204,
+      "sampledFrames": 5970,
+      "fullFieldLifeupCases": 0,
+      "lifeupGutterPeak": 0,
+      "everyArrangementChangeSampled": true,
+      "privateBuild": {
+        "driverSourceSha256": "beeb284388e0c17398437b8045b2db4f79788e1c63f59623199585610266c88a",
+        "executableSha256": "083bc1c79158a9a8b4487c4ea0e47218eb6a65ddbc1c1f1bdf71bb747e715c0a",
+        "productionExecutableSha256": "186dff417f4dd4442cc9369607bb8e3b09a48ccb86db1df51cd58a519d621172",
+        "productionLibrarySha256": "856e413bf5c43d5e33b2e3b0295f662e353c5755b710b3194e45ed58e85eaad4",
+        "platformMainObjectSha256": "81b7f2bd1f569f5b5bfe0ff55610277a158354aebcc520fb60a04e2b141af875",
+        "sharedBuildModified": false,
+        "sharedSourceModified": false,
+        "method": "Copied platform main renamed with objcopy; private driver linked to unchanged production native library."
+      },
+      "limits": [
+        "Prepared three horizontal targets and two bit depths; diagnostic white palette isolates geometry. Only Redux Lifeup is allowed to cover the widescreen gutters. No gameplay damage, color parity, physical-controller or full campaign claim."
+      ]
+    },
+    "redux": {
+      "passed": true,
+      "animations": 68,
+      "cases": 408,
+      "sampledFrames": 10524,
+      "fullFieldLifeupCases": 6,
+      "lifeupGutterPeak": 65536,
+      "everyArrangementChangeSampled": true,
+      "privateBuild": {
+        "driverSourceSha256": "beeb284388e0c17398437b8045b2db4f79788e1c63f59623199585610266c88a",
+        "executableSha256": "083bc1c79158a9a8b4487c4ea0e47218eb6a65ddbc1c1f1bdf71bb747e715c0a",
+        "productionExecutableSha256": "186dff417f4dd4442cc9369607bb8e3b09a48ccb86db1df51cd58a519d621172",
+        "productionLibrarySha256": "856e413bf5c43d5e33b2e3b0295f662e353c5755b710b3194e45ed58e85eaad4",
+        "platformMainObjectSha256": "81b7f2bd1f569f5b5bfe0ff55610277a158354aebcc520fb60a04e2b141af875",
+        "sharedBuildModified": false,
+        "sharedSourceModified": false,
+        "method": "Copied platform main renamed with objcopy; private driver linked to unchanged production native library."
+      },
+      "limits": [
+        "Prepared three horizontal targets and two bit depths; diagnostic white palette isolates geometry. Only Redux Lifeup is allowed to cover the widescreen gutters. No gameplay damage, color parity, physical-controller or full campaign claim."
+      ]
+    }
+  },
+  "limits": [
+    "Prepared private scenes and asset-driven effects; no new campaign or physical handheld/controller test.",
+    "Only battle Lifeup was identified as a full-field animation; actual pinned overworld scripts contain no visible Lifeup animation."
+  ],
+  "portableControls": {
+    "passed": true,
+    "current": {
+      "passed": true,
+      "nativeActions": 21,
+      "settingsAction": 19,
+      "zoomAction": 20,
+      "portableLabelsMatchNative": true
+    },
+    "oldMappingRejected": {
+      "labels": "Portable labels differ from native action order: ['A', 'B', 'X', 'Y', 'L', 'R', 'Start', 'Select', 'Up', 'Down', 'Left', 'Right', 'Fast-forward', 'Save', 'Load', 'FPS', 'Zoom', 'Fullscreen', 'Screenshot', 'Pause', 'Settings'] != ['A', 'B', 'X', 'Y', 'L', 'R', 'Start', 'Select', 'Up', 'Down', 'Left', 'Right', 'Fast-forward', 'Save', 'Load', 'Fullscreen', 'Pause', 'Screenshot', 'FPS', 'Settings', 'Zoom']",
+      "touchSettings": "Android Settings button action does not match native PC_SETTINGS"
+    }
+  },
+  "portableCore": {
+    "Passed": true,
+    "SettingsAbi": 5,
+    "PhoneSaveBytes": 8192,
+    "RootIsolated": true,
+    "Checked": "paths, settings round-trip, INI validation, phone-save recovery, recipe validation",
+    "GameplayTested": false
+  }
+}

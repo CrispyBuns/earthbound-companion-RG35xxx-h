@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import org.libsdl.app.SDLActivity;
 
 public final class GameActivity extends SDLActivity {
+ private static final int ACTION_SETTINGS=19;
  private static native void setTouch(int action, boolean down);
  private static native void clearTouch();
  private static native void requestQuit();
@@ -34,7 +35,7 @@ public final class GameActivity extends SDLActivity {
   left.addView(row(new String[]{"↙","↓","↘"},new int[][]{{9,10},{9},{9,11}}));
   FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.LEFT);lp.setMargins(12,0,0,12);overlay.addView(left,lp);
   LinearLayout right=new LinearLayout(this);right.setOrientation(LinearLayout.VERTICAL);
-  right.addView(row(new String[]{"X","A"},new int[][]{{2},{0}}));right.addView(row(new String[]{"L","B"},new int[][]{{4},{1}}));right.addView(row(new String[]{"R","Settings"},new int[][]{{5},{20}}));
+  right.addView(row(new String[]{"X","A"},new int[][]{{2},{0}}));right.addView(row(new String[]{"L","B"},new int[][]{{4},{1}}));right.addView(row(new String[]{"R","Settings"},new int[][]{{5},{ACTION_SETTINGS}}));
   FrameLayout.LayoutParams rp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.RIGHT);rp.setMargins(0,0,12,12);overlay.addView(right,rp);
   LinearLayout top=row(new String[]{"Start","Select","Save","Load","Fast"},new int[][]{{6},{7},{13},{14},{12}});
   FrameLayout.LayoutParams tp=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.CENTER_HORIZONTAL);overlay.addView(top,tp);

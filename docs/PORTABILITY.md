@@ -1,7 +1,7 @@
 # Linux, macOS and Android previews
 
-[Windows 1.0.1](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.11 supplies Linux and macOS, and preview.12 supplies Android
-builds with the 1.0.1 native game core and 46-achievement catalog. Windows retains its Windows Forms
+[Windows 1.0.2](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.13 supplies Linux, macOS and Android
+builds with the 1.0.2 native game core and 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).
 
@@ -37,13 +37,14 @@ Desktop preview data is stored in `EarthBoundCompanionPreview` beneath the opera
 
 Install the ARM64 APK on a compatible Android 8.0+ device. The x64 APK is supplied for emulator testing. The preview application ID is `org.earthbound.companion.preview`. APK updates use a persistent project signing key.
 
-Use [Android preview.12](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.12) for Android and [desktop preview.11](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11) for Linux/macOS. Android retains the persistent application ID/signing key, so an APK update preserves existing app data.
+Use [platform preview.13](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.13) for Android, Linux and macOS. Android retains the persistent application ID/signing key, so an APK update preserves existing app data.
 
 1. Put your clean EarthBound (USA) `.sfc` or `.smc` ROM on the device. Headered clean dumps are supported. Extract a ZIP first; do not apply a hack patch to the ROM.
 2. In **Game & setup**, choose **Set up Original from ROM** or **Set up Redux from ROM**, then select the ROM in Android's file picker. Original setup works offline. Redux downloads the pinned supported source files over verified HTTPS and builds them locally; it also prepares Original data if needed. Keep Companion open while setup runs. Once setup completes, the edition is selected automatically—press **Play**. A computer is not required. Existing packs can still be imported with the matching **Import … assets.pak** button.
 3. Touch controls include diagonals, sprint (Y), A/B/X, L/R, Start/Select, quick Save/Load, Fast and Settings. A Bluetooth or USB controller can also be used. Save/Load uses the selected quick-save slot.
 4. For a handheld or controller, open **Controls**, turn off **Show touch controls**, then choose **Save settings / return to game**. All touch buttons disappear. Android Back reveals them temporarily if you need Settings; the saved choice is reapplied when you return. With the buttons already visible, Back requests a checkpoint and exits as before.
-5. The touch Settings button opens the launcher. **Save settings / return to game** resumes the existing game.
+5. The touch **Settings** button pauses the game and opens the launcher. **Save settings / return to game** resumes the existing game. Preview.13 corrects the old button sending the Zoom action instead.
+6. To keep the zoomed-out wide view during dialogue and Goods, set **Wide FOV On** under Display. If the old Settings button already selected close-up zoom, switch Wide FOV Off, then On once; this restores the wide view. The saved touch-overlay choice is independent of the camera.
 
 A background event requests a quick save on the game thread and pauses game logic. Back requests a checkpoint and clean game exit. If SDL reports a lost render device, the game requests a checkpoint and returns to the launcher rather than continuing with invalid textures. Sudden termination cannot guarantee a new quick save. Phone lifecycle, touch layout, controllers and actual gameplay still require device testing.
 

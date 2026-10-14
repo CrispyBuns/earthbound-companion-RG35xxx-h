@@ -1,13 +1,15 @@
 # Completed feature set and maintenance
 
+October 13, 2026: **Windows 1.0.2 / platform preview.13** extend Redux battle Lifeup across widescreen and correct Android Settings/portable control labels. Wide FOV On keeps the wide view through dialogue and menus. [Focused checks](docs/RELEASE-1.0.2.md).
+
 October 13, 2026: 1.0.1 addresses reported NPC/foreground overlap, the scripted Onett intro pan and fast-forward music. [Focused checks](docs/RELEASE-1.0.1.md). No campaign replay or broad audit was started.
 
-October 13, 2026: **Windows 1.0.1 is the current maintenance release** following the official
+October 13, 2026: **Windows 1.0.1 was the first maintenance release** following the official
 1.0.0 feature set, retaining the pinned Redux input
 `897d00833f4a08a0a92f106abf631629a6a6a041`. The launcher and release wording
 reflect completion; game data, saves, seed identities and earned achievements
 retain their existing formats. Future work is focused fixes for reported bugs.
-Linux/macOS remain community preview.11; Android uses preview.12 with optional touch controls. Newer upstream Redux
+Linux/macOS/Android now use community preview.13 with optional Android touch controls. Newer upstream Redux
 changes and Deluxe are separate work. [Release record](docs/RELEASE-1.0.0.md).
 
 October 13, 2026: dev.38 corrects the Redux battle portrait padding/priority reported by **raid_rgb on Discord**. [Focused checks](docs/RELEASE-dev38.md). Shadow's widescreen CCS was reviewed and a native source map prepared; no widescreen redesign or full campaign audit was started.

@@ -576,5 +576,152 @@
       "maxOcclusion": 171,
       "maxPixelMismatch": 0
     }
+  ],
+  "windowsPackage": {
+    "zip": "EarthBound-Companion-Windows-v1.0.1.zip",
+    "sha256": "c693fcbe47f7b6fa9fdda151093c61e7ba4ca3c4804bbd05e558601026497378",
+    "manifestFiles": 50,
+    "privateContentAbsentFromZip": true,
+    "nativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+    "tests": [
+      {
+        "test": "launcher-selftest",
+        "passed": true
+      },
+      {
+        "test": "launcher-profiles",
+        "passed": true
+      },
+      {
+        "test": "achievement-consumers",
+        "edition": "original",
+        "passed": true
+      },
+      {
+        "test": "achievement-consumers",
+        "edition": "redux",
+        "passed": true
+      }
+    ],
+    "limits": [
+      "Private assets were supplied after archive validation. No campaign or setup rebuild is claimed."
+    ]
+  },
+  "installation": {
+    "installedCopies": 2,
+    "protectedFilesUnchanged": 113,
+    "nativeSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+    "copiedCheckpointLoadConfirmed": true,
+    "earnedProgressPreserved": true
+  },
+  "platformPackages": [
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "bytes": 66608509,
+      "sha256": "e986d61d7fb258fc8f0ab5e8657e5093fe2e6b6517f29d388fadc6da6d268c6d",
+      "kind": "android",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "bytes": 67628300,
+      "sha256": "3cface1a2c918d2bd5577e11268c10e153859985110fa68a1ff120e3bbfb25b2",
+      "kind": "android",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "bytes": 124654396,
+      "sha256": "e92b6bbf28ad4b0c05ad8ccec80c2236c3886c59059adcae314e0e18f1328b62",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "bytes": 90015746,
+      "sha256": "cb9f7770214d599f166321196656f616ec13de918612a703c5f8979f1894003b",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "bytes": 94906526,
+      "sha256": "6533e8145e01d9e735c4b7805e8d48068d33533bffda7fa94c78d728e01a44ef",
+      "kind": "desktop",
+      "gameContentIncluded": false,
+      "nativeArchitectureChecked": true
+    }
+  ],
+  "fourCharacterPose": {
+    "preparedScene": true,
+    "frames": 297,
+    "maximumOpaqueActorPixels": 1185,
+    "maximumOccludedActorPixels": 299,
+    "maximumPixelMismatch": 0,
+    "motion": {
+      "executableSha256": "b37eb03670969c8cd439faa927f54d87938e9a9dd1b54145589d9302bca967a0",
+      "productionExecutableSha256": "83c480133ee6485f2b81b65b30f75933e030b1686a5e5aa2ca8ea6db6a3535db",
+      "checkpointSha256": "b64dd0db8799fc02c1cee88e3c827e5f5b1b97cc8588918bec21fcdd151d4172",
+      "assetsSha256": "d9a772d10aff68bdf93c077cda640d42b835884d6834bb18bf0d43c3800f57bb",
+      "frames": 298,
+      "movingFrames": 24,
+      "cameraSteps": [
+        1.0
+      ],
+      "cameraStepStdDev": 0.0,
+      "presentedStepStdDev": 5.000000000236297e-07,
+      "timingMs": {
+        "median": 16.6667,
+        "min": 16.4447,
+        "max": 23.2734,
+        "p95": 16.6822
+      },
+      "preparedStage": {
+        "x": 2024,
+        "y": 1488
+      },
+      "limits": [
+        "One prepared warp after real copied-checkpoint restore; not a natural quest route. Timings measure host ticks, not monitor scanout."
+      ],
+      "sprint": 0,
+      "sandwichFrames": 0,
+      "direction": 3,
+      "maxMotionError": 5.214843751266685e-07,
+      "sandwichStatuses": [
+        0
+      ]
+    }
+  },
+  "platformCI": {
+    "run": 38487267926,
+    "sourceCommit": "ada105cfc93a055b4eb502bf458e3711fcbd8838",
+    "conclusion": "success",
+    "jobs": 5,
+    "androidRomFreeStartupPassed": true
+  },
+  "shadowPixelQuestion": {
+    "sourceOnlyInspection": true,
+    "originalPajamaSprite": 437,
+    "reduxPajamaSprite": 437,
+    "reduxRunningPajamaSprite": 470,
+    "changed": false,
+    "gameImagesPublished": false
+  },
+  "allSixUploadedDigestsVerified": true,
+  "windowsIsGitHubLatest": true,
+  "platformIsPrerelease": true,
+  "publishedReleases": [
+    {
+      "tag": "v1.0.1",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.1"
+    },
+    {
+      "tag": "v0.5.0-ports-preview.11",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.11"
+    }
   ]
 }

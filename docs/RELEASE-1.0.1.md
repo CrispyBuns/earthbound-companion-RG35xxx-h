@@ -39,3 +39,14 @@ Detailed receipts and platform coverage limits are in
 
 These are focused prepared/cold-restore checks, not another full playthrough or a
 claim that every NPC, cutscene, sound combination or physical device was tested.
+
+## Publication and preservation
+
+The Windows ZIP passes all 50 file-manifest hashes and launcher/profile checks.
+Both retained installations use 1.0.1; all 113 checked owner data files remained
+unchanged and a copied existing checkpoint loads. All five platform CI jobs pass
+at source commit `ada105cfc93a055b4eb502bf458e3711fcbd8838`
+([CI run](https://github.com/rages4calm/earthbound-companion/actions/runs/38487267926)).
+All five platform architectures/content checks pass. All six uploaded package
+digests match the verified local packages. Windows 1.0.1 is GitHub Latest;
+preview.11 remains a community prerelease.

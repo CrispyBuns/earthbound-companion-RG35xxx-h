@@ -1,0 +1,52 @@
+name: Android existing package QA
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Platform-preview run containing the signed Android artifact to test
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  android-package-qa:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: actions/download-artifact@v4
+        with:
+          name: EarthBound-Companion-android-preview
+          path: build/apk
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+      - name: Verify both APK payloads
+        run: |
+          python scripts/check_android_apk.py build/apk/EarthBound-Companion-android-arm64-preview.apk arm64-v8a
+          python scripts/check_android_apk.py build/apk/EarthBound-Companion-android-x64-preview.apk x86_64
+          sha256sum build/apk/*.apk
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Replay ROM-free startup and rotation on the signed package
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: default
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: bash scripts/test_android_preview.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-existing-package-smoke-log
+          path: |
+            build/android-smoke.log
+            build/android-launcher-smoke.png
+          if-no-files-found: ignore

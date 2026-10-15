@@ -1,0 +1,76 @@
+{
+  "verifiedAtUtc": "2026-10-15T19:45:16.861525+00:00",
+  "sourceCommit": "c694b4131e3eefed5ee4fa7ac28d7fef2c70f03d",
+  "release": "v1.0.7",
+  "scope": "Windows launcher/setup; native game unchanged",
+  "package": {
+    "name": "EarthBound-Companion-Windows-v1.0.7.zip",
+    "bytes": 129221042,
+    "sha256": "384fa355676710a0ad539025484e1d24058bd2559b0f8c33d930776b77ad20ba"
+  },
+  "failureTests": {
+    "Passed": true,
+    "NetworkUsed": false,
+    "OwnerDataUsed": false,
+    "Checks": 13
+  },
+  "cleanPackageSetup": {
+    "Passed": true,
+    "ZipSha256": "384fa355676710a0ad539025484e1d24058bd2559b0f8c33d930776b77ad20ba",
+    "nativeEngineUnchanged": true,
+    "archiveManifestVerified": true,
+    "freshRomSetup": true,
+    "reduxBuiltBeforeMusic": true,
+    "onlineRepairedTrack": "eb_msu1-113.pcm",
+    "all164TracksVerified": true,
+    "ownerRomAndMusicUnchanged": true,
+    "fullPlaythroughVerified": false
+  },
+  "httpProbe": {
+    "observedPrimaryStatus": 206,
+    "alternateArchiveEndpoints": 2,
+    "alternateStatuses": [
+      206,
+      206
+    ],
+    "manifestEntriesMatchingArchiveMetadata": 164,
+    "independentMirrorProvisioned": false
+  },
+  "compilation": {
+    "windowsLauncher": "PASS: 0 warnings, 0 errors",
+    "portableSharedCore": "PASS: 0 warnings, 0 errors"
+  },
+  "ownerInstallationModified": false,
+  "existingOwnerSavesUsed": false,
+  "fullPlaythroughVerified": false,
+  "platformsNotRepublished": [
+    "Android preview.19",
+    "Linux/macOS preview.18"
+  ],
+  "publicationChecks": [
+    {
+      "tag": "v1.0.7",
+      "prerelease": false,
+      "latest": "v1.0.7",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.7"
+    },
+    {
+      "tag": "v1.0.7",
+      "prerelease": false,
+      "latest": "v1.0.7",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.7"
+    },
+    {
+      "tag": "v0.5.0-ports-preview.19",
+      "prerelease": true,
+      "latest": "v1.0.7",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.19"
+    }
+  ],
+  "remoteAsset": {
+    "name": "EarthBound-Companion-Windows-v1.0.7.zip",
+    "size": 129221042,
+    "digest": "sha256:384fa355676710a0ad539025484e1d24058bd2559b0f8c33d930776b77ad20ba",
+    "state": "uploaded"
+  }
+}

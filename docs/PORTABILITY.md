@@ -37,7 +37,7 @@ Desktop preview data is stored in `EarthBoundCompanionPreview` beneath the opera
 
 Install the ARM64 APK on a compatible Android 8.0+ device. The x64 APK is supplied for emulator testing. The preview application ID is `org.earthbound.companion.preview`. APK updates use a persistent project signing key.
 
-Use [platform preview.18](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.18) for Android, Linux and macOS. Android retains the persistent application ID/signing key, so an APK update preserves existing app data.
+Use [Android preview.19](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.19) for Android and [platform preview.18](https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.18) for Linux/macOS. Android retains the persistent application ID/signing key, so an APK update preserves existing app data.
 
 1. Put your clean EarthBound (USA) `.sfc` or `.smc` ROM on the device. Headered clean dumps are supported. Extract a ZIP first; do not apply a hack patch to the ROM.
 2. In **Game & setup**, choose **Set up Original from ROM** or **Set up Redux from ROM**, then select the ROM in Android's file picker. Original setup works offline. Redux downloads the pinned supported source files over verified HTTPS and builds them locally; it also prepares Original data if needed. Keep Companion open while setup runs. Once setup completes, the edition is selected automatically—press **Play**. A computer is not required. Existing packs can still be imported with the matching **Import … assets.pak** button.
@@ -47,6 +47,8 @@ Use [platform preview.18](https://github.com/rages4calm/earthbound-companion/rel
 6. To keep the zoomed-out wide view during dialogue and Goods, set **Wide FOV On** in the game's own **Set Up** menu. If the old Settings button already selected close-up zoom, switch that option Off, then On once; this resets the saved camera to the wide view. The launcher's **Wide field of view** checkbox alone does not reset an already selected close-up zoom. The saved touch-overlay choice is independent of the camera.
 
 A background event requests a quick save on the game thread and pauses game logic. Back requests a checkpoint and clean game exit. If SDL reports a lost render device, the game requests a checkpoint and returns to the launcher rather than continuing with invalid textures. Sudden termination cannot guarantee a new quick save. Phone lifecycle, touch layout, controllers and actual gameplay still require device testing.
+
+Preview.19 uses a sliding thumbstick: drag continuously between all eight directions, move into the center to stop, or lift your thumb. Movement remains digital, matching the game. A second finger can hold **Y / Run**, **A** or another action. The compact phone layout keeps L/R beside the face buttons; tablets use a shoulder row. Interrupted touches, hiding the overlay and leaving the game release held touch inputs. The same **Show touch controls** preference remains available for handheld/controller play. [Touch update and checks](RELEASE-android-preview19.md).
 
 Android data stays in app-private storage. **Saves & mods** exports/imports through the system file picker. Export saves before uninstalling; removing the app removes its private data.
 

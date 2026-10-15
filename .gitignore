@@ -55,6 +55,8 @@ Thumbs.db
 Ports/AndroidManaged/native-libs/
 Ports/AndroidManaged/Java/*.java
 !Ports/AndroidManaged/Java/GameActivity.java
+!Ports/AndroidManaged/Java/TouchControls.java
+!Ports/AndroidManaged/Java/TouchStick.java
 Ports/Android/.gradle/
 Ports/AndroidSetup/.gradle/
 Ports/AndroidSetup/**/build/
@@ -62,3 +64,4 @@ Ports/AndroidSetup/local.properties
 
 # Private historical development and recovery material
 _Archive/
+.impeccable/review/

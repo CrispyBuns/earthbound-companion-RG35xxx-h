@@ -1,0 +1,18 @@
+--- a/src/game/door.c
++++ b/src/game/door.c
+@@ -969,6 +969,15 @@
+             } else {
+                 set_force_blank(true);
+                 ppu.window_hdma_active = false;
++                /* FORCE_BLANK_AND_WAIT_VBLANK clears HDMAEN, including the
++                 * cinematic TM/TS mask. Stop its virtual producer as well:
++                 * otherwise the next effects tick reapplies the old bars. */
++                ppu.tm_hdma_active = false;
++                if (!bt.battle_mode_flag) {
++                    ow.redux_letterbox_active = 0;
++                    ow.redux_letterbox_direction = 0;
++                    ow.redux_letterbox_top = 0;
++                }
+             }
+             s->phase = ST_EXIT_POST;
+             return STEP_RESULT_CONTINUE();   /* the single finalize yield */

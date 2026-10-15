@@ -1,0 +1,19 @@
+{
+  "checks": [
+    {
+      "build": "before",
+      "exit": 4,
+      "expected": 4
+    },
+    {
+      "build": "after",
+      "exit": 0,
+      "expected": 0
+    }
+  ],
+  "scope": "Isolated native handler check on Windows, not an Android device or full intro replay.",
+  "cause": "Force-blank map-transition cleanup cleared spotlight HDMA but left Redux cinematic TM/TS producer active. The next effect tick re-enabled the old bars.",
+  "sourceReference": "asm/overworld/screen_transition.asm invokes FORCE_BLANK_AND_WAIT_VBLANK; force_blank_and_wait_vblank.asm clears HDMAEN_MIRROR.",
+  "saveCompatibility": "No serialized fields changed. Existing affected quick-saves clear after a normal force-blank door transition.",
+  "androidDeviceTested": false
+}

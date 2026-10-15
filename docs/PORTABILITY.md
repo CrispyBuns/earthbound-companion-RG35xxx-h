@@ -1,6 +1,6 @@
 # Linux, macOS and Android previews
 
-[Windows 1.0.5](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.15 supplies Linux and macOS, while Android preview.16 adds the community game icon. These are platform preview
+[Windows 1.0.5](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.15 supplies Linux and macOS, while Android preview.17 adds the community game icon. These are platform preview
 builds with the 1.0.4 native game core and palette fixes and 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).

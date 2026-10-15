@@ -1,3 +1,5 @@
+October 15, 2026: **Windows 1.0.7** fixes optional soundtrack downloads blocking game setup, adds verified retry/fallback sources and records useful host/track diagnostics. Native gameplay is unchanged. [Focused checks](docs/RELEASE-1.0.7.md).
+
 # Completed feature set and maintenance
 
 ## 1.0.4 / platform preview.15 - battle palettes and Windows icon

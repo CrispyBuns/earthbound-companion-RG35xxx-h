@@ -5,10 +5,12 @@ sealed class SetupForm : Form {
  readonly ProgressBar bar=new(){Minimum=0,Maximum=100,Style=ProgressBarStyle.Marquee};readonly Label status=Theme.Text("Choose your clean EarthBound (USA) ROM.",10,Theme.Muted);
  readonly Button choose,start,cancel;CancellationTokenSource? stop;
  readonly bool redux;
+ readonly bool soundtrackOnly;
  readonly bool repairOriginal;
  public bool Completed{get;private set;}
  public SetupForm(bool soundtrackOnly=false,bool reduxDevelopment=false) {
   AppIcon.Apply(this);
+  this.soundtrackOnly=soundtrackOnly;
   redux=reduxDevelopment;
   repairOriginal=!soundtrackOnly&&SetupService.OriginalMovementUpdateNeeded;
   Text="Set up EarthBound Companion";ClientSize=new Size(650,410);MinimumSize=MaximumSize=Size;FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;MinimizeBox=false;StartPosition=FormStartPosition.CenterParent;BackColor=Theme.Canvas;ForeColor=Theme.Ink;Font=Theme.Font();
@@ -27,9 +29,10 @@ sealed class SetupForm : Form {
   choose.Enabled=start.Enabled=soundtrack.Enabled=false;bar.Visible=true;bar.Style=ProgressBarStyle.Continuous;stop=new();
   var report=new Progress<SetupProgress>(p=>{status.Text=p.Detail;if(p.Total>0){bar.Style=ProgressBarStyle.Continuous;bar.Value=(int)Math.Clamp(p.Done*100/Math.Max(1,p.Total),0,100);}else bar.Style=ProgressBarStyle.Marquee;});
   try {
-   string? path=SetupService.DataReady&&!redux&&!repairOriginal?null:rom.Text;var result=await SetupService.InstallAsync(path,soundtrack.Visible?soundtrack.Checked:true,report,stop.Token);
-   if(redux)await ReduxProfileService.BuildAsync(rom.Text,report,stop.Token);
-   Completed=true;bar.Style=ProgressBarStyle.Continuous;bar.Value=100;status.Text=redux?"MaternalBound Redux is ready to play.":result.MsuTracks>0?$"Ready to play. {result.MsuTracks} soundtrack tracks are verified.":"Ready to play. You can install the MSU soundtrack later from Audio.";
+   string? path=SetupService.DataReady&&!redux&&!repairOriginal?null:rom.Text;
+   var result=soundtrackOnly?await SetupService.InstallAsync(null,true,report,stop.Token):await SetupService.InstallGameAsync(path,soundtrack.Checked,redux,report,stop.Token);
+   Completed=true;bar.Style=ProgressBarStyle.Continuous;bar.Value=100;status.ForeColor=result.SoundtrackWarning==null?Theme.Ink:Theme.Gold;
+   status.Text=result.SoundtrackWarning??(redux?"MaternalBound Redux is ready to play.":result.MsuTracks>0?$"Ready to play. {result.MsuTracks} soundtrack tracks are verified.":"Ready to play. You can install the MSU soundtrack later from Audio.");
    start.Text="Done";start.Enabled=true;cancel.Visible=false;
   } catch(OperationCanceledException){status.Text="Setup canceled. Completed files were kept, so you can continue later.";start.Enabled=true;choose.Enabled=redux||!SetupService.DataReady||repairOriginal;soundtrack.Enabled=true;}
   catch(Exception e)when(e is IOException or InvalidDataException or ArgumentException or UnauthorizedAccessException or System.ComponentModel.Win32Exception or HttpRequestException){status.Text=e.Message;status.ForeColor=Theme.Error;start.Enabled=true;choose.Enabled=redux||!SetupService.DataReady||repairOriginal;soundtrack.Enabled=true;}

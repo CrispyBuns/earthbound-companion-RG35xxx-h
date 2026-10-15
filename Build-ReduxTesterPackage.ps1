@@ -1,4 +1,4 @@
-param([string]$Version='1.0.6', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
+param([string]$Version='1.0.7', [string]$NativeExePath='', [string]$ReduxHelperPath='', [string]$OriginalHelperPath='', [string]$ShaderRuntimePath='', [string]$WorkspaceRoot=$PSScriptRoot)
 $ErrorActionPreference='Stop'
 $isOfficial=$Version -match '^\d+\.\d+\.\d+$'
 $projectRoot=[IO.Path]::GetFullPath($WorkspaceRoot)
@@ -43,7 +43,8 @@ EarthBound Companion — Redux development edition
 
 1. Extract this entire folder and run EarthBound Companion.exe.
 2. Choose your clean EarthBound (USA) .sfc or .smc ROM.
-3. Leave the complete MSU soundtrack selected for enhanced music.
+3. The MSU soundtrack is optional. Leave it selected for enhanced music, or
+   uncheck it to use original music. A music download outage does not block setup.
 4. Setup downloads the pinned Redux source and soundtrack, checks them,
    and builds the native game data locally. No Python installation is needed.
 5. Play from Play, or generate a Story Shuffle adventure.
@@ -70,7 +71,8 @@ EarthBound Companion — official Windows release
 
 1. Extract this entire folder and run EarthBound Companion.exe.
 2. Choose your clean EarthBound (USA) .sfc or .smc ROM.
-3. Leave the complete MSU soundtrack selected for enhanced music.
+3. The MSU soundtrack is optional. Leave it selected for enhanced music, or
+   uncheck it to use original music. A music download outage does not block setup.
 4. Setup downloads the pinned Redux source and soundtrack, checks them,
    and builds the native game data locally. No Python installation is needed.
 5. Play either edition, or generate a Story Shuffle adventure.

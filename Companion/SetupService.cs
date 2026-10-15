@@ -2,23 +2,13 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace EarthBoundCompanion;
 
 internal sealed record SetupProgress(string Stage, string Detail, long Done=0, long Total=0);
-internal sealed record SetupResult(int MsuTracks, long MsuBytes, bool CreatedStarterSeed);
-internal sealed record MsuEntry(
- [property:JsonPropertyName("name")] string Name,
- [property:JsonPropertyName("size")] string SizeText,
- [property:JsonPropertyName("md5")] string Md5,
- [property:JsonPropertyName("sha1")] string Sha1) {
- public long Size=>long.Parse(SizeText,System.Globalization.CultureInfo.InvariantCulture);
-}
 
 internal static class SetupService {
  const string UsaRomSha256="A8FE2226728002786D68C27DDDDF0B90A894DB52E4DFE268FDF72A68CAE5F02E";
- const string MsuBase="https://archive.org/download/earthbound-msu-1-pack/";
  static readonly HttpClient Http=new(){Timeout=TimeSpan.FromMinutes(10)};
 
  internal static bool DataReady=>File.Exists(Path.Combine(Settings.BaseGame,"assets.pak"));
@@ -46,6 +36,15 @@ internal static class SetupService {
   if(installMsu)(tracks,bytes)=await InstallMsuAsync(progress,cancel);
   return new(tracks,bytes,createdSeed);
  }
+
+ // Build playable data before attempting optional music. A remote music outage must
+ // never prevent an otherwise valid Original/Redux installation from completing.
+ internal static Task<SetupResult> InstallGameAsync(string? romPath,bool installMsu,bool redux,IProgress<SetupProgress>? progress=null,CancellationToken cancel=default)=>
+  SetupWorkflow.RunAsync(async()=>{
+   var result=await InstallAsync(romPath,false,progress,cancel);
+   if(redux)await ReduxProfileService.BuildAsync(romPath!,progress,cancel);
+   return result;
+  },installMsu?()=>InstallMsuAsync(progress,cancel):null,cancel);
 
  static async Task ValidateRomAsync(string path,CancellationToken cancel) {
   var info=new FileInfo(path);if(!info.Exists)throw new IOException("That ROM file no longer exists.");
@@ -82,23 +81,23 @@ internal static class SetupService {
  }
 
  static async Task<(int Tracks,long Bytes)> InstallMsuAsync(IProgress<SetupProgress>? progress,CancellationToken cancel) {
+  try{return await DownloadMsuAsync(progress,cancel);}
+  catch(Exception e)when(e is not OperationCanceledException){
+   // Logging must not turn an optional download failure into a game-setup failure.
+   try{Directory.CreateDirectory(Settings.User);await File.WriteAllTextAsync(Path.Combine(Settings.User,"msu-setup.log"),DateTimeOffset.UtcNow+Environment.NewLine+e+Environment.NewLine,cancel);}catch(IOException){}catch(UnauthorizedAccessException){}
+   throw;
+  }
+ }
+
+ static async Task<(int Tracks,long Bytes)> DownloadMsuAsync(IProgress<SetupProgress>? progress,CancellationToken cancel) {
   var entries=LoadMsuManifest();long total=entries.Sum(e=>e.Size),done=0;int count=0;string folder=Path.Combine(Settings.Root,"msu");Directory.CreateDirectory(folder);
+  var downloader=new MsuDownloader(Http,MsuDownloader.LoadSources(Path.Combine(Settings.Root,"msu-sources.json")));
   foreach(var entry in entries) {
    cancel.ThrowIfCancellationRequested();string target=Path.Combine(folder,entry.Name);
    if(await MatchesAsync(target,entry,cancel)){done+=entry.Size;count++;progress?.Report(new("MSU",$"Verified {count} of {entries.Length} tracks",done,total));continue;}
-   string part=target+".part";if(File.Exists(part))File.Delete(part);
    progress?.Report(new("MSU",$"Downloading track {count+1} of {entries.Length}",done,total));
-   try {
-    using var response=await Http.GetAsync(MsuBase+Uri.EscapeDataString(entry.Name),HttpCompletionOption.ResponseHeadersRead,cancel);response.EnsureSuccessStatusCode();
-    await using var input=await response.Content.ReadAsStreamAsync(cancel);
-    await using(var output=new FileStream(part,FileMode.CreateNew,FileAccess.Write,FileShare.None,262144,true)){
-     byte[] buffer=new byte[262144];int read;long fileDone=0;
-     while((read=await input.ReadAsync(buffer,cancel))>0){await output.WriteAsync(buffer.AsMemory(0,read),cancel);fileDone+=read;progress?.Report(new("MSU",$"Downloading track {count+1} of {entries.Length}",done+fileDone,total));}
-     await output.FlushAsync(cancel);
-    }
-    if(!await MatchesAsync(part,entry,cancel))throw new InvalidDataException("Soundtrack download failed its checksum: "+entry.Name);
-    File.Move(part,target,true);done+=entry.Size;count++;
-   } finally {if(File.Exists(part))File.Delete(part);}
+   await downloader.DownloadAsync(entry,target,(detail,bytes)=>progress?.Report(new("MSU",$"Track {count+1}/{entries.Length}: {detail}",done+bytes,total)),cancel);
+   done+=entry.Size;count++;
   }
   return(count,total);
  }

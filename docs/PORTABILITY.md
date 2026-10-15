@@ -1,6 +1,6 @@
 # Linux, macOS and Android previews
 
-[Windows 1.0.6](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.18 supplies the battle-render and lifecycle fixes on Linux, macOS and Android. These are platform preview
+[Windows 1.0.7](https://github.com/rages4calm/earthbound-companion/releases/latest) is the official Windows release; preview.18 supplies the battle-render and lifecycle fixes on Linux, macOS and Android. These are platform preview
 builds with the 1.0.6 native game core and render fixes and 46-achievement catalog. Windows retains its Windows Forms
 launcher, renderer and installation paths. Previews use separate platform data
 and never replace a Windows installation. [Achievements](ACHIEVEMENTS.md).

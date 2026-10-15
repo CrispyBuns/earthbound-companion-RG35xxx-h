@@ -4,6 +4,7 @@ Fixes reported on Android preview.17, including shared renderer faults reproduce
 
 - Battle color math now halves the full sum before saturation and uses fixed color without halving when the subscreen is empty. This restores bright overlapping backgrounds instead of washing them toward gray.
 - Distortion belongs to each physical background layer, including vertical compression. Background scrolling no longer doubles its base offset or warps the PSI scratch layer. Separate layer tables preserve the original alternating 30fps distortion timing.
+- Save restoration rebuilds distortion only for its current scene owner, including Sound Stone, coffee/tea and the gas-station prologue. Old background data cannot reapply it to the overworld or game-over screen.
 - Redux game-over entry stops an abandoned cinematic mask producer, preventing its bars from returning after a loss. Normal cutscenes and temporary battle interruptions retain their masks.
 - Holding Run on an escalator retains the standing ride pose rather than freezing a running sprite. Ordinary walking and stair running remain unchanged.
 

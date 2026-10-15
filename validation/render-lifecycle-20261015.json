@@ -14,20 +14,20 @@
     {
       "edition": "original",
       "returncode": 0,
-      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 68\r\nCHECKS 12406 PASS\r\n"
+      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 68\r\nCHECKS 12418 PASS\r\n"
     },
     {
       "edition": "redux",
       "returncode": 0,
-      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 136\r\nCHECKS 20131 PASS\r\n"
+      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 136\r\nCHECKS 20143 PASS\r\n"
     }
   ],
   "stairCases": {
     "original": 4,
     "redux": 4
   },
-  "nativeExeSHA256": "b24babf6a323d0b55bdef2f4870e7fda0230da55f2cafa1cc47e4f07ec91ee44",
-  "patchSHA256": "73e313629122281e9fb6a4f84075be5901420469681aa373f36665e366f6c8c0",
+  "nativeExeSHA256": "415ff5402337b752749a39cc425110c2b787b4d7c1bae0c96adcad24b8ecfcab",
+  "patchSHA256": "e860f06ff2c9c1a402ba0cf3e9ad3ec3bb8b0c44f86ab16def5e845f5e90bedc",
   "files": [
     "src/core/state_dump.c",
     "src/game/battle_bg.c",
@@ -47,5 +47,13 @@
     "Death entry and Continue/No-Continue branch checkpoints checked; no natural full death-to-respawn scene replay.",
     "Four actual stair orientations per edition entered and resumed through native callbacks; escalator pose checks cover all four party members with run held/released.",
     "Windows native renderer CPU benchmark below 1ms/frame is not an Android FPS measurement."
+  ],
+  "fullCompositorCases": 108,
+  "restoreOwnershipChecks": [
+    "overworld rejects stale gas/battle data",
+    "game over rejects stale battle flag",
+    "Sound Stone main retains raster, exit drops it",
+    "coffee/tea retains raster, map flyover rejects it",
+    "gas station retains raster"
   ]
 }

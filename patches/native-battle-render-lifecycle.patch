@@ -12,7 +12,15 @@ diff --git a/src/core/state_dump.c b/src/core/state_dump.c
 diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
 --- a/src/game/battle_bg.c
 +++ b/src/game/battle_bg.c
-@@ -17,6 +17,13 @@
+@@ -4,6 +4,7 @@
+ #include "snes/ppu.h"
+ #include "core/decomp.h"
+ #include "core/memory.h"
++#include "core/mode_stack.h"
+ #include "data/assets.h"
+ #include "include/binary.h"
+ #include "include/constants.h"
+@@ -17,6 +18,13 @@
  /* Per-scanline horizontal offset array for HDMA emulation */
  int16_t bg2_scanline_hoffset[BATTLEBG_MAX_SCANLINES];
  bool bg2_distortion_active = false;
@@ -26,21 +34,52 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
  
  /* Loaded BG data structs, palette, cycling, and animation config per layer.
   * Assembly: LOADED_BG_DATA_LAYER1/LAYER2 in BSS (ram.asm lines 1511-1514). */
-@@ -25,6 +32,13 @@
+@@ -25,6 +33,44 @@
  
  /* Runtime state for the loaded battle background */
  static BattleBGState bg_state;
 +
 +void battle_bg_rebuild_rasters(void) {
 +    battle_bg_clear_rasters();
-+    if (!bt.battle_mode_flag && !bg_state.active) return;
++    /* Loaded background structs survive map reloads. Rebuild only for the
++     * current owner, never from an old gas-station/battle active flag alone. */
++    bool owns_background = bt.battle_mode_flag != 0;
++    bool game_over = false;
++    for (unsigned i = 0; i < g_mode_stack.depth; i++) {
++        const ModeState *st = &g_mode_stack.state[i];
++        switch (g_mode_stack.mode[i]) {
++        case GAME_MODE_GAME_OVER:
++            game_over = true;
++            break;
++        case GAME_MODE_GAS_STATION:
++            owns_background |= st->gas_station.phase != GS_PH6;
++            break;
++        case GAME_MODE_SOUND_STONE:
++            owns_background |= st->sound_stone.phase >= SS_FADEIN &&
++                               st->sound_stone.phase <= SS_FADEOUT;
++            break;
++        case GAME_MODE_FLYOVER:
++            owns_background |= st->flyover.kind == FO_COFFEETEA &&
++                (st->flyover.phase == FOP_CT_PARSE ||
++                 st->flyover.phase == FOP_CT_FADEWAIT);
++            break;
++        default:
++            break;
++        }
++    }
++    if (!owns_background || game_over) {
++        bg2_distortion_active = false;
++        return;
++    }
++    if (loaded_bg_data_layer1.target_layer) bg2_distortion_active = false;
 +    build_bg_raster(&loaded_bg_data_layer1);
 +    build_bg_raster(&loaded_bg_data_layer2);
 +}
++
  
  /* ---- Savestate snapshot (see BattleBgSaveState in battle_bg.h) ----
   * bg2_scanline_hoffset / bg2_distortion_active are intentionally NOT captured:
-@@ -37,19 +51,13 @@
+@@ -37,19 +83,13 @@
  }
  
  void battle_bg_savestate_unpack(const void *in) {
@@ -64,7 +103,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
      memset(bg2_scanline_hoffset, 0, sizeof(bg2_scanline_hoffset));
      bg2_distortion_active = bg_state.active && (bg_state.dist_type != 0);
  }
-@@ -85,6 +93,7 @@
+@@ -85,6 +125,7 @@
  };
  
  void battle_bg_init(void) {
@@ -72,7 +111,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
      memset(&bg_state, 0, sizeof(bg_state));
      memset(bg2_scanline_hoffset, 0, sizeof(bg2_scanline_hoffset));
      bg2_distortion_active = false;
-@@ -785,8 +794,10 @@
+@@ -785,8 +826,10 @@
      }
  
      /* ===== Distortion acceleration (assembly lines 737-785) ===== */
@@ -84,7 +123,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
  
      data->distortion_ripple_frequency += data->distortion_freq_accel;
      data->distortion_ripple_amplitude += data->distortion_amp_accel;
-@@ -801,6 +812,13 @@
+@@ -801,6 +844,13 @@
              return;
      }
  
@@ -98,7 +137,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
      /* ===== Per-scanline offset computation (assembly lines 806-820) =====
       * Mirrors PREPARE_BG_OFFSET_TABLES logic.
       *
-@@ -834,7 +852,7 @@
+@@ -834,7 +884,7 @@
      }
      int16_t comp_rate = data->distortion_compression_rate;
  
@@ -107,7 +146,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
  
      if (dist_style == 0) {
          /* Style 0 (HORIZONTAL_SMOOTH): simple sine ripple */
-@@ -842,7 +860,7 @@
+@@ -842,7 +892,7 @@
              uint8_t idx = (uint8_t)(phase >> 8);
              int16_t ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
                                           (int32_t)sine_table[idx]) >> 8);
@@ -116,7 +155,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
              phase += (uint16_t)freq;
          }
      } else if (dist_style == 1) {
-@@ -851,13 +869,13 @@
+@@ -851,13 +901,13 @@
              uint8_t idx = (uint8_t)(phase >> 8);
              int16_t ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
                                           (int32_t)sine_table[idx]) >> 8);
@@ -132,7 +171,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
                  phase += (uint16_t)freq;
              }
          }
-@@ -869,7 +887,7 @@
+@@ -869,7 +919,7 @@
                                           (int32_t)sine_table[idx]) >> 8);
              comp_accum += comp_rate;
              int16_t comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
@@ -141,7 +180,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
              phase += (uint16_t)freq;
          }
      } else if (dist_style == 3) {
-@@ -880,7 +898,7 @@
+@@ -880,7 +930,7 @@
                                           (int32_t)sine_table[idx]) >> 8);
              comp_accum += comp_rate;
              int16_t comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
@@ -150,7 +189,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
              phase += (uint16_t)freq;
              if (y + 1 < BATTLEBG_MAX_SCANLINES) {
                  idx = (uint8_t)(phase >> 8);
-@@ -888,7 +906,7 @@
+@@ -888,7 +938,7 @@
                                       (int32_t)sine_table[idx]) >> 8);
                  comp_accum += comp_rate;
                  comp_part = (int16_t)((comp_accum >> 8) & 0xFF);

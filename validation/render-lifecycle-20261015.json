@@ -14,20 +14,20 @@
     {
       "edition": "original",
       "returncode": 0,
-      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 68\r\nCHECKS 12418 PASS\r\n"
+      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 68\r\nCHECKS 12429 PASS\r\n"
     },
     {
       "edition": "redux",
       "returncode": 0,
-      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 136\r\nCHECKS 20143 PASS\r\n"
+      "output": "REAL_BG_REPRESENTATIVES 8\r\nPSI_EFFECT_CASES 136\r\nCHECKS 20154 PASS\r\n"
     }
   ],
   "stairCases": {
     "original": 4,
     "redux": 4
   },
-  "nativeExeSHA256": "415ff5402337b752749a39cc425110c2b787b4d7c1bae0c96adcad24b8ecfcab",
-  "patchSHA256": "e860f06ff2c9c1a402ba0cf3e9ad3ec3bb8b0c44f86ab16def5e845f5e90bedc",
+  "nativeExeSHA256": "f042b912e97c50d8e4b38910cf32cf6d04a16297c4576c39b970b3343fd37a03",
+  "patchSHA256": "516cb9f3db76ce4aa0ea373342c1c20ece6ac1728a030b431167b8cd1aa6add5",
   "files": [
     "src/core/state_dump.c",
     "src/game/battle_bg.c",
@@ -55,5 +55,12 @@
     "Sound Stone main retains raster, exit drops it",
     "coffee/tea retains raster, map flyover rejects it",
     "gas station retains raster"
+  ],
+  "sharedPhysicalLayerChecks": [
+    "both scroll axes survive alternating frame updates",
+    "later HDMA channel wins same-axis writes without alternating priority",
+    "disabling later channel restores earlier channel",
+    "source type3 uses VOFS; source type4 retains HOFS destination",
+    "rendered H/V/both coordinate equivalence on every physical BG"
   ]
 }

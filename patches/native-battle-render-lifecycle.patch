@@ -20,21 +20,42 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
  #include "data/assets.h"
  #include "include/binary.h"
  #include "include/constants.h"
-@@ -17,6 +18,13 @@
+@@ -17,6 +18,34 @@
  /* Per-scanline horizontal offset array for HDMA emulation */
  int16_t bg2_scanline_hoffset[BATTLEBG_MAX_SCANLINES];
  bool bg2_distortion_active = false;
 +int16_t battle_bg_raster_offsets[4][BATTLEBG_MAX_SCANLINES];
++int16_t battle_bg_raster_vertical[4][BATTLEBG_MAX_SCANLINES];
 +uint8_t battle_bg_raster_mode[4];
-+static void build_bg_raster(LoadedBGData *data);
++/* SNES HDMA channels 5/6 retain independent tables even when both address
++ * one BG. Later channels win only when they write the same scroll axis. */
++static struct {
++    uint8_t target, mode;
++    int16_t offsets[BATTLEBG_MAX_SCANLINES];
++} raster_channels[2];
++static void build_bg_raster(LoadedBGData *data, int layer_index);
++
++static void compose_bg_rasters(void) {
++    memset(battle_bg_raster_mode, 0, sizeof(battle_bg_raster_mode));
++    for (unsigned i = 0; i < 2; i++) {
++        unsigned target = raster_channels[i].target;
++        uint8_t mode = raster_channels[i].mode;
++        if (!mode || target < 1 || target > 4) continue;
++        int16_t *dest = mode == 2 ? battle_bg_raster_vertical[target - 1]
++                                 : battle_bg_raster_offsets[target - 1];
++        memcpy(dest, raster_channels[i].offsets, sizeof(raster_channels[i].offsets));
++        battle_bg_raster_mode[target - 1] |= mode;
++    }
++}
 +
 +void battle_bg_clear_rasters(void) {
 +    memset(battle_bg_raster_mode, 0, sizeof(battle_bg_raster_mode));
++    memset(raster_channels, 0, sizeof(raster_channels));
 +}
  
  /* Loaded BG data structs, palette, cycling, and animation config per layer.
   * Assembly: LOADED_BG_DATA_LAYER1/LAYER2 in BSS (ram.asm lines 1511-1514). */
-@@ -25,6 +33,44 @@
+@@ -25,6 +54,44 @@
  
  /* Runtime state for the loaded battle background */
  static BattleBGState bg_state;
@@ -72,14 +93,14 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
 +        return;
 +    }
 +    if (loaded_bg_data_layer1.target_layer) bg2_distortion_active = false;
-+    build_bg_raster(&loaded_bg_data_layer1);
-+    build_bg_raster(&loaded_bg_data_layer2);
++    build_bg_raster(&loaded_bg_data_layer1, 0);
++    build_bg_raster(&loaded_bg_data_layer2, 1);
 +}
 +
  
  /* ---- Savestate snapshot (see BattleBgSaveState in battle_bg.h) ----
   * bg2_scanline_hoffset / bg2_distortion_active are intentionally NOT captured:
-@@ -37,19 +83,13 @@
+@@ -37,19 +104,13 @@
  }
  
  void battle_bg_savestate_unpack(const void *in) {
@@ -103,7 +124,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
      memset(bg2_scanline_hoffset, 0, sizeof(bg2_scanline_hoffset));
      bg2_distortion_active = bg_state.active && (bg_state.dist_type != 0);
  }
-@@ -85,6 +125,7 @@
+@@ -85,6 +146,7 @@
  };
  
  void battle_bg_init(void) {
@@ -111,42 +132,68 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
      memset(&bg_state, 0, sizeof(bg_state));
      memset(bg2_scanline_hoffset, 0, sizeof(bg2_scanline_hoffset));
      bg2_distortion_active = false;
-@@ -785,8 +826,10 @@
+@@ -626,6 +688,12 @@
+  */
+ void generate_battlebg_frame(LoadedBGData *data, int layer_index) {
+     uint16_t target_layer = data->target_layer & 0xFF;
++    if (layer_index < 0 || layer_index > 1) return;
++    if (target_layer < 1 || target_layer > 4) {
++        raster_channels[layer_index].mode = 0;
++        compose_bg_rasters();
++        return;
++    }
+ 
+     /* ===== Palette shifting (assembly lines 23-341) ===== */
+     if (!data->freeze_palette_scrolling) {
+@@ -785,8 +853,20 @@
      }
  
      /* ===== Distortion acceleration (assembly lines 737-785) ===== */
 -    if ((data->distortion_type & 0xFF) == 0)
 +    if ((data->distortion_type & 0xFF) == 0) {
-+        if (target_layer >= 1 && target_layer <= 4) battle_bg_raster_mode[target_layer - 1] = 0;
++        raster_channels[layer_index].mode = 0;
++        compose_bg_rasters();
          return;
++    }
++
++    uint8_t axis = data->distortion_type == 3 ? 2 : 1;
++    if (raster_channels[layer_index].mode != axis ||
++        raster_channels[layer_index].target != target_layer) {
++        /* DMA destination changes before the source's 30fps table gate. */
++        raster_channels[layer_index].mode = axis;
++        raster_channels[layer_index].target = target_layer;
++        compose_bg_rasters();
 +    }
  
      data->distortion_ripple_frequency += data->distortion_freq_accel;
      data->distortion_ripple_amplitude += data->distortion_amp_accel;
-@@ -801,6 +844,13 @@
+@@ -801,6 +881,13 @@
              return;
      }
  
-+    build_bg_raster(data);
++    build_bg_raster(data, layer_index);
 +}
 +
-+static void build_bg_raster(LoadedBGData *data) {
++static void build_bg_raster(LoadedBGData *data, int layer_index) {
 +    unsigned target_layer = data->target_layer & 0xFF;
 +    if (target_layer < 1 || target_layer > 4 || !(data->distortion_type & 0xFF)) return;
-+    int16_t *offsets = battle_bg_raster_offsets[target_layer - 1];
++    int16_t *offsets = raster_channels[layer_index].offsets;
      /* ===== Per-scanline offset computation (assembly lines 806-820) =====
       * Mirrors PREPARE_BG_OFFSET_TABLES logic.
       *
-@@ -834,7 +884,7 @@
+@@ -834,7 +921,10 @@
      }
      int16_t comp_rate = data->distortion_compression_rate;
  
 -    bg2_distortion_active = true;
-+    battle_bg_raster_mode[target_layer - 1] = dist_style < 2 ? 1 : 2;
++    raster_channels[layer_index].target = target_layer;
++    /* GENERATE_BATTLEBG_FRAME selects VOFS only for type 3. Type 4's
++     * interlaced compression values still go to HOFS in the source ROM. */
++    raster_channels[layer_index].mode = data->distortion_type == 3 ? 2 : 1;
  
      if (dist_style == 0) {
          /* Style 0 (HORIZONTAL_SMOOTH): simple sine ripple */
-@@ -842,7 +892,7 @@
+@@ -842,7 +932,7 @@
              uint8_t idx = (uint8_t)(phase >> 8);
              int16_t ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
                                           (int32_t)sine_table[idx]) >> 8);
@@ -155,7 +202,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
              phase += (uint16_t)freq;
          }
      } else if (dist_style == 1) {
-@@ -851,13 +901,13 @@
+@@ -851,13 +941,13 @@
              uint8_t idx = (uint8_t)(phase >> 8);
              int16_t ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
                                           (int32_t)sine_table[idx]) >> 8);
@@ -171,7 +218,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
                  phase += (uint16_t)freq;
              }
          }
-@@ -869,7 +919,7 @@
+@@ -869,7 +959,7 @@
                                           (int32_t)sine_table[idx]) >> 8);
              comp_accum += comp_rate;
              int16_t comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
@@ -180,7 +227,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
              phase += (uint16_t)freq;
          }
      } else if (dist_style == 3) {
-@@ -880,7 +930,7 @@
+@@ -880,7 +970,7 @@
                                           (int32_t)sine_table[idx]) >> 8);
              comp_accum += comp_rate;
              int16_t comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
@@ -189,7 +236,7 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
              phase += (uint16_t)freq;
              if (y + 1 < BATTLEBG_MAX_SCANLINES) {
                  idx = (uint8_t)(phase >> 8);
-@@ -888,7 +938,7 @@
+@@ -888,9 +978,10 @@
                                       (int32_t)sine_table[idx]) >> 8);
                  comp_accum += comp_rate;
                  comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
@@ -198,15 +245,20 @@ diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
                  phase += (uint16_t)freq;
              }
          }
+     }
+-}
++    compose_bg_rasters();
++}
 diff --git a/src/game/battle_bg.h b/src/game/battle_bg.h
 --- a/src/game/battle_bg.h
 +++ b/src/game/battle_bg.h
-@@ -126,6 +126,11 @@
+@@ -126,6 +126,12 @@
  /* Per-scanline horizontal offset array for HDMA emulation */
  extern int16_t bg2_scanline_hoffset[BATTLEBG_MAX_SCANLINES];
  extern bool bg2_distortion_active;
-+/* Derived HDMA scroll values, owned by each physical BG. 1 = H, 2 = V. */
++/* Derived physical BG scroll values. Mode bits: 1 = H, 2 = V, 3 = both. */
 +extern int16_t battle_bg_raster_offsets[4][BATTLEBG_MAX_SCANLINES];
++extern int16_t battle_bg_raster_vertical[4][BATTLEBG_MAX_SCANLINES];
 +extern uint8_t battle_bg_raster_mode[4];
 +void battle_bg_clear_rasters(void);
 +void battle_bg_rebuild_rasters(void);
@@ -320,7 +372,7 @@ diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
  #include "game/maternalbound_battle_sprites.h"
  #include "include/binary.h"
  #include "platform/platform.h"
-@@ -576,7 +578,23 @@
+@@ -576,7 +578,24 @@
       * scanline back into the table so every gutter row gets its own ripple
       * offset and churns like the content; reflection (vs. clamp/wrap) keeps the
       * offset continuous across the gutter/content seam. */
@@ -338,14 +390,15 @@ diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
 +        else if (row >= BATTLEBG_MAX_SCANLINES) row = 2 * (BATTLEBG_MAX_SCANLINES - 1) - row;
 +        if (row < 0) row = 0;
 +        if (row >= BATTLEBG_MAX_SCANLINES) row = BATTLEBG_MAX_SCANLINES - 1;
-+        int value = battle_bg_raster_offsets[bg_index][row];
-+        if (raster_mode == 1) scroll_x = (value - x_pad) & 0x3FF;
-+        else scroll_y = value & 0x3FF;
++        if (raster_mode & 1)
++            scroll_x = (battle_bg_raster_offsets[bg_index][row] - x_pad) & 0x3FF;
++        if (raster_mode & 2)
++            scroll_y = battle_bg_raster_vertical[bg_index][row] & 0x3FF;
 +    } else if (bg_index == 1 && bg2_distortion_active) {
          int dist_y = scanline;
          if (dist_y < 0)
              dist_y = -dist_y;                                  /* reflect at top edge */
-@@ -612,7 +630,7 @@
+@@ -612,7 +631,7 @@
      /* Replay the cached column plan when this scanline shares its tile row with an
       * already-decoded scanline of this frame (the common case: 7 of every 8). */
      bool row_cacheable = !big_tiles
@@ -354,7 +407,7 @@ diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
                           && render_width <= 8 * BG_ROW_PLAN_MAXCOL;
      if (row_cacheable
          && bg_row_cache[bg_index].row == tile_row_map
-@@ -761,13 +779,12 @@
+@@ -761,13 +780,12 @@
      if (subtract) { r -= sr; g -= sg; b -= sb_val; }
      else           { r += sr; g += sg; b += sb_val; }
  
@@ -371,7 +424,7 @@ diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
  
      return (uint16_t)(r | (g << 6) | (b << 11));
  }
-@@ -2236,6 +2253,7 @@
+@@ -2236,6 +2254,7 @@
                  if (color_math_active && math_eligible &&
                      (no_windows || !cm_prevented_line[x])) {
                      uint16_t sub_color;
@@ -379,7 +432,7 @@ diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
                      if (need_sub) {
                          uint8_t sub_obj_pk;
                          if (no_layer_windows)
-@@ -2247,12 +2265,14 @@
+@@ -2247,12 +2266,14 @@
                              sub_color = obj_color[x];
                          else if (sub_gp_val > 0)
                              sub_color = sub_bg_color[x];

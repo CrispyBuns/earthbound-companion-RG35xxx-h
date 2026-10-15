@@ -48,24 +48,32 @@ int main(int argc,char**argv){
  for(int target=1;target<=4;target++)for(int style=1;style<=4;style++){
   LoadedBGData data={0};data.target_layer=target;data.distortion_type=style;data.distortion_ripple_amplitude=0x2000;data.distortion_ripple_frequency=0x180;data.distortion_speed=20;data.distortion_compression_rate=0x100;
   battle_bg_clear_rasters();ppu.bg_hofs[target-1]=31;ppu.bg_vofs[target-1]=7;distort_30fps=0;generate_battlebg_frame(&data,0);
-  for(int i=0;i<4;i++)CHECK(battle_bg_raster_mode[i]==(i==target-1?(style<=2?1:2):0));
-  int16_t saved[224];memcpy(saved,battle_bg_raster_offsets[target-1],sizeof(saved));
-  LoadedBGData other=data;other.target_layer=target==4?1:target+1;generate_battlebg_frame(&other,1);CHECK(!memcmp(saved,battle_bg_raster_offsets[target-1],sizeof(saved)));
+  for(int i=0;i<4;i++)CHECK(battle_bg_raster_mode[i]==(i==target-1?(style==3?2:1):0));
+  int16_t saved[224];memcpy(saved,style==3?battle_bg_raster_vertical[target-1]:battle_bg_raster_offsets[target-1],sizeof(saved));
+  LoadedBGData other=data;other.target_layer=target==4?1:target+1;generate_battlebg_frame(&other,1);CHECK(!memcmp(saved,style==3?battle_bg_raster_vertical[target-1]:battle_bg_raster_offsets[target-1],sizeof(saved)));
   data.distortion_type=0;generate_battlebg_frame(&data,0);CHECK(!battle_bg_raster_mode[target-1]);
  }
  // Rendered coordinate checks: raster offsets replace only the selected axis.
  psi_animation_state.time_until_next_frame=0;
- for(int target=0;target<4;target++)for(int axis=1;axis<=2;axis++){
+ for(int target=0;target<4;target++)for(int axis=1;axis<=3;axis++){
   memset(&ppu,0,sizeof(ppu));battle_bg_clear_rasters();ppu.inidisp=15;ppu.bgmode=0;ppu.tm=1<<target;ppu.bg_sc[target]=0x60;
   for(int row=0;row<8;row++){ppu.vram[row*2]=0x55;ppu.vram[row*2+1]=(row&1)?0xff:0;}
   for(int i=0;i<256;i++)ppu.cgram[i]=(i%4)*0x145;
   ppu.bg_hofs[target]=11;ppu.bg_vofs[target]=8;
   unsigned long long expected;
-  if(axis==1)ppu.bg_hofs[target]=4;else ppu.bg_vofs[target]=3;
+  if(axis&1)ppu.bg_hofs[target]=4;if(axis&2)ppu.bg_vofs[target]=3;
   expected=picture();ppu.bg_hofs[target]=11;ppu.bg_vofs[target]=8;battle_bg_raster_mode[target]=axis;
-  for(int i=0;i<224;i++)battle_bg_raster_offsets[target][i]=axis==1?4:3;
+  for(int i=0;i<224;i++){battle_bg_raster_offsets[target][i]=4;battle_bg_raster_vertical[target][i]=3;}
   CHECK(expected==picture());
  }
+ // Shared physical BG: retain both axes and later-channel priority over time.
+ battle_bg_clear_rasters();LoadedBGData horizontal={0},vertical={0};horizontal.target_layer=vertical.target_layer=2;horizontal.distortion_type=1;vertical.distortion_type=3;
+ horizontal.distortion_ripple_amplitude=vertical.distortion_ripple_amplitude=0x2000;horizontal.distortion_ripple_frequency=vertical.distortion_ripple_frequency=0x180;vertical.distortion_compression_rate=0x80;
+ distort_30fps=1;core.frame_counter=0;generate_battlebg_frame(&horizontal,0);core.frame_counter=1;generate_battlebg_frame(&vertical,1);CHECK(battle_bg_raster_mode[1]==3);
+ int16_t prior_vertical[224];memcpy(prior_vertical,battle_bg_raster_vertical[1],sizeof(prior_vertical));core.frame_counter=2;generate_battlebg_frame(&horizontal,0);CHECK(battle_bg_raster_mode[1]==3);CHECK(!memcmp(prior_vertical,battle_bg_raster_vertical[1],sizeof(prior_vertical)));
+ vertical.distortion_type=1;core.frame_counter=3;vertical.horizontal_position=37<<8;generate_battlebg_frame(&vertical,1);int16_t priority[224];memcpy(priority,battle_bg_raster_offsets[1],sizeof(priority));CHECK(battle_bg_raster_mode[1]==1);
+ core.frame_counter=4;horizontal.horizontal_position=19<<8;generate_battlebg_frame(&horizontal,0);CHECK(!memcmp(priority,battle_bg_raster_offsets[1],sizeof(priority)));
+ vertical.distortion_type=0;generate_battlebg_frame(&vertical,1);CHECK(battle_bg_raster_mode[1]==1);CHECK(memcmp(priority,battle_bg_raster_offsets[1],sizeof(priority)));
  // Selected real data configurations across the complete 2bpp/4bpp table.
  const unsigned char*cfg=ASSET_DATA(ASSET_DATA_BG_DATA_TABLE_BIN);unsigned count=ASSET_SIZE(ASSET_DATA_BG_DATA_TABLE_BIN)/17;
  int seen[2][4]={{0}},representatives=0;

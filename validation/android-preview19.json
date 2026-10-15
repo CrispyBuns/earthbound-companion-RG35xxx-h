@@ -1,0 +1,78 @@
+{
+  "verifiedAtUtc": "2026-10-15T19:19:21.542402+00:00",
+  "sourceCommit": "634a9783a390238b93ed50a1dfdb1b2eff9a59f4",
+  "release": "v0.5.0-ports-preview.19",
+  "scope": "Android Java touch overlay only; Windows 1.0.6 and Linux/macOS preview.18 unchanged",
+  "build": "Local Release publish, persistent project signing certificate",
+  "certificateSha256": "0ff1807701821ca658c4dd2cbc5b0a5e7c3158a95b6085ba00a6fce0b4cc40ee",
+  "packages": {
+    "android-x64": {
+      "bytes": 67652963,
+      "sha256": "ceff92977bbe094d2024ac794fedb7765c89abfaddc3f69395837e10aa76cb71",
+      "nativeUnchangedFromPreview18": {
+        "libearthbound.so": true,
+        "libSDL2.so": true
+      }
+    },
+    "android-arm64": {
+      "bytes": 66612692,
+      "sha256": "2f7566b7436586f79f7a94cfea10f6e9e0a69f848063aef95266211632c3b4b6",
+      "nativeUnchangedFromPreview18": {
+        "libearthbound.so": true,
+        "libSDL2.so": true
+      }
+    }
+  },
+  "checks": {
+    "hostJava": "PASS: continuous sliding, all eight sectors, dead zone, pointer ownership, cancellation, balanced holds",
+    "androidMotionEvents": "PASS on phone and tablet: multiple fingers, pointer reindexing, Run plus movement, action reentry/cancel, hide cleanup, accessible activation, all action IDs, 48dp targets and nonoverlap",
+    "productionApk": "PASS: cold managed launcher, resume game, native touch Settings, return to same game; no Java fatal exceptions",
+    "visibility": "PASS: game activity hide preference removes entire overlay; Android Back reveals it temporarily",
+    "packages": "PASS: version19, correct ABI, signature, native libraries match preview18, test activity/classes absent, no private game data",
+    "visualReview": "ship: final phone/tablet production emulator captures, font scale1.3, dark; documentation preserves incumbent system"
+  },
+  "environment": {
+    "android": "API37 emulator, disposable read-only Medium_Tablet AVD",
+    "phone": "1920x1080 density480",
+    "tablet": "2560x1600 density320"
+  },
+  "limits": [
+    "Physical touchscreens/controllers not certified",
+    "No full campaign replay",
+    "ARM64 package checked but not executed on physical ARM64 hardware"
+  ],
+  "publicationChecks": [
+    {
+      "tag": "v0.5.0-ports-preview.19",
+      "prerelease": true,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.19"
+    },
+    {
+      "tag": "v0.5.0-ports-preview.19",
+      "prerelease": true,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.19"
+    },
+    {
+      "tag": "v1.0.6",
+      "prerelease": false,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.6"
+    }
+  ],
+  "uploadedAssets": [
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "size": 66612692,
+      "digest": "sha256:2f7566b7436586f79f7a94cfea10f6e9e0a69f848063aef95266211632c3b4b6",
+      "state": "uploaded"
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "size": 67652963,
+      "digest": "sha256:ceff92977bbe094d2024ac794fedb7765c89abfaddc3f69395837e10aa76cb71",
+      "state": "uploaded"
+    }
+  ]
+}

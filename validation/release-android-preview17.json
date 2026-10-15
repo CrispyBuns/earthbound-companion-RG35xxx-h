@@ -1,0 +1,20 @@
+{
+  "tag": "v0.5.0-ports-preview.17",
+  "buildRun": 38666367160,
+  "sourceCommit": "5f0ad20",
+  "focusedNativeCheckPassed": true,
+  "additionalGameplayTestsRun": false,
+  "androidDeviceTested": false,
+  "packages": [
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "bytes": 66608596,
+      "sha256": "8a3939b17afa5c567be3cad66bcebc30728ea7302f83bc81f5fbb7fa511a1271"
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "bytes": 67632483,
+      "sha256": "ed05023e4e205d57abc7ff97dd20045a0d3dd393fc8ee366d2dce695fe7fe139"
+    }
+  ]
+}

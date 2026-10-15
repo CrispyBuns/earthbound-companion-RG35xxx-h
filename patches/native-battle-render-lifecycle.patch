@@ -1,0 +1,360 @@
+diff --git a/src/core/state_dump.c b/src/core/state_dump.c
+--- a/src/core/state_dump.c
++++ b/src/core/state_dump.c
+@@ -792,6 +792,7 @@
+                 reassign_entity_script(ghost, EVENT_SCRIPT_MINI_GHOST);
+         }
+     }
++    battle_bg_rebuild_rasters();
+     psi_animation_savestate_rebind();
+     battle_recover_cutscene_letterbox();
+     /* TM/TS scanline tables are derived PPU scratch, outside SECTION_PPU.
+diff --git a/src/game/battle_bg.c b/src/game/battle_bg.c
+--- a/src/game/battle_bg.c
++++ b/src/game/battle_bg.c
+@@ -17,6 +17,13 @@
+ /* Per-scanline horizontal offset array for HDMA emulation */
+ int16_t bg2_scanline_hoffset[BATTLEBG_MAX_SCANLINES];
+ bool bg2_distortion_active = false;
++int16_t battle_bg_raster_offsets[4][BATTLEBG_MAX_SCANLINES];
++uint8_t battle_bg_raster_mode[4];
++static void build_bg_raster(LoadedBGData *data);
++
++void battle_bg_clear_rasters(void) {
++    memset(battle_bg_raster_mode, 0, sizeof(battle_bg_raster_mode));
++}
+ 
+ /* Loaded BG data structs, palette, cycling, and animation config per layer.
+  * Assembly: LOADED_BG_DATA_LAYER1/LAYER2 in BSS (ram.asm lines 1511-1514). */
+@@ -25,6 +32,13 @@
+ 
+ /* Runtime state for the loaded battle background */
+ static BattleBGState bg_state;
++
++void battle_bg_rebuild_rasters(void) {
++    battle_bg_clear_rasters();
++    if (!bt.battle_mode_flag && !bg_state.active) return;
++    build_bg_raster(&loaded_bg_data_layer1);
++    build_bg_raster(&loaded_bg_data_layer2);
++}
+ 
+ /* ---- Savestate snapshot (see BattleBgSaveState in battle_bg.h) ----
+  * bg2_scanline_hoffset / bg2_distortion_active are intentionally NOT captured:
+@@ -37,19 +51,13 @@
+ }
+ 
+ void battle_bg_savestate_unpack(const void *in) {
++    battle_bg_clear_rasters();
+     const BattleBgSaveState *s = (const BattleBgSaveState *)in;
+     distort_30fps = s->distort_30fps;
+     bg_state      = s->bg_state;
+-    /* The derived render state must be re-derived, not inherited from the
+-     * running process: loading a non-battle snapshot while currently IN a
+-     * battle otherwise leaves the current battle's bg2_distortion_active +
+-     * stale hoffset table applied to the loaded scene forever (nothing
+-     * outside battle code ever clears them, the "rebuilt each frame"
+-     * invariant above only holds while battle frames run).
+-     * In-battle snapshots recover on their next battle frame: the
+-     * full-config path (generate_battlebg_frame) re-asserts the flag and
+-     * rebuilds the table every frame, and the simplified path's flag is
+-     * exactly bg_state.active && dist_type != 0. */
++    /* Never inherit a previous scene's derived tables. The slot loader calls
++     * battle_bg_rebuild_rasters after restoring all serialized sections;
++     * simplified title backgrounds recover from bg_state on their next tick. */
+     memset(bg2_scanline_hoffset, 0, sizeof(bg2_scanline_hoffset));
+     bg2_distortion_active = bg_state.active && (bg_state.dist_type != 0);
+ }
+@@ -85,6 +93,7 @@
+ };
+ 
+ void battle_bg_init(void) {
++    battle_bg_clear_rasters();
+     memset(&bg_state, 0, sizeof(bg_state));
+     memset(bg2_scanline_hoffset, 0, sizeof(bg2_scanline_hoffset));
+     bg2_distortion_active = false;
+@@ -785,8 +794,10 @@
+     }
+ 
+     /* ===== Distortion acceleration (assembly lines 737-785) ===== */
+-    if ((data->distortion_type & 0xFF) == 0)
++    if ((data->distortion_type & 0xFF) == 0) {
++        if (target_layer >= 1 && target_layer <= 4) battle_bg_raster_mode[target_layer - 1] = 0;
+         return;
++    }
+ 
+     data->distortion_ripple_frequency += data->distortion_freq_accel;
+     data->distortion_ripple_amplitude += data->distortion_amp_accel;
+@@ -801,6 +812,13 @@
+             return;
+     }
+ 
++    build_bg_raster(data);
++}
++
++static void build_bg_raster(LoadedBGData *data) {
++    unsigned target_layer = data->target_layer & 0xFF;
++    if (target_layer < 1 || target_layer > 4 || !(data->distortion_type & 0xFF)) return;
++    int16_t *offsets = battle_bg_raster_offsets[target_layer - 1];
+     /* ===== Per-scanline offset computation (assembly lines 806-820) =====
+      * Mirrors PREPARE_BG_OFFSET_TABLES logic.
+      *
+@@ -834,7 +852,7 @@
+     }
+     int16_t comp_rate = data->distortion_compression_rate;
+ 
+-    bg2_distortion_active = true;
++    battle_bg_raster_mode[target_layer - 1] = dist_style < 2 ? 1 : 2;
+ 
+     if (dist_style == 0) {
+         /* Style 0 (HORIZONTAL_SMOOTH): simple sine ripple */
+@@ -842,7 +860,7 @@
+             uint8_t idx = (uint8_t)(phase >> 8);
+             int16_t ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
+                                          (int32_t)sine_table[idx]) >> 8);
+-            bg2_scanline_hoffset[y] = ripple + base_hofs;
++            offsets[y] = ripple + base_hofs;
+             phase += (uint16_t)freq;
+         }
+     } else if (dist_style == 1) {
+@@ -851,13 +869,13 @@
+             uint8_t idx = (uint8_t)(phase >> 8);
+             int16_t ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
+                                          (int32_t)sine_table[idx]) >> 8);
+-            bg2_scanline_hoffset[y] = ripple + base_hofs;
++            offsets[y] = ripple + base_hofs;
+             phase += (uint16_t)freq;
+             if (y + 1 < BATTLEBG_MAX_SCANLINES) {
+                 idx = (uint8_t)(phase >> 8);
+                 ripple = (int16_t)(((int32_t)(int16_t)amp_hi *
+                                      (int32_t)sine_table[idx]) >> 8);
+-                bg2_scanline_hoffset[y + 1] = base_hofs - ripple;
++                offsets[y + 1] = base_hofs - ripple;
+                 phase += (uint16_t)freq;
+             }
+         }
+@@ -869,7 +887,7 @@
+                                          (int32_t)sine_table[idx]) >> 8);
+             comp_accum += comp_rate;
+             int16_t comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
+-            bg2_scanline_hoffset[y] = comp_part + ripple;
++            offsets[y] = comp_part + ripple;
+             phase += (uint16_t)freq;
+         }
+     } else if (dist_style == 3) {
+@@ -880,7 +898,7 @@
+                                          (int32_t)sine_table[idx]) >> 8);
+             comp_accum += comp_rate;
+             int16_t comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
+-            bg2_scanline_hoffset[y] = comp_part + ripple;
++            offsets[y] = comp_part + ripple;
+             phase += (uint16_t)freq;
+             if (y + 1 < BATTLEBG_MAX_SCANLINES) {
+                 idx = (uint8_t)(phase >> 8);
+@@ -888,7 +906,7 @@
+                                      (int32_t)sine_table[idx]) >> 8);
+                 comp_accum += comp_rate;
+                 comp_part = (int16_t)((comp_accum >> 8) & 0xFF);
+-                bg2_scanline_hoffset[y + 1] = comp_part - ripple;
++                offsets[y + 1] = comp_part - ripple;
+                 phase += (uint16_t)freq;
+             }
+         }
+diff --git a/src/game/battle_bg.h b/src/game/battle_bg.h
+--- a/src/game/battle_bg.h
++++ b/src/game/battle_bg.h
+@@ -126,6 +126,11 @@
+ /* Per-scanline horizontal offset array for HDMA emulation */
+ extern int16_t bg2_scanline_hoffset[BATTLEBG_MAX_SCANLINES];
+ extern bool bg2_distortion_active;
++/* Derived HDMA scroll values, owned by each physical BG. 1 = H, 2 = V. */
++extern int16_t battle_bg_raster_offsets[4][BATTLEBG_MAX_SCANLINES];
++extern uint8_t battle_bg_raster_mode[4];
++void battle_bg_clear_rasters(void);
++void battle_bg_rebuild_rasters(void);
+ 
+ /* Initialize the battle background system */
+ void battle_bg_init(void);
+diff --git a/src/game/battle_ui.c b/src/game/battle_ui.c
+--- a/src/game/battle_ui.c
++++ b/src/game/battle_ui.c
+@@ -794,6 +794,8 @@
+ }
+ 
+ void load_battle_bg(uint16_t layer1_id, uint16_t layer2_id, uint16_t letterbox_style) {
++    battle_bg_clear_rasters();
++    bg2_distortion_active = false;
+     /* Sprite Y offset centers SNES-coordinate sprites vertically. The
+      * per-BG viewport-fill assignment below depends on bitdepth (read a few
+      * lines down), so it's set there instead of unconditionally here --
+diff --git a/src/game/overworld_palette.c b/src/game/overworld_palette.c
+--- a/src/game/overworld_palette.c
++++ b/src/game/overworld_palette.c
+@@ -790,6 +790,12 @@
+     for (;;) {
+         switch ((GameOverPhase)st->phase) {
+         case GO_ENTER:
++            /* A death abandons the interrupted story scene. Stop its mask
++             * producer too, or it reasserts the bars after respawning. */
++            ow.redux_letterbox_active = 0;
++            ow.redux_letterbox_direction = 0;
++            ow.redux_letterbox_top = 0;
++            ppu.tm_hdma_active = false;
+             st->saved_x = ow.respawn_x;
+             st->saved_y = ow.respawn_y;
+             disable_all_entities();
+diff --git a/src/game/position_buffer.c b/src/game/position_buffer.c
+--- a/src/game/position_buffer.c
++++ b/src/game/position_buffer.c
+@@ -117,6 +117,7 @@
+     int16_t char_id, uint16_t walking_style,
+     int16_t entity_offset, int16_t party_idx)
+ {
++    bool running = maternalbound_running() && walking_style != WALKING_STYLE_ESCALATOR;
+     uint16_t mode = 0;  /* Y register in assembly, visual mode index */
+ 
+     /* Pajamas check (assembly lines 16-26).
+@@ -126,9 +127,9 @@
+         bool alternate=entity_offset>=0 && entities.var[4][entity_offset]!=0;
+         if (entity_offset>=0) {
+             entities.overlay_flags[entity_offset]=alternate && !(ow.redux_secondary_timer & 0x80) ? 2 : 0;
+-            entities.var[3][entity_offset]=maternalbound_running() ? 5 : 8;
+-        }
+-        return maternalbound_running() ? 470 : 437;
++            entities.var[3][entity_offset]=running ? 5 : 8;
++        }
++        return running ? 470 : 437;
+     }
+     if ((!maternalbound_enabled() || game_state.character_mode != CHARACTER_MODE_BICYCLE) && char_id == CHARACTER_NESS && ow.disabled_transitions == 0 && ow.pajama_flag != 0)
+         return 437;  /* OVERWORLD_SPRITE::NESS_IN_PJS */
+@@ -180,7 +181,7 @@
+         /* Ghost mode: if char_struct.unknown53 == 0, return special sprite */
+         if (party_idx >= 0 && party_idx < TOTAL_PARTY_COUNT &&
+             party_characters[party_idx].unknown53 == 0) {
+-            return maternalbound_enabled() && maternalbound_running() ? 471 : 6;
++            return maternalbound_enabled() && running ? 471 : 6;
+         }
+     }
+ 
+@@ -219,7 +220,7 @@
+     if (entity_offset >= 0) {
+         uint16_t anim_speed;
+ 
+-        if ((game_state.party_status & 0xFF) == 3 || (maternalbound_enabled() && maternalbound_running())) {
++        if ((game_state.party_status & 0xFF) == 3 || (maternalbound_enabled() && running)) {
+             anim_speed = 5;    /* Special party status → fast */
+         } else if (party_idx >= 0 && party_idx < TOTAL_PARTY_COUNT &&
+                    party_characters[party_idx].afflictions[STATUS_GROUP_PERSISTENT_EASYHEAL]
+@@ -253,7 +254,7 @@
+     if (mode >= PLAYABLE_CHAR_COL_COUNT)
+         return (int16_t)0xFFFF;
+     if (maternalbound_enabled())
+-        return (int16_t)maternalbound_sprite_variant(char_id,mode,maternalbound_running(),
++        return (int16_t)maternalbound_sprite_variant(char_id,mode,running,
+             entity_offset>=0 && entities.var[4][entity_offset]!=0);
+     return (int16_t)lookup_playable_char_sprite((uint16_t)char_id, mode);
+ }
+diff --git a/src/snes/ppu.c b/src/snes/ppu.c
+--- a/src/snes/ppu.c
++++ b/src/snes/ppu.c
+@@ -1,4 +1,5 @@
+ #include "snes/ppu.h"
++#include "game/battle_bg.h"
+ #include "include/binary.h"
+ #include <string.h>
+ 
+@@ -37,6 +38,7 @@
+ }
+ 
+ void ppu_clear_effects(void) {
++    battle_bg_clear_rasters();
+     ppu.cgwsel = 0;
+     ppu.cgadsub = 0;
+     ppu.ts = 0;
+diff --git a/src/snes/ppu_render.c b/src/snes/ppu_render.c
+--- a/src/snes/ppu_render.c
++++ b/src/snes/ppu_render.c
+@@ -1,5 +1,7 @@
+ #include "snes/ppu.h"
+ #include "game/battle_bg.h"
++#include "game/battle.h"
++#include "game/oval_window.h"
+ #include "game/maternalbound_battle_sprites.h"
+ #include "include/binary.h"
+ #include "platform/platform.h"
+@@ -576,7 +578,23 @@
+      * scanline back into the table so every gutter row gets its own ripple
+      * offset and churns like the content; reflection (vs. clamp/wrap) keeps the
+      * offset continuous across the gutter/content seam. */
+-    if (bg_index == 1 && bg2_distortion_active) {
++    uint8_t raster_mode = battle_bg_raster_mode[bg_index];
++    /* PSI temporarily owns the scratch BG (BG2 in mode 0, BG1 in mode 1).
++     * A two-background 4bpp fight may otherwise leave BG1's art HDMA on
++     * the spell arrangement. Keep the background table for its return. */
++    if (bt.battle_mode_flag && psi_animation_state.time_until_next_frame &&
++        bg_index == (loaded_bg_data_layer1.bitdepth == 2 ? 1 : 0))
++        raster_mode = 0;
++    if (raster_mode) {
++        int row = scanline;
++        if (row < 0) row = -row;
++        else if (row >= BATTLEBG_MAX_SCANLINES) row = 2 * (BATTLEBG_MAX_SCANLINES - 1) - row;
++        if (row < 0) row = 0;
++        if (row >= BATTLEBG_MAX_SCANLINES) row = BATTLEBG_MAX_SCANLINES - 1;
++        int value = battle_bg_raster_offsets[bg_index][row];
++        if (raster_mode == 1) scroll_x = (value - x_pad) & 0x3FF;
++        else scroll_y = value & 0x3FF;
++    } else if (bg_index == 1 && bg2_distortion_active) {
+         int dist_y = scanline;
+         if (dist_y < 0)
+             dist_y = -dist_y;                                  /* reflect at top edge */
+@@ -612,7 +630,7 @@
+     /* Replay the cached column plan when this scanline shares its tile row with an
+      * already-decoded scanline of this frame (the common case: 7 of every 8). */
+     bool row_cacheable = !big_tiles
+-                         && !(bg_index == 1 && bg2_distortion_active)
++                         && !raster_mode && !(bg_index == 1 && bg2_distortion_active)
+                          && render_width <= 8 * BG_ROW_PLAN_MAXCOL;
+     if (row_cacheable
+         && bg_row_cache[bg_index].row == tile_row_map
+@@ -761,13 +779,12 @@
+     if (subtract) { r -= sr; g -= sg; b -= sb_val; }
+     else           { r += sr; g += sg; b += sb_val; }
+ 
+-    /* SNES hardware order: clamp THEN halve (not halve then clamp).
+-     * E.g. 20+30=50 â†’ clamp to 31 â†’ halve to 15, NOT 50â†’25â†’25. */
++    /* Half addition averages the full sum before saturation (LakeSnes PPU).
++     * Saturating first collapses bright overlapping layers to gray. */
++    if (half) { r >>= 1; g >>= 1; b >>= 1; }
+     if (r < 0) r = 0; else if (r > 31) r = 31;
+     if (g < 0) g = 0; else if (g > 31) g = 31;
+     if (b < 0) b = 0; else if (b > 31) b = 31;
+-
+-    if (half) { r >>= 1; g >>= 1; b >>= 1; }
+ 
+     return (uint16_t)(r | (g << 6) | (b << 11));
+ }
+@@ -2236,6 +2253,7 @@
+                 if (color_math_active && math_eligible &&
+                     (no_windows || !cm_prevented_line[x])) {
+                     uint16_t sub_color;
++                    bool use_half = half_math;
+                     if (need_sub) {
+                         uint8_t sub_obj_pk;
+                         if (no_layer_windows)
+@@ -2247,12 +2265,14 @@
+                             sub_color = obj_color[x];
+                         else if (sub_gp_val > 0)
+                             sub_color = sub_bg_color[x];
+-                        else
+-                            sub_color = 0;
++                        else {
++                            sub_color = fixed_color;
++                            use_half = false; /* Subscreen backdrop uses fixed color, never halves. */
++                        }
+                     } else {
+                         sub_color = fixed_color;
+                     }
+-                    color = blend_colors(color, sub_color, subtract_mode, half_math);
++                    color = blend_colors(color, sub_color, subtract_mode, use_half);
+                 }
+ 
+                 /* Brightness */

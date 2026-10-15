@@ -51,17 +51,26 @@ jobs:
           else
             [ "${#files[@]}" -eq 5 ]
           fi
-          gh release upload "$RELEASE_TAG" "${files[@]}"
           python - "${files[@]}" <<'PY'
           import hashlib, json, os, pathlib, subprocess, sys
           repo, tag = os.environ['GH_REPO'], os.environ['RELEASE_TAG']
-          release = json.loads(subprocess.check_output(
-              ['gh', 'api', f'repos/{repo}/releases/tags/{tag}']))
-          assets = {entry['name']: entry for entry in release['assets']}
+          # Draft tags need not exist as Git refs yet; resolve the release ID.
+          release_id = json.loads(subprocess.check_output(
+              ['gh', 'release', 'view', tag, '--json', 'databaseId']))['databaseId']
+          def assets():
+              release = json.loads(subprocess.check_output(
+                  ['gh', 'api', f'repos/{repo}/releases/{release_id}']))
+              return {entry['name']: entry for entry in release['assets']}
+          uploaded = assets()
           for name in sys.argv[1:]:
               path = pathlib.Path(name)
               digest = 'sha256:' + hashlib.sha256(path.read_bytes()).hexdigest()
-              asset = assets[path.name]
+              if path.name not in uploaded:
+                  subprocess.run(['gh', 'release', 'upload', tag, str(path)], check=True)
+                  uploaded = assets()
+              # A resumed job reuses identical completed uploads. It must never
+              # silently replace a different file with the same package name.
+              asset = uploaded[path.name]
               if asset['size'] != path.stat().st_size or asset.get('digest') != digest:
                   raise SystemExit(f'Uploaded file differs: {path.name}')
               print(json.dumps(dict(name=path.name, size=asset['size'],

@@ -1,0 +1,316 @@
+--- a/src/core/mode_stack.h
++++ b/src/core/mode_stack.h
+@@ -2323,7 +2323,15 @@
+     uint32_t     cc1a_saved_argmem;/* DT_RESUME_CC1A_PARTY_SEL: argument_memory to restore */
+     uint32_t     cc18_cancel_target;/* DT_RESUME_CC18_SEL: CC_18_08 cancel jump target */
+     ScriptReader reader;           /* offset-based script cursor (serializable) */
++    /* CC substitutions use the same typewriter as literal text. Inline bytes
++     * survive a quick save halfway through a name, without retaining pointers.
++     * Fits the existing 160-byte ModeState reserve; previous fields stay put. */
++    uint8_t substitution[96];
++    uint8_t substitution_wrap_start[12], substitution_wrap_end[12];
++    uint8_t substitution_length, substitution_position;
+ } DisplayTextModeState;  /* note: DisplayTextState (display_text.h) is the `dt` global type */
++
++_Static_assert(sizeof(DisplayTextModeState) <= 160, "Text state exceeds save reserve");
+ 
+ /* GAME_MODE_ACTIONSCRIPT_FRAME: finish an interrupted run_actionscript_frame()
+  * (script.c). The entity-script interpreter is already run-to-completion per
+--- a/src/game/display_text_internal.h
++++ b/src/game/display_text_internal.h
+@@ -42,6 +42,9 @@
+ uint8_t get_cc_table_entry_size(uint16_t index);
+ void print_cc_table_value(uint16_t index);
+ void print_enemy_article(uint16_t mode);
++const char *dt_enemy_article(uint16_t mode);
++void dt_queue_string(ModeState *out, const uint8_t *str, int max_len, bool wrap);
++void dt_queue_psi_name(ModeState *out, uint16_t ability_id);
+ 
+ /* PSI teleport destination table constants */
+ #define PSI_TELEPORT_DEST_NAME_LEN    25
+--- a/src/game/display_text.c
++++ b/src/game/display_text.c
+@@ -34,6 +34,7 @@
+ #include "snes/ppu.h"
+ #include "core/memory.h"
+ #include "platform/platform.h"
++#include "platform/pc_options.h"
+ #include "core/math.h"
+ #include "core/decomp.h"
+ #include "core/mode_stack.h"
+@@ -1814,37 +1815,38 @@
+  *      If the_flag == 0: return (enemy doesn't use article).
+  *   4. If dt.last_printed_character == CHAR::BULLET (0x70, start of line): print "The ".
+  *      Otherwise: print "the ". */
+-void print_enemy_article(uint16_t mode) {
++const char *dt_enemy_article(uint16_t mode) {
+     if (mode == 0) {
+         /* Attacker */
+         if (dt.attacker_enemy_id == -1) {
+             dt.print_attacker_article = 0;
+-            return;
++            return "";
+         }
+         if (dt.print_attacker_article != 0)
+-            return;
++            return "";
+         if (!enemy_config_table)
+-            return;
++            return "";
+         if (enemy_config_table[dt.attacker_enemy_id].the_flag == 0)
+-            return;
++            return "";
+     } else {
+         /* Target */
+         if (dt.target_enemy_id == -1) {
+             dt.print_target_article = 0;
+-            return;
++            return "";
+         }
+         if (dt.print_target_article != 0)
+-            return;
++            return "";
+         if (!enemy_config_table)
+-            return;
++            return "";
+         if (enemy_config_table[dt.target_enemy_id].the_flag == 0)
+-            return;
++            return "";
+     }
+     /* Print "The " at start of line, "the " otherwise */
+-    if (dt.last_printed_character == 0x70)
+-        print_string("The ");
+-    else
+-        print_string("the ");
++    return dt.last_printed_character == 0x70 ? "The " : "the ";
++}
++
++void print_enemy_article(uint16_t mode) {
++    print_string(dt_enemy_article(mode));
+ }
+ 
+ /* --- Simple CC argument skip table ---
+@@ -1993,6 +1995,42 @@
+  * Replaces the former inline cc_halt() -> pump_mode(GAME_MODE_TEXT_PROMPT); the
+  * prompt's whole phase machine lives in mode_step_text_prompt. No post-work, so
+  * the parent simply resumes DT_RUN (next byte) on POP. */
++/* Queue one literal substitution segment. Wrap boundaries preserve the existing
++ * whole-name/item-word layout while rendering each letter through PRINT_LETTER.
++ * The queue is drained before the next control code, so no pointers or delayed
++ * lookups into mutable battle/name buffers cross a frame or quick save. */
++void dt_queue_string(ModeState *out, const uint8_t *str, int max_len, bool wrap) {
++    DisplayTextModeState *st = &out->display_text;
++    unsigned start = st->substitution_length;
++    for (int i = 0; i < max_len && str[i]; ++i) {
++        if (st->substitution_length >= sizeof(st->substitution))
++            FATAL("Text substitution exceeds inline buffer\n");
++        st->substitution[st->substitution_length++] = str[i];
++    }
++    if (wrap && st->substitution_length > start) {
++        unsigned end = st->substitution_length - 1;
++        st->substitution_wrap_start[start / 8] |= 1u << (start % 8);
++        st->substitution_wrap_end[end / 8] |= 1u << (end % 8);
++    }
++}
++
++void dt_queue_psi_name(ModeState *out, uint16_t ability_id) {
++    if (ability_id >= PSI_MAX_ENTRIES) return;
++    const PsiAbility *psi = &psi_ability_data[ability_id];
++    if (psi->name == 1) {
++        if (maternalbound_enabled()) {
++            const uint8_t prefix[] = {'P'+0x30, 'K'+0x30, ' '+0x30};
++            dt_queue_string(out, prefix, sizeof(prefix), false);
++        }
++        dt_queue_string(out, game_state.favourite_thing, sizeof(game_state.favourite_thing), false);
++    } else if (psi->name > 1 && psi->name - 1 < PSI_NAME_MAX_ENTRIES) {
++        dt_queue_string(out, psi_name_data + (psi->name-1)*PSI_NAME_SIZE, PSI_NAME_SIZE, false);
++    }
++    if (psi->level >= 1 && psi->level <= PSI_SUFFIX_COUNT)
++        dt_queue_string(out, psi_suffix_data + (psi->level-1)*PSI_SUFFIX_ENTRY_SIZE,
++                        PSI_SUFFIX_ENTRY_SIZE, false);
++}
++
+ static StepResult dt_push_text_prompt(int show_triangle, int skip_text_speed) {
+     static ModeState init;  /* outlives this dispatch (pump copies it) */
+     memset(&init, 0, sizeof(init));
+@@ -2146,7 +2184,8 @@
+     ScriptReader *r = &st->reader;
+ 
+     for (;;) {
+-        if (!(r->ptr_off < r->end_off || r->prefix_off >= 0)) {
++        bool substitution = st->substitution_position < st->substitution_length;
++        if (!substitution && !(r->ptr_off < r->end_off || r->prefix_off >= 0)) {
+             /* End of stream without END_BLOCK: POP_TEXT_STACK_FRAME equivalent. */
+             dt.g_cc18_attrs_saved = st->saved_cc18_attrs;
+             return STEP_RESULT_POP(0);
+@@ -2156,7 +2195,7 @@
+          * we're at a word boundary (dt.upcoming_word_length == 0).  If so, peek
+          * ahead to measure the next word and insert a newline if it won't fit.
+          * Otherwise just decrement the counter (still inside measured word). */
+-        if (dt.enable_word_wrap) {
++        if (!substitution && dt.enable_word_wrap) {
+             if (dt.upcoming_word_length > 0) {
+                 dt.upcoming_word_length--;
+             } else {
+@@ -2168,7 +2207,25 @@
+             }
+         }
+ 
+-        uint8_t byte = script_read_byte(r);
++        uint8_t byte;
++        if (substitution) {
++            unsigned pos = st->substitution_position;
++            if (st->substitution_wrap_start[pos / 8] & (1u << (pos % 8))) {
++                unsigned end = pos;
++                while (end + 1 < st->substitution_length &&
++                       !(st->substitution_wrap_end[end / 8] & (1u << (end % 8)))) ++end;
++                WindowInfo *w = get_focus_window_info();
++                if (w && win.current_focus_window != WINDOW_ID_NONE) {
++                    unsigned width = get_string_pixel_width(st->substitution + pos, end-pos+1);
++                    unsigned current = (uint16_t)((w->text_x-1)*8 + (vwf_x & 7));
++                    if (current + width > (w->width-2)*8u) {
++                        print_newline();
++                        vwf_indent_new_line = 1;
++                    }
++                }
++            }
++            byte = st->substitution[st->substitution_position++];
++        } else byte = script_read_byte(r);
+ 
+         /* Printable character (>= 0x20), port of PRINT_LETTER
+          * (asm/text/print_letter.asm).
+@@ -2201,7 +2258,7 @@
+ 
+             /* Sound + delay only when not instant printing
+              * (assembly lines 68-70: skip to @RETURN if instant) */
+-            if (!dt.instant_printing) {
++            if (!dt.instant_printing && !pc_options.instant_text) {
+                 /* Sound logic (assembly lines 36-66):
+                  * Mode 2: always play. Mode 3: never play.
+                  * Default: play if dt.blinking_triangle_flag == 0.
+@@ -2497,6 +2554,15 @@
+             if (cc_1c_dispatch(r, &cc1c_init, &child_mode)) {
+                 return STEP_RESULT_PUSH_INIT(child_mode, &cc1c_init);
+             }
++            /* Inline output only: preserve this call's reader/resume state and
++             * drain the copied characters with the normal typing cadence. */
++            memcpy(st->substitution, cc1c_init.display_text.substitution, sizeof(st->substitution));
++            memcpy(st->substitution_wrap_start, cc1c_init.display_text.substitution_wrap_start,
++                   sizeof(st->substitution_wrap_start));
++            memcpy(st->substitution_wrap_end, cc1c_init.display_text.substitution_wrap_end,
++                   sizeof(st->substitution_wrap_end));
++            st->substitution_position = 0;
++            st->substitution_length = cc1c_init.display_text.substitution_length;
+             break;
+         }
+         case 0x1D: cc_1d_dispatch(r); break;
+--- a/src/game/display_text_cc.c
++++ b/src/game/display_text_cc.c
+@@ -2755,7 +2755,11 @@
+          * arg==0 → use argument_memory. Looks up and prints the stat. */
+         uint8_t arg = script_read_byte(r);
+         uint16_t stat_index = arg ? (uint16_t)arg : (uint16_t)(get_argument_memory() & 0xFFFF);
+-        print_cc_table_value(stat_index);
++        int type, length;
++        uintptr_t value = resolve_cc_table_data(stat_index, &type, &length);
++        if (type == CC_TABLE_TYPE_STRING && value)
++            dt_queue_string(out_init, (const uint8_t *)value, length < 31 ? length : 31, true);
++        else print_number((int)value, 0);
+         break;
+     }
+     case 0x02: {
+@@ -2787,15 +2791,8 @@
+             name_data = game_state.pet_name;
+             name_max = 6;
+         }
+-        if (name_data) {
+-            if (dt.allow_text_overflow) {
+-                int len = 0;
+-                while (len < name_max && name_data[len] != 0x00) len++;
+-                print_eb_string(name_data, len);
+-            } else {
+-                print_string_with_wordwrap(name_data, (int16_t)name_max);
+-            }
+-        }
++        if (name_data)
++            dt_queue_string(out_init, name_data, name_max, !dt.allow_text_overflow);
+         break;
+     }
+     case 0x03: {
+@@ -2810,7 +2807,7 @@
+             char_code = (uint16_t)arg;
+         }
+         uint8_t eb = (uint8_t)char_code;
+-        print_eb_string(&eb, 1);
++        dt_queue_string(out_init, &eb, 1, false);
+         break;
+     }
+     case 0x04:
+@@ -2842,7 +2839,13 @@
+         }
+         const ItemConfig *entry = get_item_entry(item_id);
+         if (entry) {
+-            print_text_with_word_splitting(entry->name, ITEM_NAME_LEN);
++            int start = 0;
++            for (int i = 0; i < ITEM_NAME_LEN && entry->name[i]; ++i) {
++                if (entry->name[i] == 0x50 || i + 1 == ITEM_NAME_LEN || !entry->name[i+1]) {
++                    dt_queue_string(out_init, entry->name + start, i + 1 - start, true);
++                    start = i + 1;
++                }
++            }
+         }
+         break;
+     }
+@@ -2856,7 +2859,7 @@
+         if (dest_id < PSI_TELEPORT_DEST_MAX_ENTRIES) {
+             const uint8_t *entry = psi_teleport_dest_data +
+                                    (uint32_t)dest_id * PSI_TELEPORT_DEST_ENTRY_SIZE;
+-            print_string_with_wordwrap(entry, PSI_TELEPORT_DEST_NAME_LEN);
++            dt_queue_string(out_init, entry, PSI_TELEPORT_DEST_NAME_LEN, true);
+         }
+         break;
+     }
+@@ -2933,22 +2936,30 @@
+          * Port of CC_1C_0D / @PRINT_ENEMY_ATTACKER_NAME (asm/text/ccs/tree_1C.asm:110-125).
+          * USA: prints article prefix ("The"/"the"), then attacker name.
+          * Calls RETURN_BATTLE_ATTACKER_ADDRESS → PRINT_STRING_WITH_WORDWRAP. */
+-        print_enemy_article(0);  /* USA only: conditional article */
++        const char *article = dt_enemy_article(0);
++        uint8_t prefix[4];
++        int length = 0;
++        while (article[length]) { prefix[length] = ascii_to_eb_char(article[length]); ++length; }
++        dt_queue_string(out_init, prefix, length, false);
+         char *attacker_name = return_battle_attacker_address();
+         /* Assembly: PRINT_STRING_WITH_WORDWRAP with max_len=80 */
+         if (attacker_name[0] != '\0')
+-            print_string_with_wordwrap((const uint8_t *)attacker_name, BATTLE_NAME_ATTACKER_SIZE);
++            dt_queue_string(out_init, (const uint8_t *)attacker_name, BATTLE_NAME_ATTACKER_SIZE, true);
+         break;
+     }
+     case 0x0E: {
+         /* PRINT_ACTION_TARGET_NAME: 0 args.
+          * Port of CC_1C_0E / @PRINT_ENEMY_TARGET_NAME (asm/text/ccs/tree_1C.asm:126-141).
+          * USA: prints article prefix, then target name. */
+-        print_enemy_article(1);  /* USA only: conditional article */
++        const char *article = dt_enemy_article(1);
++        uint8_t prefix[4];
++        int length = 0;
++        while (article[length]) { prefix[length] = ascii_to_eb_char(article[length]); ++length; }
++        dt_queue_string(out_init, prefix, length, false);
+         char *target_name = return_battle_target_address();
+         /* Assembly: PRINT_STRING_WITH_WORDWRAP with max_len=80 */
+         if (target_name[0] != '\0')
+-            print_string_with_wordwrap((const uint8_t *)target_name, BATTLE_NAME_TARGET_SIZE);
++            dt_queue_string(out_init, (const uint8_t *)target_name, BATTLE_NAME_TARGET_SIZE, true);
+         break;
+     }
+     case 0x0F: {
+@@ -2981,7 +2992,7 @@
+          * prints name from PSI_NAME_TABLE and level suffix from PSI_SUFFIXES. */
+         uint8_t arg = script_read_byte(r);
+         uint16_t ability_id = arg ? (uint16_t)arg : (uint16_t)(get_argument_memory() & 0xFFFF);
+-        print_psi_ability_name(ability_id);
++        dt_queue_psi_name(out_init, ability_id);
+         break;
+     }
+     case 0x13: {

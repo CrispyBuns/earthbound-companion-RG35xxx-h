@@ -1,0 +1,27 @@
+{
+  "nativeFixtures": [
+    {
+      "passed": true,
+      "output": "TEXT_TYPING Original 509 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
+      "nativeExeSHA256": "ec419571d02e4d5fae681ecc8ce62e66858947044079cd07aa9778ce51ec677d",
+      "driverSHA256": "96c48ef8b1b8d0a56df6263bb897b1f60fff65f69e9d6a80bac936ef6f35d03b",
+      "ownerDataWritten": false,
+      "fullPlaythroughVerified": false
+    },
+    {
+      "passed": true,
+      "output": "TEXT_TYPING Redux 547 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
+      "nativeExeSHA256": "ec419571d02e4d5fae681ecc8ce62e66858947044079cd07aa9778ce51ec677d",
+      "driverSHA256": "96c48ef8b1b8d0a56df6263bb897b1f60fff65f69e9d6a80bac936ef6f35d03b",
+      "ownerDataWritten": false,
+      "fullPlaythroughVerified": false
+    }
+  ],
+  "patch": "native-text-typing.patch",
+  "saveStateLayoutUnchanged": true,
+  "oldModeStateFieldsUnchanged": true,
+  "scriptedPausesPreserved": true,
+  "windowlessTessiePaddingPreserved": true,
+  "androidPhysicalDeviceVerified": false,
+  "caveSpawnReport": "Separate report under investigation; no encounter tables changed."
+}

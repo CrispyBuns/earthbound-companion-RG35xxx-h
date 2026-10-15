@@ -23,5 +23,76 @@
   "scriptedPausesPreserved": true,
   "windowlessTessiePaddingPreserved": true,
   "androidPhysicalDeviceVerified": false,
-  "caveSpawnReport": "Separate report under investigation; no encounter tables changed."
+  "caveSpawnReport": {
+    "status": "Not reproduced in bounded direct-spawn fixtures; user save and actual route still needed.",
+    "pinnedReduxMapCellsCompared": 20480,
+    "mapDifferences": 0,
+    "beforeAndAfterFrankFlag": true,
+    "bothEditions": true,
+    "fixtureLimits": "Direct spawn calls after map loading; not automatic spawn streaming or Android gameplay. Groups 84-96 produced enemies before and after flag64; group97 did not produce spawns in either condition. No encounter data or gameplay setting changed."
+  },
+  "patchChainVerified": 10,
+  "packagedWindows": {
+    "Bytes": 129222829,
+    "SHA256": "4B64B86878492101C23E32CC4740C9B45999A72FB4C722C1425E1D5E3D02B5E7",
+    "FullPlaythroughVerified": false,
+    "checks": [
+      "Original packaged native startup passed",
+      "Redux packaged native startup passed",
+      "Redux names selftest passed",
+      "Redux vm selftest passed"
+    ],
+    "publicPayloadScanPassed": true,
+    "nativeSHA256": "ec419571d02e4d5fae681ecc8ce62e66858947044079cd07aa9778ce51ec677d",
+    "file": "EarthBound-Companion-Windows-v1.0.8.zip"
+  },
+  "platformBuildRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38813153788",
+  "androidROMFreeStartup": {
+    "passed": true,
+    "api": 35,
+    "architecture": "x86_64",
+    "sourceCommit": "3c3d3e1",
+    "physicalAndroidGameplayVerified": false
+  },
+  "sourceCommit": "3c3d3e1e232e64374bf5fee4ee6e4ebbe45a6d01",
+  "platformAssets": [
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "size": 90033317,
+      "digest": "sha256:9cf38fb89efac0d5db1d7e548ab3d1eedd1771869bbe1aba6376e8670c4c60fc",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "size": 67661155,
+      "digest": "sha256:f7e7f97e025d3714e4250519503f7d8f68f69177192ae28ab202633bf8098415",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "size": 66641364,
+      "digest": "sha256:e20177035ef51d84e3f9251b33dee4c0f6634ee46edb1c1257203dff290f863a",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "size": 124664837,
+      "digest": "sha256:2461837d7ac64a6a03d78612987f164a2c0ef1044da5d3310c9cca7cd1ad8e50",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "size": 94912120,
+      "digest": "sha256:8a51034aba4c18c21f194e28beee7e07c050490dd886b8ee0fa9ad892cded3c4",
+      "serverDigestVerified": true
+    }
+  ],
+  "platformBuildPassed": true,
+  "uploadVerificationRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38815472083",
+  "releaseTags": {
+    "windows": "v1.0.8",
+    "platforms": "v0.5.0-ports-preview.20"
+  },
+  "publishedAndChecked": true,
+  "ownerInstallationsModified": false
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 /** Android-only game HUD. Native action IDs and the launcher hide preference stay unchanged. */
 public final class TouchControls extends FrameLayout {
+ private static final int ACTION_SETTINGS=19;
  private static final int INK=0xfff7f3ff,GOLD=0xfffad870,DARK=0xff12101f;
  private final TouchStick.Actions actions;
  private final ArrayList<ActionButton> buttons=new ArrayList<>();
@@ -73,7 +74,7 @@ public final class TouchControls extends FrameLayout {
    toolbar.addView(button(names[i],ids[i],false,false),p);
   }
   LayoutParams tp=new LayoutParams(-2,dp(48),Gravity.TOP|Gravity.CENTER_HORIZONTAL);addView(toolbar,tp);
-  ActionButton settings=button("",19,true,false);settings.setContentDescription("Settings");
+  ActionButton settings=button("",ACTION_SETTINGS,true,false);settings.setContentDescription("Settings");
   settings.setCompoundDrawablesWithIntrinsicBounds(null,new SettingsIcon(dp(22)),null,null);settings.setPadding(0,dp(13),0,0);
   addView(settings,new LayoutParams(dp(48),dp(48),Gravity.TOP|Gravity.RIGHT));
  }

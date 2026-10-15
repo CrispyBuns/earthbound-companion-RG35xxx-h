@@ -1,0 +1,98 @@
+{
+  "verifiedAtUtc": "2026-10-15T15:59:16.094310+00:00",
+  "sourceCommit": "ae69342dee3d3e841834eabd7c069fea32ac06fd",
+  "buildRun": 38763366349,
+  "uploadRun": 38763435947,
+  "buildOnly": false,
+  "jobs": [
+    {
+      "name": "android",
+      "conclusion": "success"
+    },
+    {
+      "name": "windows-guard",
+      "conclusion": "success"
+    },
+    {
+      "name": "desktop (macos-15, osx-arm64)",
+      "conclusion": "success"
+    },
+    {
+      "name": "desktop (macos-15-intel, osx-x64)",
+      "conclusion": "success"
+    },
+    {
+      "name": "desktop (ubuntu-24.04, linux-x64)",
+      "conclusion": "success"
+    }
+  ],
+  "publicationChecks": [
+    {
+      "tag": "v1.0.6",
+      "prerelease": false,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.6"
+    },
+    {
+      "tag": "v1.0.6",
+      "prerelease": false,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v1.0.6"
+    },
+    {
+      "tag": "v0.5.0-ports-preview.18",
+      "prerelease": true,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.18"
+    },
+    {
+      "tag": "v0.5.0-ports-preview.18",
+      "prerelease": true,
+      "latest": "v1.0.6",
+      "url": "https://github.com/rages4calm/earthbound-companion/releases/tag/v0.5.0-ports-preview.18"
+    }
+  ],
+  "packages": {
+    "v1.0.6": [
+      {
+        "name": "EarthBound-Companion-Windows-v1.0.6.zip",
+        "bytes": 129216598,
+        "digest": "sha256:d1fd85f1eacbc9fe8bbae81aa871e642fb3411fee74f930c956af4e6ae66be0b"
+      }
+    ],
+    "v0.5.0-ports-preview.18": [
+      {
+        "name": "EarthBound-Companion-android-arm64-preview.apk",
+        "bytes": 66620884,
+        "digest": "sha256:cb18f15ffd79b7754454ead5200459a0cc700a40e8984076d258a7acbba2d211"
+      },
+      {
+        "name": "EarthBound-Companion-android-x64-preview.apk",
+        "bytes": 67644771,
+        "digest": "sha256:d66710df7786a3eb2c3fb4c28116e0f9d92321498ec70556e786e0a696990b94"
+      },
+      {
+        "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+        "bytes": 124660769,
+        "digest": "sha256:76c7512854cef979d4ff9773d6c1a7530d00fc14cae3999444ad1168fbcd6192"
+      },
+      {
+        "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+        "bytes": 90023006,
+        "digest": "sha256:41afbf2bbbc9ae8da5d2b315469cf4f79a6c0402ae2d87cafa49f237b832ce5d"
+      },
+      {
+        "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+        "bytes": 94913106,
+        "digest": "sha256:8e0de1d2154acc7900f5995a78d0c83164e11834719cb2e4a52ffee7b11c7aaf"
+      }
+    ]
+  },
+  "windowsZipComparedToLocalSHA256": true,
+  "windowsGameExeMatchesTestedNative": true,
+  "cloudVerification": "Server-side transfer from successful exact-commit CI with signing and package checks; uploaded digests recorded, not separately rehashed locally.",
+  "nativeExeSHA256": "f042b912e97c50d8e4b38910cf32cf6d04a16297c4576c39b970b3343fd37a03",
+  "ownerInstallModified": false,
+  "physicalAndroidGameplayVerified": false,
+  "fullPlaythroughVerified": false
+}

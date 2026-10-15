@@ -52,3 +52,18 @@ jobs:
             [ "${#files[@]}" -eq 5 ]
           fi
           gh release upload "$RELEASE_TAG" "${files[@]}"
+          python - "${files[@]}" <<'PY'
+          import hashlib, json, os, pathlib, subprocess, sys
+          repo, tag = os.environ['GH_REPO'], os.environ['RELEASE_TAG']
+          release = json.loads(subprocess.check_output(
+              ['gh', 'api', f'repos/{repo}/releases/tags/{tag}']))
+          assets = {entry['name']: entry for entry in release['assets']}
+          for name in sys.argv[1:]:
+              path = pathlib.Path(name)
+              digest = 'sha256:' + hashlib.sha256(path.read_bytes()).hexdigest()
+              asset = assets[path.name]
+              if asset['size'] != path.stat().st_size or asset.get('digest') != digest:
+                  raise SystemExit(f'Uploaded file differs: {path.name}')
+              print(json.dumps(dict(name=path.name, size=asset['size'],
+                                    digest=digest, serverDigestVerified=True)))
+          PY

@@ -1,6 +1,6 @@
 {
   "issue": "https://github.com/rages4calm/earthbound-companion/issues/3",
-  "status": "Source fix; release packages not yet rebuilt",
+  "status": "Published in Windows1.0.9 / platform preview.21",
   "nativeChecks": [
     {
       "passed": true,
@@ -26,5 +26,6 @@
   "sceneTimingRetained": true,
   "battleMasksUnaffected": true,
   "reporterExactBattleEntryNotReproduced": true,
-  "ownerInstallModified": false
+  "ownerInstallModified": false,
+  "publicationReceipt": "release-1.0.9.json"
 }

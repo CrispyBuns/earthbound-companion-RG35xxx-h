@@ -1,0 +1,60 @@
+{
+  "sourceCommit": "58e08d0d8b1a4e8c57a4d18641fb60c7abfd37ef",
+  "nativeFixtureReceipt": "issue3-cinematic-option.json",
+  "nativeSHA256": "d78544204bd0cd45581f82fdf21777d0b80246c05491f48677df5f1bbbe216ee",
+  "freshWindowsPackage": {
+    "Bytes": 129222924,
+    "SHA256": "6C76B640559D3424381320607C33491483E57C782D47977F871567B4361AFA12",
+    "checks": [
+      "Original",
+      "Redux",
+      "ReduxVM",
+      "ReduxNames"
+    ],
+    "publicPayloadScanPassed": true
+  },
+  "windowsPackageFile": "EarthBound-Companion-Windows-v1.0.9.zip",
+  "platformBuildRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38963694297",
+  "platformUploadRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38963732623",
+  "ownerInstallationsModified": false,
+  "fullPlaythroughVerified": false,
+  "physicalAndroidGameplayVerified": false,
+  "publicationPending": false,
+  "platformAssets": [
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "size": 90035036,
+      "digest": "sha256:b3599526880187e471e8bc8704b974b261c6e303d9298cd497f09bf35c21287a",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "size": 67661155,
+      "digest": "sha256:f6a59ad43bd786a5104ecf070f50dad605c9c248115d99cf91d9d8cace684e8d",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "size": 66641364,
+      "digest": "sha256:ece126e53b655964aaf713153082e7622f7e4fc4b8c300e0a00018bad8fb19d0",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "size": 124664984,
+      "digest": "sha256:ef3f35e11516d57bfdf96cd465e2601c6c9c175754c5d278ccfb2a5061b0763a",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "size": 94911780,
+      "digest": "sha256:a237c21a1f85257397273745d1c82470ba520bc2657332c745bb27057f249328",
+      "serverDigestVerified": true
+    }
+  ],
+  "platformBuildPassed": true,
+  "androidAPI35StartupPassed": true,
+  "publishedAndChecked": true,
+  "windowsLatest": "v1.0.9",
+  "platformTag": "v0.5.0-ports-preview.21"
+}

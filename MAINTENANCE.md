@@ -1,3 +1,5 @@
+October 16, 2026: **Windows1.0.9 / platform preview.21** add a cinematic-letterbox toggle and preserve scripted timing waits with Quick dialogue. All six packages published and verified. [Release notes](docs/RELEASE-1.0.9.md).
+
 October 15, 2026: **Windows 1.0.8 / platform preview.20** fix Instant text ignoring character delays and names appearing all at once. The shared fix covers Original and pinned Redux. [Focused checks](docs/RELEASE-1.0.8.md).
 
 October 15, 2026: **Windows 1.0.7** fixes optional soundtrack downloads blocking game setup, adds verified retry/fallback sources and records useful host/track diagnostics. Native gameplay is unchanged. [Focused checks](docs/RELEASE-1.0.7.md).

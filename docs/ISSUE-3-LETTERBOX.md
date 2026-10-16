@@ -1,4 +1,4 @@
-# Issue 3: cinematic bars and scene timing (unreleased source)
+# Issue 3: cinematic bars and scene timing (Windows1.0.9 / platform preview.21)
 
 Display now has **Cinematic letterboxing**, available in the Windows launcher and
 shared Linux/macOS/Android launcher. It controls Redux story-scene bars, not normal
@@ -14,4 +14,5 @@ Both-edition focused native fixtures, Windows launcher build and portable settin
 tests passed. Exact reporter battle scene and physical Android were not reproduced.
 No full campaign was repeated. Receipt: validation/issue3-cinematic-option.json.
 
-Source update only: existing Windows1.0.8 / preview.20 downloads do not include it.
+Published in Windows1.0.9 and platform preview.21 on all platforms.
+See [release notes](RELEASE-1.0.9.md) and [verified packages](../validation/release-1.0.9.json).

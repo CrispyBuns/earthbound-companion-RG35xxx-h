@@ -151,6 +151,7 @@ sealed partial class MainForm : Form {
   string[] res=["1920 × 1080","2560 × 1440","3840 × 2160","3440 × 1440","1280 × 720"];
   int[] widths=[1920,2560,3840,3440,1280],heights=[1080,1440,2160,1440,720];int selected=Array.IndexOf(widths,settings.Width);if(selected<0)selected=0;
   Choice("Window resolution","Borderless fullscreen uses your monitor's current resolution.",res,selected,i=>{settings.Width=widths[i];settings.Height=heights[i];});
+  Check("Cinematic letterboxing","Redux story-scene black bars. Disable to keep the scene unobstructed; timing is preserved.",settings.CinematicLetterbox,v=>settings.CinematicLetterbox=v);
   Check("Borderless fullscreen","Toggle while playing with F11.",settings.Fullscreen,v=>settings.Fullscreen=v);
   Choice("Aspect ratio","Extra scenery is rendered beyond the original frame.",["Widescreen 16:9","Classic 4:3","Ultrawide 21:9"],settings.Aspect,i=>settings.Aspect=i);
   Choice("Image rendering","Scale2x softens pixel edges; Smooth uses bilinear filtering.",["Crisp pixels","Scale2x enhanced","Smooth"],settings.Filter,i=>settings.Filter=i);

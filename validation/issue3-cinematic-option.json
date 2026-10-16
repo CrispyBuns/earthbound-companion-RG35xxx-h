@@ -1,0 +1,30 @@
+{
+  "issue": "https://github.com/rages4calm/earthbound-companion/issues/3",
+  "status": "Source fix; release packages not yet rebuilt",
+  "nativeChecks": [
+    {
+      "passed": true,
+      "output": "TEXT_TYPING Original 513 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
+      "nativeExeSHA256": "d78544204bd0cd45581f82fdf21777d0b80246c05491f48677df5f1bbbe216ee",
+      "driverSHA256": "0a004f5695868c9d615647d76ddfc857ebee74cc032f2a56f8e7c9bb5e7fe0cf",
+      "ownerDataWritten": false,
+      "fullPlaythroughVerified": false
+    },
+    {
+      "passed": true,
+      "output": "TEXT_TYPING Redux 570 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
+      "nativeExeSHA256": "d78544204bd0cd45581f82fdf21777d0b80246c05491f48677df5f1bbbe216ee",
+      "driverSHA256": "0a004f5695868c9d615647d76ddfc857ebee74cc032f2a56f8e7c9bb5e7fe0cf",
+      "ownerDataWritten": false,
+      "fullPlaythroughVerified": false
+    }
+  ],
+  "windowsLauncherBuildPassed": true,
+  "portableSettingsTestsPassed": true,
+  "patchAppliesAfterPreviousTen": true,
+  "saveLayoutChanged": false,
+  "sceneTimingRetained": true,
+  "battleMasksUnaffected": true,
+  "reporterExactBattleEntryNotReproduced": true,
+  "ownerInstallModified": false
+}

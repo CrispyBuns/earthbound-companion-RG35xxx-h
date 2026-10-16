@@ -93,6 +93,7 @@ public sealed partial class MainView : UserControl {
   Check(p,"Fullscreen",()=>settings.Fullscreen,v=>settings.Fullscreen=v);Check(p,"Integer scaling",()=>settings.IntegerScale,v=>settings.IntegerScale=v);
   Choice(p,"Filter",["Nearest","Scale2x","Linear"],()=>settings.Filter,v=>settings.Filter=v);Choice(p,"Aspect ratio",["Widescreen","4:3","Ultrawide"],()=>settings.Aspect,v=>settings.Aspect=v);
   Check(p,"Wide field of view",()=>settings.WideFov,v=>settings.WideFov=v);Check(p,"Depth effect",()=>settings.TiltShift,v=>settings.TiltShift=v);Check(p,"Color grading",()=>settings.ColorGrading,v=>settings.ColorGrading=v);Check(p,"Scanlines",()=>settings.Scanlines,v=>settings.Scanlines=v);
+  Check(p,"Cinematic letterboxing (Redux story scenes)",()=>settings.CinematicLetterbox,v=>settings.CinematicLetterbox=v);
   Check(p,"Original title presentation in Redux",()=>settings.OriginalTitleScreen,v=>settings.OriginalTitleScreen=v);
   p.Children.Add(Text("External Slang presets are Windows-only in this first preview. The built-in display effects above remain available."));return p;
  }

@@ -115,6 +115,27 @@ int main(int argc,char **argv) {
     /* Preserve the windowless-padding fix used by Tessie and other events. */
     reset(1,false); win.current_focus_window=WINDOW_ID_NONE; run(name,sizeof(name),false);
     CHECK(count==0); CHECK(tick==0);
+    /* Quick dialogue must not auto-cancel scripted timing/music waits. */
+    reset(1,true); ModeState wait={0}; wait.text_delay.remaining=9;
+    wait.text_delay.cancelable=1; wait.text_delay.primed=1;
+    CHECK(mode_step_text_delay(&wait).kind==STEP_CONTINUE);
+    CHECK(wait.text_delay.remaining==8);
+    core.pad1_pressed=PAD_A; CHECK(mode_step_text_delay(&wait).kind==STEP_POP);
+    core.pad1_pressed=0;
+    if (maternalbound_enabled()) {
+        bt.battle_mode_flag=0; pc_options.disable_cinematic_letterbox=1;
+        maternalbound_letterbox_start(11);
+        for(int i=0;i<14;i++){maternalbound_effects_tick();CHECK(!ppu.tm_hdma_active);}
+        CHECK(ow.redux_letterbox_active && !ow.redux_letterbox_direction);
+        pc_options.disable_cinematic_letterbox=0; maternalbound_effects_tick();CHECK(ppu.tm_hdma_active);
+        pc_options.disable_cinematic_letterbox=1; maternalbound_effects_tick();CHECK(!ppu.tm_hdma_active);
+        bt.battle_mode_flag=1; ppu.tm_hdma_active=true;
+        maternalbound_effects_tick();CHECK(ppu.tm_hdma_active); /* Battle still owns its masks. */
+        bt.battle_mode_flag=0; maternalbound_letterbox_start(13);
+        for(int i=0;i<14;i++)maternalbound_effects_tick();
+        CHECK(!ow.redux_letterbox_active && !ppu.tm_hdma_active);
+        pc_options.disable_cinematic_letterbox=0;
+    }
     printf("TEXT_TYPING %s %u checks PASS; ModeState=%zu; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\n",
            maternalbound_enabled()?"Redux":"Original",checks,sizeof(ModeState));
     return 0;

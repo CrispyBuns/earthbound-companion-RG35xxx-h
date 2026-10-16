@@ -1,0 +1,66 @@
+--- a/src/platform/pc_options.h
++++ b/src/platform/pc_options.h
+@@ -36,6 +36,7 @@
+     int keys[PC_ACTIONS], buttons[PC_ACTIONS];
+     char msu_dir[1024];
+     char shader_preset[1024];
++    int disable_cinematic_letterbox; /* Presentation only; keep scene timing. */
+ } PcOptions;
+ extern PcOptions pc_options;
+ extern _Atomic bool pc_paused;
+--- a/src/platform/pc_options.c
++++ b/src/platform/pc_options.c
+@@ -69,6 +69,7 @@
+                                          {"integer_scale", &pc_options.integer_scale, 0, 1},
+                                          {"filter", &pc_options.filter, 0, 2},
+                                          {"instant_text", &pc_options.instant_text, 0, 1},
++                                         {"disable_cinematic_letterbox", &pc_options.disable_cinematic_letterbox, 0, 1},
+                                          {"no_homesickness", &pc_options.no_homesickness, 0, 1},
+                                          {"no_dad_calls", &pc_options.no_dad_calls, 0, 1},
+                                          {"exp_multiplier", &pc_options.exp_multiplier, 1, 16},
+--- a/src/game/display_text_cc.c
++++ b/src/game/display_text_cc.c
+@@ -465,7 +465,7 @@
+     }
+     if (st->primed && st->cancelable && (core.pad1_pressed & PAD_TEXT_ADVANCE))
+         return STEP_RESULT_POP(0);
+-    if (st->remaining == 0 || (pc_options.instant_text && st->cancelable))
++    if (st->remaining == 0)
+         return STEP_RESULT_POP(0);
+ 
+     if (update_hppp_meter_work_step()) {
+--- a/src/game/maternalbound.c
++++ b/src/game/maternalbound.c
+@@ -3,6 +3,7 @@
+  * Credit: ShadowOne333 and upstream contributors; see CREDITS.md and source
+  * references below. This module is licensed separately from the foundation. */
+ #include "game/maternalbound.h"
++#include "platform/pc_options.h"
+ #include <limits.h>
+ #include <string.h>
+ #include <stdlib.h>
+@@ -262,12 +263,18 @@
+         ppu.tm_hdma_active = false;
+         return;
+     }
+-    bt.letterbox_top_end = ow.redux_letterbox_top;
+-    bt.letterbox_bottom_start = 224-ow.redux_letterbox_top;
+-    bt.letterbox_nonvisible_screen_value = 4; /* BG3, the black bars */
+-    bt.letterbox_visible_screen_value = 23; /* BG1/BG2/BG3/objects */
+-    build_letterbox_hdma_table();
+-    apply_letterbox_to_ppu();
++    /* Hiding cinematic bars must not skip their scripted opening/closing
++     * frames, or overwrite the separate battle masks handled above. */
++    if (pc_options.disable_cinematic_letterbox) {
++        ppu.tm_hdma_active = false;
++    } else {
++        bt.letterbox_top_end = ow.redux_letterbox_top;
++        bt.letterbox_bottom_start = 224-ow.redux_letterbox_top;
++        bt.letterbox_nonvisible_screen_value = 4; /* BG3, the black bars */
++        bt.letterbox_visible_screen_value = 23; /* BG1/BG2/BG3/objects */
++        build_letterbox_hdma_table();
++        apply_letterbox_to_ppu();
++    }
+     if (ow.redux_letterbox_direction == 1) {
+         if (ow.redux_letterbox_top < 39) ow.redux_letterbox_top += 3;
+         else ow.redux_letterbox_direction = 0;

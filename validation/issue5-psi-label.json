@@ -1,0 +1,22 @@
+{
+  "issue": "https://github.com/rages4calm/earthbound-companion/issues/5",
+  "status": "source-fix-tested; packages not rebuilt",
+  "cause": "Redux added PK before the saved PSI prefix in the custom favourite-thing power name.",
+  "coverage": "Immediate menu and queued dialogue paths; save field unchanged; full patch chain applies.",
+  "original": {
+    "passed": true,
+    "output": "TEXT_TYPING Original 534 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
+    "nativeExeSHA256": "7de9e3d8df3d5a3101eab31f504e6496594ff248aae1a6be52d282f33cf3f5f7",
+    "driverSHA256": "632c2641d25dc0c9fbdc900155213f245ade91b8730915ed87b7a106d4488712",
+    "ownerDataWritten": false,
+    "fullPlaythroughVerified": false
+  },
+  "redux": {
+    "passed": true,
+    "output": "TEXT_TYPING Redux 590 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
+    "nativeExeSHA256": "7de9e3d8df3d5a3101eab31f504e6496594ff248aae1a6be52d282f33cf3f5f7",
+    "driverSHA256": "632c2641d25dc0c9fbdc900155213f245ade91b8730915ed87b7a106d4488712",
+    "ownerDataWritten": false,
+    "fullPlaythroughVerified": false
+  }
+}

@@ -1,0 +1,28 @@
+--- a/src/game/display_text.c
++++ b/src/game/display_text.c
+@@ -1013,8 +1013,12 @@
+         }
+         /* PSI Rockin, print favourite_thing (EB-encoded in game_state, null-terminated) */
+         int len = 0;
+-        while (len < (int)sizeof(game_state.favourite_thing) && game_state.favourite_thing[len] != 0x00) len++;
+-        print_eb_string(game_state.favourite_thing, len);
++        /* Save layout reserves four bytes for the original "PSI " prefix.
++         * Redux supplies "PK " above; render only the custom part, without
++         * rewriting the save or dropping any characters of the chosen name. */
++        int offset = maternalbound_enabled() ? 4 : 0;
++        while (offset + len < (int)sizeof(game_state.favourite_thing) && game_state.favourite_thing[offset + len] != 0x00) len++;
++        print_eb_string(game_state.favourite_thing + offset, len);
+     } else if (psi_name_id > 1 && (psi_name_id - 1) < PSI_NAME_MAX_ENTRIES) {
+         const uint8_t *entry = psi_name_data + (uint32_t)(psi_name_id - 1) * PSI_NAME_SIZE;
+         int len = 0;
+@@ -2022,7 +2026,9 @@
+             const uint8_t prefix[] = {'P'+0x30, 'K'+0x30, ' '+0x30};
+             dt_queue_string(out, prefix, sizeof(prefix), false);
+         }
+-        dt_queue_string(out, game_state.favourite_thing, sizeof(game_state.favourite_thing), false);
++        int offset = maternalbound_enabled() ? 4 : 0;
++        dt_queue_string(out, game_state.favourite_thing + offset,
++                        sizeof(game_state.favourite_thing) - offset, false);
+     } else if (psi->name > 1 && psi->name - 1 < PSI_NAME_MAX_ENTRIES) {
+         dt_queue_string(out, psi_name_data + (psi->name-1)*PSI_NAME_SIZE, PSI_NAME_SIZE, false);
+     }

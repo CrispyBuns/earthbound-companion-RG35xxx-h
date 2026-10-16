@@ -136,6 +136,25 @@ int main(int argc,char **argv) {
         CHECK(!ow.redux_letterbox_active && !ppu.tm_hdma_active);
         pc_options.disable_cinematic_letterbox=0;
     }
+    /* Saved favourite names include the original four-byte PSI prefix.
+     * Check both immediate menu printing and queued battle/dialogue names. */
+    uint8_t saved_thing[sizeof(game_state.favourite_thing)];
+    memcpy(saved_thing,game_state.favourite_thing,sizeof(saved_thing));
+    memset(game_state.favourite_thing,0,sizeof(game_state.favourite_thing));
+    const char *named="PSI Test";
+    for(unsigned i=0;named[i];i++)game_state.favourite_thing[i]=ascii_to_eb_char(named[i]);
+    uint8_t expected[16]={0}; const char *label=maternalbound_enabled()?"PK Test":"PSI Test";
+    unsigned size=strlen(label);
+    for(unsigned i=0;i<size;i++)expected[i]=ascii_to_eb_char(label[i]);
+    reset(1,true); print_psi_name(1); CHECK(count==size);CHECK(!memcmp(output,expected,size));
+    unsigned tested=0;
+    for(unsigned i=0;i<PSI_MAX_ENTRIES;i++)if(psi_ability_data[i].name==1){
+        ModeState queued={0};dt_queue_psi_name(&queued,i);
+        CHECK(queued.display_text.substitution_length>=size);
+        CHECK(!memcmp(queued.display_text.substitution,expected,size));tested++;
+    }
+    CHECK(tested>0); CHECK(!memcmp(game_state.favourite_thing,(uint8_t[]){0x80,0x83,0x79,0x50,0x84,0x95,0xa3,0xa4},8));
+    memcpy(game_state.favourite_thing,saved_thing,sizeof(saved_thing));
     printf("TEXT_TYPING %s %u checks PASS; ModeState=%zu; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\n",
            maternalbound_enabled()?"Redux":"Original",checks,sizeof(ModeState));
     return 0;

@@ -1,0 +1,59 @@
+{
+  "sourceCommit": "6f1f557afef295c605e04d7d66f99d3990f1593f",
+  "nativeFixtureReceipt": "issue5-psi-label.json",
+  "nativeSHA256": "7de9e3d8df3d5a3101eab31f504e6496594ff248aae1a6be52d282f33cf3f5f7",
+  "freshWindowsPackage": {
+    "Bytes": 129222768,
+    "SHA256": "CE91C7D9A517D4887EA61F736528718A0F563FB4DD5124ACCE53130913A1F4DD",
+    "checks": [
+      "Original",
+      "Redux",
+      "ReduxNames"
+    ],
+    "publicPayloadScanPassed": true
+  },
+  "windowsPackageFile": "EarthBound-Companion-Windows-v1.0.10.zip",
+  "platformBuildRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38978770694",
+  "platformUploadRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/38978809543",
+  "ownerInstallationsModified": false,
+  "fullPlaythroughVerified": false,
+  "physicalAndroidGameplayVerified": false,
+  "publicationPending": false,
+  "windowsLatest": "v1.0.10",
+  "platformTag": "v0.5.0-ports-preview.22",
+  "platformAssets": [
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "size": 90175054,
+      "digest": "sha256:0f07c5e84d4e7472e24ba86efca5f0c330928fe824f8131ca47720eabb4a7ce4",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "size": 67661155,
+      "digest": "sha256:eb516f27bc289c66a14397f8a460b17abb461e0a02cf6dfa28ec97e50f2ac6ac",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "size": 66641364,
+      "digest": "sha256:4dd509bd949810a2493fda3a145c06a23c4cfdfa651f328bea63247d35212987",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "size": 125035032,
+      "digest": "sha256:0bc5028e591afb0fd36429becd7d99a8bf4255f27e19e5b485577133ddb4db82",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "size": 95304501,
+      "digest": "sha256:7e1c1b2446942fca7309da2e99926cbd7c147745291fce5314492de9b159f95b",
+      "serverDigestVerified": true
+    }
+  ],
+  "platformBuildPassed": true,
+  "androidAPI35StartupPassed": true,
+  "publishedAndChecked": true
+}

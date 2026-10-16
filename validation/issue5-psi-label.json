@@ -1,6 +1,6 @@
 {
   "issue": "https://github.com/rages4calm/earthbound-companion/issues/5",
-  "status": "source-fix-tested; packages not rebuilt",
+  "status": "published in Windows1.0.10 and platform preview.22",
   "cause": "Redux added PK before the saved PSI prefix in the custom favourite-thing power name.",
   "coverage": "Immediate menu and queued dialogue paths; save field unchanged; full patch chain applies.",
   "original": {
@@ -18,5 +18,6 @@
     "driverSHA256": "632c2641d25dc0c9fbdc900155213f245ade91b8730915ed87b7a106d4488712",
     "ownerDataWritten": false,
     "fullPlaythroughVerified": false
-  }
+  },
+  "releaseReceipt": "release-1.0.10.json"
 }

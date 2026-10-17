@@ -8,6 +8,7 @@
 #undef print_eb_string
 #include "platform/pc_options.h"
 #include "core/state_dump.h"
+#include "game/map_loader.h"
 #include <stddef.h>
 
 void print_eb_string(const uint8_t *, int);
@@ -155,6 +156,27 @@ int main(int argc,char **argv) {
     }
     CHECK(tested>0); CHECK(!memcmp(game_state.favourite_thing,(uint8_t[]){0x80,0x83,0x79,0x50,0x84,0x95,0xa3,0xa4},8));
     memcpy(game_state.favourite_thing,saved_thing,sizeof(saved_thing));
+    /* Receipt must identify the awarded item even in a hole or slot 14. */
+    uint8_t saved_inventory[sizeof(party_characters[0].items)];
+    memcpy(saved_inventory,party_characters[0].items,sizeof(saved_inventory));
+    const uint8_t *old_blob=dialogue_blob; size_t old_blob_size=dialogue_blob_size;
+    for(unsigned slot=0;slot<ITEM_INVENTORY_SIZE;slot++) {
+        memset(party_characters[0].items,42,sizeof(saved_inventory));
+        party_characters[0].items[slot]=0;
+        uint8_t give[]={0x0e,1,1}; dialogue_blob=give; dialogue_blob_size=sizeof(give);
+        ScriptReader r={TEXT_SRC_DIALOGUE,0,sizeof(give),-1};
+        cc_1d_dispatch(&r);
+        CHECK(get_working_memory()==1); CHECK(get_argument_memory()==slot+1);
+        CHECK(party_characters[0].items[slot]==1);
+        CHECK(get_character_item(1,(uint16_t)get_argument_memory())==1);
+        for(unsigned other=0;other<ITEM_INVENTORY_SIZE;other++)
+            CHECK(party_characters[0].items[other]==(other==slot?1:42));
+    }
+    dialogue_blob=old_blob;dialogue_blob_size=old_blob_size;
+    memcpy(party_characters[0].items,saved_inventory,sizeof(saved_inventory));
+    CHECK(map_loader_tile_in_bounds(0,0));CHECK(map_loader_tile_in_bounds(1023,1279));
+    CHECK(!map_loader_tile_in_bounds(-1,0));CHECK(!map_loader_tile_in_bounds(0,-1));
+    CHECK(!map_loader_tile_in_bounds(1024,10));CHECK(!map_loader_tile_in_bounds(0,1280));
     printf("TEXT_TYPING %s %u checks PASS; ModeState=%zu; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\n",
            maternalbound_enabled()?"Redux":"Original",checks,sizeof(ModeState));
     return 0;

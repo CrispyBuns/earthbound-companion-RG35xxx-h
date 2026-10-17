@@ -1,0 +1,79 @@
+--- a/src/game/display_text_cc.c
++++ b/src/game/display_text_cc.c
+@@ -3331,36 +3331,30 @@
+          * Port of CC_1D_0E (asm/text/ccs/give_item_to_character_2.asm).
+          * Byte 1 = char_id (0 → working_memory). Byte 2 = item_id (0 → argument_memory).
+          * Gives item to character (or first available if char_id=0xFF).
+-         * Stores next empty slot index in argument_memory.
++         * Stores the received item's 1-based slot in argument_memory.
+          * Stores result (receiving char_id or 0) in working_memory. */
+         uint8_t char_arg = script_read_byte(r);
+         uint8_t item_arg = script_read_byte(r);
+         uint16_t char_id = char_arg ? (uint16_t)char_arg : (uint16_t)(get_working_memory() & 0xFFFF);
+         uint16_t item_id = item_arg ? (uint16_t)item_arg : (uint16_t)(get_argument_memory() & 0xFFFF);
++        /* Receipt scripts need the slot just filled, not the next free slot:
++         * gaps and the final inventory slot break that old shortcut. */
++        uint16_t receipt_slots[TOTAL_PARTY_COUNT];
++        for (unsigned who = 0; who < TOTAL_PARTY_COUNT; ++who) {
++            unsigned slot = 0;
++            while (slot < ITEM_INVENTORY_SIZE && party_characters[who].items[slot]) ++slot;
++            receipt_slots[who] = (uint16_t)(slot + 1);
++        }
+         uint16_t result = give_item_to_character(char_id, item_id);
+         uint16_t empty = 0;
+         if (result) {
+-            /* Key Items pool feature, not part of the original ROM/
+-             * assembly. The vanilla trick here relies on
+-             * find_empty_inventory_slot()'s 0-based "next empty slot"
+-             * happening to equal the 1-based slot the item was JUST
+-             * placed at (both scans use the same first-match algorithm,
+-             * and giving the item fills exactly one slot in between) --
+-             * so the generic "(Ness got the X)" message
+-             * (MSG_SYS_ITEM_RECEIVED -> _SUB_GETGOODS_MES) can re-fetch
+-             * "the item just received" via GET_CHARACTER_ITEM using this
+-             * value as the slot. A pool item never fills a slot at all,
+-             * so that trick finds the SAME (now-stale) empty slot as
+-             * before the give, which the message then misreads as
+-             * whatever item already happened to sit one slot earlier --
+-             * e.g. "Ness got the cookie" when the item actually received
+-             * was the Backstage Pass. Route pool items through the same
+-             * sentinel mechanism mode_step_use_item() (text.c) uses instead. */
++            /* Pool items have no inventory slot. Keep their existing receipt
++             * sentinel; regular items use the slot captured before insertion. */
+             if (is_key_item_type(item_id)) {
+                 key_items_set_use_in_progress(item_id);
+                 empty = KEY_ITEMS_POOL_USE_SLOT_SENTINEL;
+             } else {
+-                empty = find_empty_inventory_slot(result);
++                empty = receipt_slots[result - 1];
+             }
+         }
+         set_argument_memory((uint32_t)empty);
+--- a/src/game/map_loader.c
++++ b/src/game/map_loader.c
+@@ -1197,8 +1197,8 @@
+              * block_row < 320 bounds check fails), during scripted camera moves. */
+             uint16_t block_id = 0;
+             bool render_empty = false;
+-            if (world_tx < 0 || world_ty < 0) {
+-                /* Off the top/left edge of the map -- matches LOAD_MAP_ROW's
++            if (!map_loader_tile_in_bounds(world_tx, world_ty)) {
++                /* Off any edge of the map -- matches LOAD_MAP_ROW's
+                  * @OUT_OF_BOUNDS_CLEAR path (row index fails its $0140 bounds
+                  * check), which really does store a literal blank entry with
+                  * no arrangement lookup at all. */
+--- a/src/game/map_loader.h
++++ b/src/game/map_loader.h
+@@ -13,6 +13,12 @@
+ 
+ #include "core/types.h"
+ #include "include/binary.h"
++
++/* World tiles: 32 sectors across (32 tiles each), 80 down (16 each).
++ * Check axes separately: a flattened index can wrap east into the next row. */
++static inline bool map_loader_tile_in_bounds(int x, int y) {
++    return x >= 0 && x < 1024 && y >= 0 && y < 1280;
++}
+ 
+ /* NPC configuration entry (17 bytes, packed to match ROM binary layout).
+  * 1584 entries in the table. */

@@ -21,3 +21,4 @@ patches/native-dialogue-camera.patch whitespace=-blank-at-eol,-blank-at-eof
 patches/native-render-input.patch whitespace=-blank-at-eol,-blank-at-eof
 patches/native-cinematic-option.patch whitespace=-blank-at-eol,-blank-at-eof
 patches/native-psi-label.patch whitespace=-blank-at-eol,-blank-at-eof
+patches/native-paula-receipt.patch whitespace=-blank-at-eol,-blank-at-eof

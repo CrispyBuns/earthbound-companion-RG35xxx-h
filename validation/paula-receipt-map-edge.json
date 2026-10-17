@@ -1,11 +1,11 @@
 {
-  "status": "source fixed; downloadable packages not rebuilt",
+  "status": "published in Windows1.0.11 and platform preview.23",
   "receiptFix": "CC 1D 0E now returns the actual filled inventory slot; handles holes and last slot without changing awards.",
   "mapFix": "Reject world tile x>=1024 and y>=1280 before flattening the sector index, preventing east-edge row aliasing.",
   "original": {
     "passed": true,
     "output": "TEXT_TYPING Original 792 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
-    "nativeExeSHA256": "5a493e17184eaec9e53d28ffc2cc5de8795a8713fad411a36adbff844c1d1426",
+    "nativeExeSHA256": "9a17ec821b7b64fee8f78f7d93440cfddf2644ceabc5fdf15f83402dca0bb3bf",
     "driverSHA256": "d8b00e7f6daf497537039b5e44898c0457076a6dc1e7cbeceffa31fe3a5bca81",
     "ownerDataWritten": false,
     "fullPlaythroughVerified": false
@@ -13,12 +13,13 @@
   "redux": {
     "passed": true,
     "output": "TEXT_TYPING Redux 848 checks PASS; ModeState=160; literal Fast/Medium/Slow=2/3/4 frames; Instant=0\r\n",
-    "nativeExeSHA256": "5a493e17184eaec9e53d28ffc2cc5de8795a8713fad411a36adbff844c1d1426",
+    "nativeExeSHA256": "9a17ec821b7b64fee8f78f7d93440cfddf2644ceabc5fdf15f83402dca0bb3bf",
     "driverSHA256": "d8b00e7f6daf497537039b5e44898c0457076a6dc1e7cbeceffa31fe3a5bca81",
     "ownerDataWritten": false,
     "fullPlaythroughVerified": false
   },
   "patchChainApplies": true,
   "reporterExactSceneReproduced": false,
-  "physicalAndroidGameplayVerified": false
+  "physicalAndroidGameplayVerified": false,
+  "releaseReceipt": "release-1.0.11.json"
 }

@@ -1,0 +1,60 @@
+{
+  "sourceCommit": "1d8da7c51130a345d1a760a9f8c6203880ade515",
+  "nativeFixtureReceipt": "paula-receipt-map-edge.json",
+  "nativeSHA256": "9a17ec821b7b64fee8f78f7d93440cfddf2644ceabc5fdf15f83402dca0bb3bf",
+  "freshWindowsPackage": {
+    "Bytes": 129223017,
+    "SHA256": "F285F9840D063438C4934505F9DF74085FF72BC15BB4AD58D2748FF512F4D900",
+    "checks": [
+      "Original",
+      "Redux",
+      "ReduxNames"
+    ],
+    "publicPayloadScanPassed": true
+  },
+  "windowsPackageFile": "EarthBound-Companion-Windows-v1.0.11.zip",
+  "platformBuildRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/39070404038",
+  "platformUploadRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/39070471372",
+  "ownerInstallationsModified": false,
+  "fullPlaythroughVerified": false,
+  "physicalAndroidGameplayVerified": false,
+  "reporterExactSceneReproduced": false,
+  "publicationPending": false,
+  "windowsLatest": "v1.0.11",
+  "platformTag": "v0.5.0-ports-preview.23",
+  "platformAssets": [
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "size": 90177959,
+      "digest": "sha256:efb13d91aac639e8907a02ba911b92f5dcd747da67a1c61ae44a33c2e15b530d",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "size": 67661155,
+      "digest": "sha256:498e59e0676bbb80d788484554826bdb3b06007b84e41e0d0668f0c515d4bc67",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "size": 66645460,
+      "digest": "sha256:ea46118b2d66aee814a04998e373a14fc9600293e5e79de612544cbd8c35a94c",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "size": 125034225,
+      "digest": "sha256:67d710e814c57ab6bc98fd2a4d0d1d22141f97b128404d80134850555a21f7aa",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "size": 95307624,
+      "digest": "sha256:8737fcc68529d76f21450a7ac6cb921c9e083f5a9067bccc3f3927bbdd76bee9",
+      "serverDigestVerified": true
+    }
+  ],
+  "platformBuildPassed": true,
+  "androidAPI35StartupPassed": true,
+  "publishedAndChecked": true
+}

@@ -1,0 +1,57 @@
+{
+  "sourceCommit": "5b147f42bfd17bc0aa97226beea70e5811b7c373",
+  "setupPathReceipt": "issue6-setup-paths.json",
+  "nativeSHA256": "9a17ec821b7b64fee8f78f7d93440cfddf2644ceabc5fdf15f83402dca0bb3bf",
+  "nativeCodeUnchangedSince": "v1.0.11",
+  "freshWindowsPackage": {
+    "Bytes": 129223100,
+    "SHA256": "8018E64ED51E98AFB4A568E21B6483B6AB62D6FE00102303D2EBC7A3853603C8",
+    "publicPayloadScanPassed": true,
+    "manifestVersionVerified": true
+  },
+  "windowsPackageFile": "EarthBound-Companion-Windows-v1.0.12.zip",
+  "platformBuildRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/39516163458",
+  "platformUploadRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/39516229936",
+  "platformAssets": [
+    {
+      "name": "EarthBound-Companion-linux-x64-preview.tar.gz",
+      "size": 125066589,
+      "digest": "sha256:7f4acc6b859e9c2829f9b1b64b73ecfe22cc172e082b3b9ac4f03fbde7c54b51",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-arm64-preview.apk",
+      "size": 66645460,
+      "digest": "sha256:6575351251b15bbbf623cd88d69c90dc5c3079a6272c6680b02eeccafb269ebe",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-android-x64-preview.apk",
+      "size": 67661155,
+      "digest": "sha256:ae898bacb9471d5513cb259367d8d75f6598ce0e22fc4c17b3d7ccfb4238f57e",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-x64-preview.tar.gz",
+      "size": 95308712,
+      "digest": "sha256:efcfce46992643d40d6655bb6ddef4d2e8e0846dbb722651fc346ecd5f84ceb2",
+      "serverDigestVerified": true
+    },
+    {
+      "name": "EarthBound-Companion-osx-arm64-preview.tar.gz",
+      "size": 90176861,
+      "digest": "sha256:8fb4da2dbf13f6e48ce776e3a2b5093284a642a238db61fd182da83b9b1694e0",
+      "serverDigestVerified": true
+    }
+  ],
+  "platformBuildPassed": true,
+  "androidAPI35StartupPassed": true,
+  "ownerInstallationsModified": false,
+  "fullPlaythroughVerified": false,
+  "physicalAndroidGameplayVerified": false,
+  "reporterHandheldReproduced": false,
+  "publicationPending": false,
+  "publishedAndChecked": true,
+  "windowsLatest": "v1.0.12",
+  "platformTag": "v0.5.0-ports-preview.24"
+}

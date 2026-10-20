@@ -1,6 +1,6 @@
 {
   "issue": "https://github.com/rages4calm/earthbound-companion/issues/6",
-  "status": "source fix pushed; downloads not rebuilt",
+  "status": "published in Windows1.0.12 / platform preview.24",
   "sourceCommit": "29d67f814e21297ac091fc48446ccc3a873a52ad",
   "ciRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/39515762886",
   "jobs": [
@@ -22,5 +22,6 @@
     "Windows existing shared tests passed"
   ],
   "reporterHandheldReproduced": false,
-  "ownerDataModified": false
+  "ownerDataModified": false,
+  "releaseReceipt": "release-1.0.12.json"
 }

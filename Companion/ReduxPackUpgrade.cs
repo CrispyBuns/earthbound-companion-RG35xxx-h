@@ -21,9 +21,15 @@ static class ReduxStoryUpgrade {
   ((oldHash==NamesBeforeHash||oldHash==GraphicsBeforeHash)&&newHash==BattleGraphicsHash)||
   (oldHash==NamesBeforeHash&&newHash==GraphicsBeforeHash);
  internal static void Physical(string path) {
-  for(string? p=Path.GetFullPath(path);p!=null;p=Path.GetDirectoryName(p))
+  // Unix homes/XDG directories can have legitimate symlink ancestors (SteamOS).
+  // Trust the configured app-data root, while still rejecting redirected files
+  // and directories beneath it. Keep Windows installation checks unchanged.
+  string root=Path.TrimEndingDirectorySeparator(Path.GetFullPath(Settings.Root));
+  for(string? p=Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));p!=null;p=Path.GetDirectoryName(p)) {
+   if(!OperatingSystem.IsWindows()&&p==root)break;
    if((File.Exists(p)||Directory.Exists(p))&&(File.GetAttributes(p)&FileAttributes.ReparsePoint)!=0)
     throw new IOException("Select an ordinary installation folder, without redirected paths.");
+  }
  }
  internal static string Validate(byte[] oldPack,byte[] newPack) {
   StoryShuffle.ValidatePack(oldPack);StoryShuffle.ValidatePack(newPack);

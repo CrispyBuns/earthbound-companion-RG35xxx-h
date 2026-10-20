@@ -8,6 +8,34 @@ Settings.OverrideRoot=root;
 Directory.CreateDirectory(Settings.BaseGame);
 Environment.SetEnvironmentVariable("COMPANION_ACHIEVEMENTS_DIR",Path.Combine(root,"Achievements"));
 void Require(bool condition,string message){if(!condition)throw new Exception(message);}
+// SteamOS/Linux may redirect home, XDG ancestors, or the app-data root.
+// Profile children must still be physical and must never reach an outside file.
+if(!OperatingSystem.IsWindows()) {
+ string sandbox=Path.Combine(root,"redirected-path-test");
+ string real=Path.Combine(sandbox,"real");Directory.CreateDirectory(real);
+ string parentLink=Path.Combine(sandbox,"home-link");Directory.CreateSymbolicLink(parentLink,real);
+ string data=Path.Combine(parentLink,".local","share","EarthBoundCompanionPreview");
+ Directory.CreateDirectory(data);
+ try {
+  Settings.OverrideRoot=data;
+  ReduxStoryUpgrade.Physical(ReduxProfileService.DirectoryPath);
+  Require(!Directory.Exists(ReduxProfileService.DirectoryPath),"Path validation created a profile");
+  string rootLink=Path.Combine(sandbox,"data-link");Directory.CreateSymbolicLink(rootLink,data);
+  Settings.OverrideRoot=rootLink;
+  ReduxStoryUpgrade.Physical(Path.Combine(rootLink,"Profiles","future-profile"));
+  string outside=Path.Combine(sandbox,"outside");Directory.CreateDirectory(outside);
+  string sentinel=Path.Combine(outside,"sentinel");File.WriteAllText(sentinel,"unchanged");
+  string child=Path.Combine(rootLink,"Profiles");Directory.CreateSymbolicLink(child,outside);
+  try{ReduxStoryUpgrade.Physical(Path.Combine(child,"future-profile"));throw new Exception("Redirected profile accepted");}
+  catch(IOException){}
+  Require(File.ReadAllText(sentinel)=="unchanged","Validation modified an outside file");
+  // A sibling outside the configured root does not inherit its exemption.
+  try{ReduxStoryUpgrade.Physical(Path.Combine(parentLink,"unrelated"));throw new Exception("Unrelated redirected path accepted");}
+  catch(IOException){}
+  Directory.Delete(child);Directory.Delete(rootLink);
+ } finally {Settings.OverrideRoot=root;Directory.Delete(parentLink);}
+ Console.WriteLine("Unix data-root symlinks accepted; redirected profile children rejected.");
+}
 var achievementView=AchievementProfiles.Read("original");
 Require(achievementView.Entries.Count==46&&achievementView.Entries.All(e=>!e.Unlocked),"Missing profile should show full locked set");
 Require(achievementView.Entries.Select(e=>e.Id).Distinct().Count()==46&&achievementView.Entries.All(e=>AchievementProfiles.Categories.Contains(e.Category)),"Catalog IDs or categories invalid");

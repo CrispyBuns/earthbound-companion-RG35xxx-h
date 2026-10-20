@@ -1,0 +1,26 @@
+{
+  "issue": "https://github.com/rages4calm/earthbound-companion/issues/6",
+  "status": "source fix pushed; downloads not rebuilt",
+  "sourceCommit": "29d67f814e21297ac091fc48446ccc3a873a52ad",
+  "ciRun": "https://github.com/rages4calm/earthbound-companion/actions/runs/39515762886",
+  "jobs": [
+    {
+      "name": "path-check (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "name": "path-check (windows-2022)",
+      "conclusion": "success"
+    }
+  ],
+  "checks": [
+    "Unix symlinked home/XDG ancestor accepted",
+    "Unix symlinked app data root accepted",
+    "Redirected child profile rejected",
+    "Unrelated redirected path rejected",
+    "Outside sentinel file unchanged",
+    "Windows existing shared tests passed"
+  ],
+  "reporterHandheldReproduced": false,
+  "ownerDataModified": false
+}

@@ -1,0 +1,61 @@
+name: RG35XX-H KNULLI native build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [rg35xx-h-knulli]
+    paths:
+      - '.github/workflows/rg35xx-h-knulli.yml'
+      - 'scripts/prepare_port_sources.py'
+      - 'patches/**'
+      - 'docs/rg35xx-h-knulli.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rg35xx-h-knulli-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-arm64:
+    # Native ARM64 runner avoids cross-architecture SDL/CMake assumptions.
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build pkg-config libsdl2-dev python3
+
+      - name: Prepare pinned native game source
+        run: python3 scripts/prepare_port_sources.py --native native-source
+
+      - name: Configure native C game engine
+        run: |
+          cmake -S native-source/port/unix -B build/rg35xx-h -G Ninja \
+            -DEB_RUNTIME_ASSETS=ON \
+            -DEB_ENABLE_VERIFY=OFF \
+            -DEB_ENABLE_AUDIO=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG"
+
+      - name: Compile native game engine
+        run: cmake --build build/rg35xx-h --target earthbound --parallel 2
+
+      - name: Assemble code-only PortMaster package
+        run: |
+          mkdir -p build/package/maternalbound-redux/gamedata
+          install -m 755 build/rg35xx-h/earthbound build/package/maternalbound-redux/maternalbound-redux
+          install -m 755 ports/maternalbound-redux.sh build/package/maternalbound-redux/maternalbound-redux.sh
+          cp docs/rg35xx-h-knulli.md build/package/maternalbound-redux/README.txt
+          # Intentionally do not copy assets.pak, ROMs, saves, or generated game data.
+          tar -czf build/maternalbound-redux-rg35xx-h-knulli-arm64.tar.gz -C build/package maternalbound-redux
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maternalbound-redux-rg35xx-h-knulli-arm64
+          path: build/maternalbound-redux-rg35xx-h-knulli-arm64.tar.gz
+          if-no-files-found: error
+          retention-days: 14

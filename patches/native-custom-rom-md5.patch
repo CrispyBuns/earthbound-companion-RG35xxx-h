@@ -1,0 +1,31 @@
+diff --git a/ebtools/rom.py b/ebtools/rom.py
+index 0000000..0000000 100644
+--- a/ebtools/rom.py
++++ b/ebtools/rom.py
+@@
+-import struct
++import hashlib
++import struct
+@@
+ ROM_SIZE = 0x300000
++
++# Exact user-supplied MaternalBound Redux ROM with replacement SPC music.
++# This is an additional allow-list entry; standard header validation remains
++# unchanged for every other ROM.
++CUSTOM_ROM_MD5 = "16a8d3d7eea1312324fe8212a48453d3"
+@@
+     for headered, base in [(False, 0xFFB0), (True, 0x101B0)]:
+@@
+             if title == identifier:
+                 return DetectResult(header=headered, matched=True)
++
++    # The custom soundtrack ROM may have a stale SNES header checksum. Accept
++    # only the exact known file hash, and preserve header stripping for .smc
++    # files with a 512-byte copier header.
++    if (
++        len(data) in (ROM_SIZE, ROM_SIZE + 512)
++        and hashlib.md5(data).hexdigest() == CUSTOM_ROM_MD5
++    ):
++        return DetectResult(header=(len(data) == ROM_SIZE + 512), matched=True)
++
+     return DetectResult(header=False, matched=False)

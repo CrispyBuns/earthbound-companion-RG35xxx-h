@@ -1,7 +1,7 @@
 diff --git a/ebtools/rom.py b/ebtools/rom.py
 --- a/ebtools/rom.py
 +++ b/ebtools/rom.py
-@@ -1,7 +1,13 @@
+@@ -1,8 +1,12 @@
  """ROM detection: header check, checksum validation, title matching."""
  
 -import struct
@@ -11,13 +11,13 @@ diff --git a/ebtools/rom.py b/ebtools/rom.py
  
  # Size of an EarthBound/Mother 2 ROM, header stripped.
  ROM_SIZE = 0x300000
-+
+ 
 +# Vanilla EarthBound ROM with the user's custom SPC music applied.
 +# This is an additional allow-list entry; standard header validation remains
 +# unchanged for every other ROM.
 +CUSTOM_ROM_MD5 = "16a8d3d7eea1312324fe8212a48453d3"
-@@ -25,5 +31,15 @@ def detect(data: bytes, identifier: str) -> DetectResult:
-             title = data[base + 16 : base + 37].decode("ascii", errors="replace")
++
+@@ -29,4 +33,13 @@
              if title == identifier:
                  return DetectResult(header=headered, matched=True)
 +

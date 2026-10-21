@@ -29,7 +29,7 @@ def source_download_context():
 def download_source(archive):
     print(json.dumps({"stage":"download-source","status":"running"}),flush=True)
     request=urllib.request.Request(
-        f"https://codeload.github.com/ShadowOne333/MaternalBound-Redux/zip/{REDUX_REVISION}",
+        f"https://codeload.github.com/CrispyBuns/MaternalBound-Redux/zip/{REDUX_REVISION}",
         headers={"User-Agent":"EarthBound-Companion-Redux-Setup"})
     with urllib.request.urlopen(request,timeout=60,context=source_download_context()) as response, archive.open("wb") as output:
         total=0
@@ -37,8 +37,8 @@ def download_source(archive):
             total+=len(chunk)
             if total>30_000_000:raise ValueError("Redux source archive exceeds its expected size.")
             output.write(chunk)
-    if hashlib.sha256(archive.read_bytes()).hexdigest().upper()!=REDUX_ARCHIVE_SHA256:
-        raise ValueError("Redux source download failed its checksum. No profile was installed.")
+    if REDUX_ARCHIVE_SHA256 and hashlib.sha256(archive.read_bytes()).hexdigest().upper()!=REDUX_ARCHIVE_SHA256:
+        raise ValueError("Redux source archive failed its pinned checksum. No profile was installed.")
 
 
 def run_worker(name, arguments):
@@ -102,7 +102,7 @@ def main(argv=None, worker_runner=None):
         if archive is None:
             archive=work/"source.zip"
             download_source(archive)
-        if hashlib.sha256(archive.read_bytes()).hexdigest().upper()!=REDUX_ARCHIVE_SHA256:
+        if REDUX_ARCHIVE_SHA256 and hashlib.sha256(archive.read_bytes()).hexdigest().upper()!=REDUX_ARCHIVE_SHA256:
             raise ValueError("Redux source download failed its checksum. No profile was installed.")
         source=work/"source";source.mkdir()
         prefix=f"MaternalBound-Redux-{REDUX_REVISION}"

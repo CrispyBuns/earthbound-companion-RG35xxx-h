@@ -16,7 +16,7 @@ diff --git a/ebtools/rom.py b/ebtools/rom.py
 +# This is an additional allow-list entry; standard header validation remains
 +# unchanged for every other ROM.
 +CUSTOM_ROM_MD5 = "16a8d3d7eea1312324fe8212a48453d3"
-@@ -25,6 +31,16 @@ def detect(data: bytes, identifier: str) -> DetectResult:
+@@ -25,5 +31,15 @@ def detect(data: bytes, identifier: str) -> DetectResult:
              title = data[base + 16 : base + 37].decode("ascii", errors="replace")
              if title == identifier:
                  return DetectResult(header=headered, matched=True)

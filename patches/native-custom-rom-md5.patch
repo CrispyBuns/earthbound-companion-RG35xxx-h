@@ -1,7 +1,7 @@
 diff --git a/ebtools/rom.py b/ebtools/rom.py
 --- a/ebtools/rom.py
 +++ b/ebtools/rom.py
-@@ -1,31 +1,45 @@
+@@ -1,31 +1,47 @@
  """ROM detection: header check, checksum validation, title matching."""
  
 +import hashlib

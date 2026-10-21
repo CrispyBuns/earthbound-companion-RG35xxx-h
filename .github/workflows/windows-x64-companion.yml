@@ -1,0 +1,58 @@
+name: Windows x64 Companion ZIP
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [windows-x64-companion-workflow]
+    paths:
+      - '.github/workflows/windows-x64-companion.yml'
+      - 'Companion/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-x64-companion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish self-contained Windows x64 application
+        shell: pwsh
+        run: |
+          dotnet publish Companion/Companion.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            --output dist/EarthBound-Companion-Windows-x64
+          if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed.' }
+          Copy-Item Companion/Assets/earthbound-companion.ico dist/EarthBound-Companion-Windows-x64/
+          @'
+          EarthBound Companion — Windows x64 application build
+
+          Run "EarthBound Companion.exe" on Windows 10/11 x64.
+
+          This artifact contains the Companion application only. It does not
+          include the native game engine, redux-setup.exe, a ROM, assets.pak,
+          soundtrack files, or saves. It is not the complete playable package
+          and does not yet generate an assets.pak by itself.
+          '@ | Set-Content dist/EarthBound-Companion-Windows-x64/README.txt -Encoding utf8
+          Compress-Archive -Path dist/EarthBound-Companion-Windows-x64 -DestinationPath dist/EarthBound-Companion-Windows-x64.zip -CompressionLevel Optimal
+
+      - name: Upload Windows x64 ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: EarthBound-Companion-Windows-x64
+          path: dist/EarthBound-Companion-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14

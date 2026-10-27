@@ -30,7 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential clang cmake ninja-build git pkg-config patchelf \
-            libdrm-dev libgbm-dev libegl1-mesa-dev libgles2-mesa-dev \
+            libegl1-mesa-dev libgles2-mesa-dev \
             libasound2-dev libudev-dev libdbus-1-dev libxkbcommon-dev \
             python3-dev
 
@@ -38,7 +38,7 @@ jobs:
         run: |
           python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
 
-      - name: Build SDL2 for KMSDRM/EGL
+      - name: Build SDL2 with EGL/OpenGL ES (no KMSDRM)
         shell: bash
         run: |
           SDL_SRC="$PWD/build/dependencies/SDL-5d249570393f7a37e037abf22cd6012a4cc56a71"
@@ -46,7 +46,7 @@ jobs:
             -DSDL_SHARED=OFF \
             -DSDL_STATIC=ON \
             -DSDL_TEST=OFF \
-            -DSDL_KMSDRM=ON \
+            -DSDL_KMSDRM=OFF \
             -DSDL_OPENGL=ON \
             -DSDL_OPENGLES=ON \
             -DSDL_X11=OFF \

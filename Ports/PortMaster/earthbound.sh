@@ -8,7 +8,7 @@ set -u
 PORT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 GAME_DIR="$PORT_DIR/Game"
 ROM_DIR="$PORT_DIR/ROM"
-ROM="$ROM_DIR/EarthBound (USA).sfc"
+ROM=""
 BASE_ASSETS="$GAME_DIR/assets.pak"
 PROFILE_DIR="$GAME_DIR/Profiles/maternalbound-redux-897d0083"
 REDUX_ASSETS="$PROFILE_DIR/assets.pak"
@@ -36,9 +36,19 @@ if [[ ! -x "$GAME_DIR/earthbound" ]]; then
     fail "Missing Game/earthbound native executable."
 fi
 
-if [[ ! -f "$ROM" ]]; then
-    fail "Clean EarthBound (USA) ROM not found. Place it at: $ROM"
+# Accept a clean USA ROM in either common SNES extension. If several ROMs
+# are present, require the user to leave only the intended base ROM here.
+for candidate in "$ROM_DIR"/*.sfc "$ROM_DIR"/*.smc; do
+    [[ -f "$candidate" ]] || continue
+    if [[ -n "$ROM" ]]; then
+        fail "More than one .sfc/.smc ROM found in $ROM_DIR. Leave only the clean USA EarthBound ROM."
+    fi
+    ROM="$candidate"
+done
+if [[ -z "$ROM" ]]; then
+    fail "Clean EarthBound (USA) ROM not found. Place one .sfc or .smc ROM in: $ROM_DIR"
 fi
+log "ROM input: $ROM"
 
 if [[ ! -s "$BASE_ASSETS" ]]; then
     if [[ ! -x "$GAME_DIR/ebtools-setup" ]]; then

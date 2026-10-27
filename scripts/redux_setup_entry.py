@@ -29,8 +29,8 @@ def source_download_context():
 def download_source(archive):
     print(json.dumps({"stage":"download-source","status":"running"}),flush=True)
     request=urllib.request.Request(
-        f"https://codeload.github.com/ShadowOne333/MaternalBound-Redux/zip/{REDUX_REVISION}",
-        headers={"User-Agent":"EarthBound-Companion-Redux-Setup"})
+        f"https://codeload.github.com/CrispyBuns/MaternalBound-Redux/zip/{REDUX_REVISION}",
+        headers={"User-Agent":"CrispyBuns-MaternalBound-PortMaster-Setup"})
     with urllib.request.urlopen(request,timeout=60,context=source_download_context()) as response, archive.open("wb") as output:
         total=0
         while chunk:=response.read(262144):

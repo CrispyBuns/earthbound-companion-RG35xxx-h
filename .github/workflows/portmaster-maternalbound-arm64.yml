@@ -1,0 +1,110 @@
+name: PortMaster MaternalBound ARM64 test build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portmaster-maternalbound-arm64
+  cancel-in-progress: true
+
+jobs:
+  build-rg35xx-h:
+    # Build on native ARM64 Linux so PyInstaller emits an ARM64 Linux helper.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: portmaster-maternalbound-rg35xxh
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install ARM64 build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential clang cmake ninja-build git pkg-config patchelf \
+            libdrm-dev libgbm-dev libegl1-mesa-dev libgles2-mesa-dev \
+            libasound2-dev libudev-dev libdbus-1-dev libxkbcommon-dev \
+            python3-dev
+
+      - name: Fetch pinned native source and SDL
+        run: |
+          python scripts/prepare_port_sources.py --native native-source --sdl build/dependencies
+
+      - name: Build SDL2 for KMSDRM/EGL
+        shell: bash
+        run: |
+          SDL_SRC="$PWD/build/dependencies/SDL-5d249570393f7a37e037abf22cd6012a4cc56a71"
+          cmake -S "$SDL_SRC" -B build/sdl -G Ninja \
+            -DSDL_SHARED=OFF \
+            -DSDL_STATIC=ON \
+            -DSDL_TEST=OFF \
+            -DSDL_KMSDRM=ON \
+            -DSDL_OPENGL=ON \
+            -DSDL_OPENGLES=ON \
+            -DSDL_X11=OFF \
+            -DSDL_WAYLAND=OFF \
+            -DSDL_ALSA=ON \
+            -DSDL_PULSEAUDIO=OFF \
+            -DSDL_PIPEWIRE=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$PWD/build/sdl-install"
+          cmake --build build/sdl --parallel 3
+          cmake --install build/sdl
+
+      - name: Build native game for Cortex-A53
+        shell: bash
+        run: |
+          cmake -S native-source/port/unix -B build/native -G Ninja \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_C_FLAGS_RELEASE="-O3 -mcpu=cortex-a53 -mtune=cortex-a53 -DNDEBUG" \
+            -DEB_RUNTIME_ASSETS=ON \
+            -DEB_ENABLE_VERIFY=OFF \
+            -DEB_ENABLE_AUDIO=ON \
+            -DEB_SDL2_STATIC_CONFIG_DIR="$PWD/build/sdl-install/lib/cmake/SDL2" \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/native --target earthbound --parallel 3
+          SDL_AUDIODRIVER=dummy build/native/earthbound --selftest-pc
+
+      - name: Build ARM64 on-device ROM extraction helper
+        shell: bash
+        run: |
+          python -m pip install './native-source[packaging]'
+          cd native-source
+          pyinstaller ebtools_setup.spec --noconfirm
+          ./dist/ebtools-setup --help
+          cd ..
+          mkdir -p build/package/Game
+          cp native-source/dist/ebtools-setup build/package/Game/ebtools-setup
+
+      - name: Build ARM64 MaternalBound Redux conversion helper
+        run: python scripts/build_portable_helpers.py --work build/helper-tools --output build/package/Game
+
+      - name: Assemble code-only test package
+        shell: bash
+        run: |
+          cp build/native/earthbound build/package/Game/earthbound
+          cp Ports/PortMaster/earthbound.sh build/package/earthbound.sh
+          cp PORTMASTER-MATERNALBOUND.md build/package/README-PORTMASTER.md
+          cp LICENSE.md CREDITS.md UPSTREAM.md build/package/
+          cp native-source/src/vendor/lakesnes/LICENSE.txt build/package/LICENSE-LakeSnes.txt
+          cp build/dependencies/SDL-5d249570393f7a37e037abf22cd6012a4cc56a71/LICENSE.txt build/package/LICENSE-SDL2.txt
+          mkdir -p build/package/ROM build/package/Game/Profiles build/package/saves
+          chmod +x build/package/earthbound.sh build/package/Game/earthbound \
+            build/package/Game/ebtools-setup build/package/Game/redux-setup
+          (cd build/package && tar -czf "$GITHUB_WORKSPACE/MaternalBound-PortMaster-RG35XX-H-test.tar.gz" .)
+          sha256sum MaternalBound-PortMaster-RG35XX-H-test.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaternalBound-PortMaster-RG35XX-H-code-only-test
+          path: MaternalBound-PortMaster-RG35XX-H-test.tar.gz
+          if-no-files-found: error
+          retention-days: 7

@@ -23,11 +23,6 @@ exec >>"$LOG" 2>&1
 log() { printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo unknown-time)" "$*"; }
 fail() {
     log "ERROR: $*"
-    if command -v pgrep >/dev/null 2>&1; then
-        # PortMaster frontends usually display the launcher exit; keep the
-        # detailed reason in log.txt rather than relying on a desktop dialog.
-        :
-    fi
     exit 1
 }
 
@@ -78,7 +73,7 @@ fi
 
 log "Starting native game."
 cd "$GAME_DIR" || fail "Cannot enter Game directory."
-./earthbound --assets "$REDUX_ASSETS" --save "$SAVE_FILE" --log-file "$LOG"
+./earthbound --assets "$REDUX_ASSETS" --save "$SAVE_FILE"
 status=$?
 log "Native game exited with status $status."
 exit "$status"
